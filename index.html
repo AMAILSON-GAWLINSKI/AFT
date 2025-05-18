@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login - Acesso ao Sistema</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     * {
       box-sizing: border-box;
@@ -87,6 +88,7 @@
       transform: translateY(-50%);
       cursor: pointer;
       color: #777;
+      font-size: 18px;
     }
 
     @media (max-width: 480px) {
@@ -111,7 +113,9 @@
     <input type="text" id="username" placeholder="Usuário" autocomplete="username" />
     <div class="input-group">
       <input type="password" id="password" placeholder="Senha" autocomplete="current-password" />
-      <span class="toggle-password" id="togglePassword">👁️</span>
+      <span class="toggle-password" id="togglePassword">
+        <i class="fa-solid fa-eye-slash"></i>
+      </span>
     </div>
     <button class="btn-login" onclick="login()">Entrar</button>
     <div class="error-msg" id="errorMsg"></div>
@@ -124,13 +128,11 @@
       let level = 0;
 
       if (user === 'Operador' && pass === '1234') {
-        level = 3;
+        level = 2; // Acesso limitado
       } else if (user === 'amailson' && pass === '1234') {
-        level = 3;
-         } else if (user === 'amailson' && pass === '1234') {
-        level = 3;
+        level = 5; // Acesso total
       } else if (user === 'Daniel' && pass === 'Daniel@1978') {
-        level = 3;
+        level = 5; // Acesso total
       } else {
         document.getElementById('errorMsg').innerText = '❌ Usuário ou senha incorretos.';
         return;
@@ -140,28 +142,26 @@
       window.location.href = 'sistema.html';
     }
 
-    // Mostrar/ocultar senha
-    document.getElementById('togglePassword').addEventListener('click', function() {
+    // Mostrar/ocultar senha com lógica de olho
+    document.getElementById('togglePassword').addEventListener('click', function () {
       const passwordInput = document.getElementById('password');
       const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
       passwordInput.setAttribute('type', type);
-      
-      // Opcional: mudar o ícone quando a senha estiver visível
-      this.textContent = type === 'password' ? '👁️' : '👁️‍🗨️';
+
+      if (type === 'text') {
+        this.innerHTML = '<i class="fa-solid fa-eye"></i>'; // Senha visível (olho aberto)
+      } else {
+        this.innerHTML = '<i class="fa-solid fa-eye-slash"></i>'; // Senha oculta (olho fechado)
+      }
     });
 
-    // Evento de teclado para o campo de senha
+    // Tecla Enter ativa login
     document.getElementById('password').addEventListener('keydown', function(event) {
-      if (event.key === 'Enter') {
-        login();
-      }
+      if (event.key === 'Enter') login();
     });
 
-    // Evento de teclado para o campo de usuário
     document.getElementById('username').addEventListener('keydown', function(event) {
-      if (event.key === 'Enter') {
-        login();
-      }
+      if (event.key === 'Enter') login();
     });
   </script>
 </body>
