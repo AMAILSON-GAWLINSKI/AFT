@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Aluguel de Veículos</title>
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
@@ -11,126 +11,501 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
-    body { font-family: Arial, sans-serif; background: #ffffff; padding: 20px; }
-    .container { background: rgb(247, 247, 247); padding: 30px; max-width: 1000px; margin: auto; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    h1, h2 { text-align: center; color: #37b61e; }
-    .form-group { display: flex; flex-wrap: wrap; gap: 20px; }
-    .form-item { flex: 1 1 45%; display: flex; flex-direction: column; }
-    label { font-weight: bold; margin-bottom: 5px; }
-    input, select, textarea { padding: 10px; border: 1px solid #050505; border-radius: 5px; font-size: 15px; }
-    textarea { resize: vertical; }
-    button { background-color: #2E86C1; color: white; padding: 10px 18px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-    .valor-destaque { background: #dff0d8; color: #155724; padding: 15px; border-radius: 6px; font-size: 22px; text-align: center; margin-top: 20px; }
-    .resultado, #historicoContainer { margin-top: 20px; }
-    .resultado table, #historicoContainer table { width: 100%; border-collapse: collapse; background: white; }
-    table td, table th { padding: 10px; border: 1px solid #ffffff; text-align: center; }
-    th { background: #fffcfc; }
+    :root {
+      --primary-color: #37b61e;
+      --secondary-color: #2E86C1;
+      --danger-color: #E74C3C;
+      --text-color: #333;
+      --light-gray: #f5f5f5;
+      --border-color: #ddd;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    body { 
+      font-family: Arial, sans-serif; 
+      background: #ffffff; 
+      padding: 15px; 
+      color: var(--text-color);
+      line-height: 1.5;
+    }
+    
+    .container { 
+      background: rgb(247, 247, 247); 
+      padding: 20px; 
+      max-width: 1000px; 
+      margin: auto; 
+      border-radius: 10px; 
+      box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+    }
+    
+    h1, h2 { 
+      text-align: center; 
+      color: var(--primary-color); 
+      margin-top: 0;
+    }
+    
+    h1 { font-size: 1.8rem; }
+    h2 { font-size: 1.5rem; }
+    
+    .form-group { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 15px; 
+    }
+    
+    .form-item { 
+      flex: 1 1 100%; 
+      display: flex; 
+      flex-direction: column; 
+    }
+    
+    label { 
+      font-weight: bold; 
+      margin-bottom: 5px; 
+      font-size: 0.9rem;
+    }
+    
+    input, select, textarea { 
+      padding: 10px; 
+      border: 1px solid var(--border-color); 
+      border-radius: 5px; 
+      font-size: 1rem; 
+      width: 100%;
+    }
+    
+    textarea { 
+      resize: vertical; 
+      min-height: 80px;
+    }
+    
+    button { 
+      background-color: var(--secondary-color); 
+      color: white; 
+      padding: 12px 20px; 
+      border: none; 
+      border-radius: 5px; 
+      cursor: pointer; 
+      font-weight: bold; 
+      margin-top: 10px; 
+      font-size: 1rem;
+      transition: background-color 0.3s;
+      width: 100%;
+    }
+    
+    button:hover {
+      background-color: #1a6ea8;
+    }
+    
+    .valor-destaque { 
+      background: #dff0d8; 
+      color: #155724; 
+      padding: 15px; 
+      border-radius: 6px; 
+      font-size: 1.2rem; 
+      text-align: center; 
+      margin-top: 20px; 
+    }
+    
+    .resultado, #historicoContainer { 
+      margin-top: 20px; 
+      overflow-x: auto;
+    }
+    
+    .resultado table, #historicoContainer table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      background: white; 
+      font-size: 0.9rem;
+    }
+    
+    table td, table th { 
+      padding: 8px; 
+      border: 1px solid var(--border-color); 
+      text-align: left;
+    }
+    
+    th { 
+      background: var(--light-gray); 
+    }
+    
+    .pdf-header { 
+      text-align: center; 
+      margin-bottom: 15px; 
+    }
+    
+    .pdf-title { 
+      font-size: 1.1rem; 
+      font-weight: bold; 
+    }
+    
+    .pdf-subtitle { 
+      font-size: 0.9rem; 
+      color: #555; 
+    }
+    
+    .pdf-footer { 
+      text-align: center; 
+      margin-top: 15px; 
+      font-size: 0.8rem; 
+      color: #777; 
+    }
+    
+    .btn-excluir { 
+      background-color: var(--danger-color); 
+      padding: 5px 10px; 
+      font-size: 0.8rem; 
+      margin: 2px; 
+      white-space: nowrap;
+    }
+    
+    .btn-excluir:hover {
+      background-color: #c0392b;
+    }
+    
+    .btn-limpar {
+      background-color: var(--danger-color) !important;
+    }
+    
+    .btn-limpar:hover {
+      background-color: #c0392b !important;
+    }
+    
+    .no-print { 
+      display: block; 
+    }
+    
+    .print-only { 
+      display: none; 
+    }
+    
+    .controls { 
+      display: flex; 
+      gap: 10px; 
+      margin-bottom: 15px; 
+      flex-wrap: wrap; 
+    }
+    
+    .controls select { 
+      padding: 8px; 
+      border-radius: 5px; 
+      flex: 1 1 200px;
+    }
+    
+    .controls button {
+      flex: 1 1 150px;
+      margin-top: 0;
+    }
+    
+    /* Estilo compacto para o resultado */
+    .resultado-compact table { 
+      width: 100%; 
+      font-size: 0.85rem; 
+    }
+    
+    .resultado-compact td, .resultado-compact th { 
+      padding: 6px; 
+    }
+    
+    .resultado-compact .total-row { 
+      font-weight: bold; 
+      background-color: var(--light-gray); 
+    }
+    
+    hr {
+      border: 0;
+      height: 1px;
+      background-color: var(--border-color);
+      margin: 20px 0;
+    }
+    
+    /* Estilos para o calendário - mantendo o mesmo estilo do vale alimentação */
+    .flatpickr-day.feriado, 
+    .flatpickr-day.feriado-movel,
+    .flatpickr-day.domingo {
+      background-color: #f5c6cb !important;
+      color: #721c24 !important;
+      cursor: not-allowed !important;
+      font-weight: bold !important;
+      border: 1px dashed #f194a1 !important;
+      text-decoration: line-through !important;
+    }
+    
+    .flatpickr-day.feriado:hover, 
+    .flatpickr-day.feriado-movel:hover,
+    .flatpickr-day.domingo:hover {
+      background-color: #f5c6cb !important;
+    }
+    
+    /* Media Queries para telas maiores */
+    @media (min-width: 768px) {
+      .form-item { 
+        flex: 1 1 calc(50% - 15px); 
+      }
+      
+      button {
+        width: auto;
+        display: inline-block;
+      }
+      
+      .controls button {
+        flex: 0 1 auto;
+      }
+      
+      h1 { font-size: 2rem; }
+      h2 { font-size: 1.7rem; }
+      
+      .valor-destaque { 
+        font-size: 1.4rem; 
+      }
+    }
+    
+    @media print {
+      .no-print { 
+        display: none !important; 
+      }
+      
+      .print-only { 
+        display: block !important; 
+      }
+      
+      body { 
+        background: white; 
+        padding: 0; 
+      }
+      
+      .container { 
+        box-shadow: none; 
+        background: white; 
+        padding: 10px; 
+      }
+      
+      button { 
+        display: none !important; 
+      }
+      
+      .resultado table, #historicoContainer table {
+        font-size: 10pt;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>ALUGUEL DE VEÍCULOS</h1>
+    <h1 class="print-only">ALUGUEL DE VEÍCULOS - HISTÓRICO COMPLETO</h1>
+    <h1 class="no-print">ALUGUEL DE VEÍCULOS</h1>
 
-    <div class="form-group">
-      <div class="form-item">
-        <label>👷 Operador:</label>
-        <select id="operador">
-          <option value="">-- Selecione --</option>
-          <option>Amailson Gawlinski</option>
-          <option>Caio José</option>
-          <option>Daniel Rodrigo</option>
-          <option>George Gonçalves</option>
-          <option>Igor Nascimento</option>
-          <option>Lissandro da Silva</option>
-          <option>Patrick Darlan</option>
-          <option>Ricardo Alves</option>
-          <option>Luana Parcianello</option>
-          <option>Keniel Vasque</option>
-        </select>
+    <div class="no-print">
+      <div class="form-group">
+        <div class="form-item">
+          <label>👷 Operador:</label>
+          <select id="operador">
+            <option value="">-- Selecione --</option>
+            <option>Amailson Gawlinski</option>
+            <option>Caio José</option>
+            <option>Daniel Rodrigo</option>
+            <option>George Gonçalves</option>
+            <option>Igor Nascimento</option>
+            <option>Lissandro da Silva</option>
+            <option>Patrick Darlan</option>
+            <option>Ricardo Alves</option>
+            <option>Luana Parcianello</option>
+            <option>Keniel Vasque</option>
+          </select>
+        </div>
+
+        <div class="form-item">
+          <label>🚗 Tipo de Veículo:</label>
+          <select id="tipo">
+            <option value="">-- Selecione --</option>
+            <option value="moto">Moto (R$ 750)</option>
+            <option value="carro">Carro (R$ 1500)</option>
+          </select>
+        </div>
+
+        <div class="form-item">
+          <label>📅 Dias previstos:</label>
+          <input type="text" id="faltas" placeholder="Clique e selecione os dias úteis" />
+        </div>
+
+        <div class="form-item">
+          <label>✅ Dias reais trabalhados:</label>
+          <input type="number" id="diasReais" min="0" placeholder="Digite o número de dias trabalhados" />
+        </div>
+
+        <div class="form-item">
+          <label>📉 Faltas a descontar:</label>
+          <input type="number" id="faltasDesconto" min="0" />
+        </div>
+
+        <div class="form-item">
+          <label>🍊 Desconto CAJU (R$):</label>
+          <input type="number" id="descontoCaju" step="0.01" min="0" />
+        </div>
+
+        <div class="form-item">
+          <label>💰 Outros Descontos (R$):</label>
+          <input type="number" id="outrosDescontos" step="0.01" min="0" />
+        </div>
+
+        <div class="form-item" style="flex: 1 1 100%;">
+          <label>📝 Justificativa:</label>
+          <textarea id="justificativa" rows="3" placeholder="Obrigatória se houver desconto."></textarea>
+        </div>
       </div>
 
-      <div class="form-item">
-        <label>🚗 Tipo de Veículo:</label>
-        <select id="tipo">
-          <option value="">-- Selecione --</option>
-          <option value="moto">Moto (R$ 750)</option>
-          <option value="carro">Carro (R$ 1500)</option>
-        </select>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button onclick="calcularValor()">➕ Calcular</button>
+        <button onclick="exportarPDF()">📄 Salvar PDF</button>
       </div>
 
-      <div class="form-item">
-        <label>📅 Dias previstos:</label>
-        <input type="text" id="faltas" placeholder="Clique e selecione os dias úteis" />
-      </div>
+      <div class="valor-destaque" id="valorOperador" style="display:none;"></div>
+      <div class="resultado" id="resultado" style="display:none;"></div>
 
-      <div class="form-item">
-        <label>✅ Dias reais trabalhados:</label>
-        <input type="text" id="diasReais" placeholder="Selecione os dias trabalhados" />
-      </div>
-
-      <div class="form-item">
-        <label>📉 Faltas a descontar:</label>
-        <input type="number" id="faltasDesconto" min="0" />
-      </div>
-
-      <div class="form-item">
-        <label>🍊 Desconto CAJU (R$):</label>
-        <input type="number" id="descontoCaju" step="0.01" min="0" />
-      </div>
-
-      <div class="form-item">
-        <label>💰 Outros Descontos (R$):</label>
-        <input type="number" id="outrosDescontos" step="0.01" min="0" />
-      </div>
-
-      <div class="form-item" style="flex: 1 1 100%;">
-        <label>📝 Justificativa:</label>
-        <textarea id="justificativa" rows="2" placeholder="Obrigatória se houver desconto."></textarea>
-      </div>
+      <hr>
     </div>
 
-    <button onclick="calcularValor()">Calcular</button>
-    <button onclick="exportarPDF()">Salvar PDF</button>
+    <div id="historicoSection">
+      <h2>📚 Histórico</h2>
+      <div class="controls no-print">
+        <select id="filtroOperador" onchange="mostrarHistorico()">
+          <option value="">Todos os Operadores</option>
+        </select>
+        <button onclick="mostrarHistorico()">🔄 Atualizar</button>
+        <button onclick="exportarHistoricoPDF()">📤 Exportar Histórico</button>
+        <button class="btn-limpar" onclick="limparHistorico()">🧹 Limpar Histórico</button>
+        <button onclick="sincronizarHistoricoCompleto()">🔄 Sincronizar com Planilha</button>
+      </div>
 
-    <div class="valor-destaque" id="valorOperador" style="display:none;"></div>
-    <div class="resultado" id="resultado" style="display:none;"></div>
-
-    <hr>
-    <h2>📚 Histórico</h2>
-    <select id="filtroOperador" onchange="mostrarHistorico()">
-      <option value="">Todos os Operadores</option>
-    </select>
-    <button onclick="mostrarHistorico()">🔄 Atualizar</button>
-    <button onclick="exportarHistoricoPDF()">📤 Exportar Histórico</button>
-    <button onclick="limparHistorico()">🗑️ Limpar Histórico</button>
-
-    <div id="historicoContainer" style="display:none;"></div>
+      <div id="historicoContainer" style="display:none;"></div>
+    </div>
   </div>
 
   <script>
-    let diasSelecionados = [], diasReaisTrabalhados = [];
+    let diasSelecionados = [];
 
+    // Feriados fixos (dia/mês)
+    const feriadosFixos = [
+      { dia: 1, mes: 1 },   // Ano Novo
+      { dia: 21, mes: 4 },  // Tiradentes
+      { dia: 1, mes: 5 },   // Dia do Trabalho
+      { dia: 7, mes: 9 },   // Independência
+      { dia: 12, mes: 10 }, // Nossa Senhora Aparecida
+      { dia: 2, mes: 11 },  // Finados
+      { dia: 15, mes: 11 }, // Proclamação da República
+      { dia: 25, mes: 12 }  // Natal
+    ];
+
+    // Feriados móveis (ano específico)
+    const feriadosMoveis = {
+      "2025-03-04": "Carnaval",
+      "2025-04-18": "Sexta-feira Santa",
+      "2025-06-19": "Corpus Christi"
+    };
+
+    // Configuração do flatpickr com os dias bloqueados
     flatpickr("#faltas", {
-      mode: "multiple", dateFormat: "Y-m-d", locale: "pt",
-      onChange: selected => diasSelecionados = selected
+      mode: "multiple", 
+      dateFormat: "Y-m-d", 
+      locale: "pt",
+      onChange: selected => diasSelecionados = selected,
+      disable: [
+        function(date) {
+          // Verifica se é domingo (0 = Domingo, 1 = Segunda, ..., 6 = Sábado)
+          if (date.getDay() === 0) {
+            return true;
+          }
+          
+          // Verifica feriados fixos
+          const dia = date.getDate();
+          const mes = date.getMonth() + 1; // getMonth() retorna 0-11
+          
+          const isFeriadoFixo = feriadosFixos.some(f => f.dia === dia && f.mes === mes);
+          if (isFeriadoFixo) {
+            return true;
+          }
+          
+          // Verifica feriados móveis
+          const dataFormatada = date.getFullYear() + '-' + 
+                              String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                              String(date.getDate()).padStart(2, '0');
+          
+          if (feriadosMoveis[dataFormatada]) {
+            return true;
+          }
+          
+          return false;
+        }
+      ],
+      onDayCreate: function(dObj, dStr, fp, dayElem) {
+        const date = dayElem.dateObj;
+        
+        // Marca domingos
+        if (date.getDay() === 0) {
+          dayElem.classList.add('domingo');
+          dayElem.title = "Domingo";
+        }
+        
+        // Marca feriados fixos
+        const dia = date.getDate();
+        const mes = date.getMonth() + 1;
+        
+        const isFeriadoFixo = feriadosFixos.some(f => f.dia === dia && f.mes === mes);
+        if (isFeriadoFixo) {
+          dayElem.classList.add('feriado');
+          dayElem.title = "Feriado Nacional";
+        }
+        
+        // Marca feriados móveis
+        const dataFormatada = date.getFullYear() + '-' + 
+                            String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                            String(date.getDate()).padStart(2, '0');
+        
+        if (feriadosMoveis[dataFormatada]) {
+          dayElem.classList.add('feriado-movel');
+          dayElem.title = feriadosMoveis[dataFormatada];
+        }
+      }
     });
 
-    flatpickr("#diasReais", {
-      mode: "multiple", dateFormat: "Y-m-d", locale: "pt",
-      onChange: selected => diasReaisTrabalhados = selected
-    });
+    // Função para gerar um ID numérico aleatório único
+    function gerarID() {
+      const min = 10000; // Número mínimo de 5 dígitos
+      const max = 99999; // Número máximo de 5 dígitos
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function formatarValor(valor) {
+      return parseFloat(valor).toFixed(2)
+        .replace('.', ',')
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
 
     function calcularValor() {
       const operador = document.getElementById("operador").value;
       const tipo = document.getElementById("tipo").value;
+      const diasTrabalhadosInput = document.getElementById("diasReais");
+      const diasTrabalhados = parseInt(diasTrabalhadosInput.value) || 0;
       const faltasExtras = parseInt(document.getElementById("faltasDesconto").value) || 0;
       const descontoCaju = Math.max(parseFloat(document.getElementById("descontoCaju").value) || 0, 0);
       const outrosDescontos = Math.max(parseFloat(document.getElementById("outrosDescontos").value) || 0, 0);
       const justificativa = document.getElementById("justificativa").value;
+      
+      // Gerar ID numérico aleatório único para este cálculo
+      const idCalculo = gerarID();
 
-      if (!operador || !tipo || diasSelecionados.length === 0 || diasReaisTrabalhados.length === 0) {
+      if (!operador || !tipo || diasSelecionados.length === 0) {
         alert("Preencha todos os campos obrigatórios.");
         return;
+      }
+
+      if (diasTrabalhados === 0) {
+        if (!confirm("Dias trabalhados está como 0. Isso significa que o operador não trabalhou nenhum dia. Deseja continuar?")) {
+          diasTrabalhadosInput.focus();
+          return;
+        }
       }
 
       if ((faltasExtras > 0 || descontoCaju > 0 || outrosDescontos > 0) && justificativa.trim() === "") {
@@ -140,26 +515,49 @@
 
       const valorMensal = tipo === "moto" ? 750 : 1500;
       const valorPorDia = valorMensal / diasSelecionados.length;
-      const diasTrabalhados = diasReaisTrabalhados.length;
       const valorFinal = Math.max((valorPorDia * diasTrabalhados) - (faltasExtras * valorPorDia) - descontoCaju - outrosDescontos, 0);
+      const totalDescontos = (faltasExtras * valorPorDia) + descontoCaju + outrosDescontos;
 
       document.getElementById("valorOperador").style.display = "block";
-      document.getElementById("valorOperador").innerText = `💰 Valor a receber: R$ ${valorFinal.toFixed(2).replace('.', ',')}`;
+      document.getElementById("valorOperador").innerText = `💰 Valor a receber: R$ ${formatarValor(valorFinal)} (ID: ${idCalculo})`;
 
       document.getElementById("resultado").style.display = "block";
       document.getElementById("resultado").innerHTML = `
-        <table>
-          <tr><td>Operador</td><td>${operador}</td></tr>
-          <tr><td>Tipo</td><td>${tipo}</td></tr>
-          <tr><td>Dias Prev.</td><td>${diasSelecionados.length}</td></tr>
-          <tr><td>Dias Reais</td><td>${diasTrabalhados}</td></tr>
-          <tr><td>Valor/Dia</td><td>R$ ${valorPorDia.toFixed(2)}</td></tr>
-          <tr><td>Descontos</td><td>R$ ${(faltasExtras * valorPorDia + descontoCaju + outrosDescontos).toFixed(2)}</td></tr>
-          <tr><td>Justificativa</td><td>${justificativa || '-'}</td></tr>
-          <tr><td><strong>Total</strong></td><td><strong>R$ ${valorFinal.toFixed(2)}</strong></td></tr>
-        </table>`;
+        <div class="pdf-content resultado-compact">
+          <div class="pdf-header">
+            <div class="pdf-title">Comprovante de Aluguel de Veículo</div>
+            <div class="pdf-subtitle">${new Date().toLocaleDateString('pt-BR')} | ID: ${idCalculo}</div>
+          </div>
+          <table>
+            <tr><th colspan="2" style="text-align:center;background:var(--primary-color);color:white;">DADOS DO ALUGUEL</th></tr>
+            <tr><td style="width:50%;"><strong>Operador:</strong></td><td>${operador}</td></tr>
+            <tr><td><strong>Tipo de Veículo:</strong></td><td>${tipo === "moto" ? "Moto" : "Carro"} (R$ ${formatarValor(valorMensal)})</td></tr>
+            <tr><td><strong>Período:</strong></td><td>${diasSelecionados.length} dias úteis</td></tr>
+            
+            <tr><th colspan="2" style="text-align:center;background:var(--primary-color);color:white;">CÁLCULO</th></tr>
+            <tr><td><strong>Valor por dia:</strong></td><td>R$ ${formatarValor(valorPorDia)}</td></tr>
+            <tr><td><strong>Dias trabalhados:</strong></td><td>${diasTrabalhados}</td></tr>
+            <tr><td><strong>Valor bruto:</strong></td><td>R$ ${formatarValor(valorPorDia * diasTrabalhados)}</td></tr>
+            
+            <tr><th colspan="2" style="text-align:center;background:var(--primary-color);color:white;">DESCONTOS</th></tr>
+            <tr><td><strong>Faltas extras (${faltasExtras} dias):</strong></td><td>R$ ${formatarValor(faltasExtras * valorPorDia)}</td></tr>
+            <tr><td><strong>Desconto CAJU:</strong></td><td>R$ ${formatarValor(descontoCaju)}</td></tr>
+            <tr><td><strong>Outros descontos:</strong></td><td>R$ ${formatarValor(outrosDescontos)}</td></tr>
+            <tr><td><strong>Total descontos:</strong></td><td>R$ ${formatarValor(totalDescontos)}</td></tr>
+            
+            <tr class="total-row"><td><strong>VALOR LÍQUIDO:</strong></td><td><strong>R$ ${formatarValor(valorFinal)}</strong></td></tr>
+            
+            ${justificativa ? `<tr><th colspan="2" style="text-align:center;background:var(--light-gray);">JUSTIFICATIVA</th></tr>
+            <tr><td colspan="2">${justificativa}</td></tr>` : ''}
+            
+            <tr><td colspan="2" style="text-align:center;font-size:0.8rem;padding-top:15px;">
+              Sistema de Aluguel de Veículos - ${new Date().getFullYear()} | ID: ${idCalculo}
+            </td></tr>
+          </table>
+        </div>`;
 
       salvarHistorico({
+        id: idCalculo,
         operador, tipo, diasPrevistos: diasSelecionados.length, diasTrabalhados,
         valorPorDia: valorPorDia.toFixed(2), faltasExtras, descontoCaju, outrosDescontos,
         justificativa, valorFinal: valorFinal.toFixed(2)
@@ -179,10 +577,17 @@
       const historico = JSON.parse(localStorage.getItem("historicoAluguel") || "[]");
       const filtrado = filtro ? historico.filter(h => h.operador === filtro) : historico;
 
-      let html = `<table><thead><tr>
-        <th>Data</th><th>Operador</th><th>Tipo</th><th>Dias Prev.</th><th>Dias Reais</th>
-        <th>Valor/Dia</th><th>Descontos</th><th>Valor Final</th><th>Justificativa</th><th>Remover</th>
-      </tr></thead><tbody>`;
+      let html = `<div class="pdf-content">
+        <div class="pdf-header">
+          <div class="pdf-title">Histórico de Aluguel de Veículos</div>
+          <div class="pdf-subtitle">${new Date().toLocaleDateString('pt-BR')}</div>
+        </div>
+        <table><thead><tr>
+          <th>ID</th>
+          <th>Data</th><th>Operador</th><th>Tipo</th><th>Dias Prev.</th><th>Dias Trab.</th>
+          <th>Valor/Dia</th><th>Descontos</th><th>Valor Final</th>
+          <th class="no-print">Ações</th>
+        </tr></thead><tbody>`;
 
       for (let i = filtrado.length - 1; i >= 0; i--) {
         const h = filtrado[i];
@@ -195,25 +600,27 @@
         );
 
         html += `<tr>
-          <td>${h.data}</td><td>${h.operador}</td><td>${h.tipo}</td><td>${h.diasPrevistos}</td>
+          <td>${h.id}</td>
+          <td>${h.data.split(',')[0]}</td><td>${h.operador}</td><td>${h.tipo === "moto" ? "Moto" : "Carro"}</td><td>${h.diasPrevistos}</td>
           <td>${h.diasTrabalhados}</td><td>R$ ${parseFloat(h.valorPorDia).toFixed(2).replace('.', ',')}</td>
           <td>R$ ${totalDescontos.toFixed(2).replace('.', ',')}</td>
           <td>R$ ${parseFloat(h.valorFinal).toFixed(2).replace('.', ',')}</td>
-          <td>${h.justificativa}</td>
-          <td><button onclick="removerRegistro(${idxOriginal})">❌</button></td>
+          <td class="no-print"><button class="btn-excluir" onclick="removerRegistro(${idxOriginal})">Excluir</button></td>
         </tr>`;
       }
 
-      html += "</tbody></table>";
+      html += "</tbody></table></div>";
       document.getElementById("historicoContainer").innerHTML = html;
-      document.getElementById("historicoContainer").style.display = "block";
+      document.getElementById("historicoContainer").style.display = filtrado.length > 0 ? "block" : "none";
     }
 
     function removerRegistro(index) {
-      const historico = JSON.parse(localStorage.getItem("historicoAluguel") || "[]");
-      historico.splice(index, 1);
-      localStorage.setItem("historicoAluguel", JSON.stringify(historico));
-      mostrarHistorico();
+      if (confirm("Tem certeza que deseja excluir este registro?")) {
+        const historico = JSON.parse(localStorage.getItem("historicoAluguel") || "[]");
+        historico.splice(index, 1);
+        localStorage.setItem("historicoAluguel", JSON.stringify(historico));
+        mostrarHistorico();
+      }
     }
 
     function limparHistorico() {
@@ -240,26 +647,172 @@
       const elemento = document.querySelector(".resultado");
       if (!elemento) return;
       
-      // Definir margens e tamanho de página para o PDF
       const opt = {
-        margin:       [0, 0, 0, 0],  // Margem superior, inferior, esquerda e direita
-        filename:     'resultado.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 5 },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        margin: [0, 0, 0, 0], // [top, left, bottom, right] em mm
+        filename: 'comprovante_aluguel_veiculo.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 7, // Aumenta a qualidade
+          logging: false,
+          useCORS: true
+        },
+        jsPDF: { 
+          unit: 'mm', 
+          format: 'a4', 
+          orientation: 'portrait',
+          putOnlyUsedFonts: true
+        }
       };
       
-      html2pdf().from(elemento).set(opt).save();
+      // Gera o PDF com as margens ajustadas
+      html2pdf().set(opt).from(elemento).save();
     }
 
     function exportarHistoricoPDF() {
-      const elemento = document.getElementById("historicoContainer");
-      if (!elemento) return;
-      html2pdf().from(elemento).save("historico_aluguel.pdf");
+      // Obter todos os dados do histórico
+      const historico = JSON.parse(localStorage.getItem("historicoAluguel") || "[]");
+      
+      // Ordenar do mais recente para o mais antigo
+      historico.sort((a, b) => new Date(b.data) - new Date(a.data));
+      
+      // Criar o conteúdo HTML para o PDF
+      let html = `
+        <div style="font-family: Arial, sans-serif; padding: 10px;">
+          <h1 style="text-align: center; color: var(--primary-color);">ALUGUEL DE VEÍCULOS - HISTÓRICO COMPLETO</h1>
+          <div style="text-align: center; margin-bottom: 15px; color: #555;">
+            Gerado em ${new Date().toLocaleDateString('pt-BR')} - Total de registros: ${historico.length}
+          </div>
+          <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+            <thead>
+              <tr style="background-color: var(--light-gray);">
+                <th style="border: 1px solid var(--border-color); padding: 5px;">ID</th>
+                <th style="border: 1px solid var(--border-color); padding: 5px;">Data</th>
+                <th style="border: 1px solid var(--border-color); padding: 5px;">Operador</th>
+                <th style="border: 1px solid var(--border-color); padding: 5px;">Tipo</th>
+                <th style="border: 1px solid var(--border-color); padding: 5px;">Dias Prev.</th>
+                <th style="border: 1px solid var(--border-color); padding: 5px;">Dias Trab.</th>
+                <th style="border: 1px solid var(--border-color); padding: 5px;">Valor/Dia</th>
+                <th style="border: 1px solid var(--border-color); padding: 5px;">Descontos</th>
+                <th style="border: 1px solid var(--border-color); padding: 5px;">Valor Final</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+      
+      // Adicionar cada registro ao HTML
+      historico.forEach(h => {
+        const totalDescontos = (h.faltasExtras * parseFloat(h.valorPorDia)) + h.descontoCaju + h.outrosDescontos;
+        html += `
+          <tr>
+            <td style="border: 1px solid var(--border-color); padding: 5px;">${h.id}</td>
+            <td style="border: 1px solid var(--border-color); padding: 5px;">${h.data.split(',')[0]}</td>
+            <td style="border: 1px solid var(--border-color); padding: 5px;">${h.operador}</td>
+            <td style="border: 1px solid var(--border-color); padding: 5px;">${h.tipo === "moto" ? "Moto" : "Carro"}</td>
+            <td style="border: 1px solid var(--border-color); padding: 5px; text-align: center;">${h.diasPrevistos}</td>
+            <td style="border: 1px solid var(--border-color); padding: 5px; text-align: center;">${h.diasTrabalhados}</td>
+            <td style="border: 1px solid var(--border-color); padding: 5px; text-align: right;">R$ ${parseFloat(h.valorPorDia).toFixed(2).replace('.', ',')}</td>
+            <td style="border: 1px solid var(--border-color); padding: 5px; text-align: right;">R$ ${totalDescontos.toFixed(2).replace('.', ',')}</td>
+            <td style="border: 1px solid var(--border-color); padding: 5px; text-align: right;">R$ ${parseFloat(h.valorFinal).toFixed(2).replace('.', ',')}</td>
+          </tr>
+        `;
+      });
+      
+      html += `
+            </tbody>
+          </table>
+          <div style="text-align: center; margin-top: 15px; font-size: 10px; color: #777;">
+            Sistema de Aluguel de Veículos - ${new Date().getFullYear()}
+          </div>
+        </div>
+      `;
+      
+      // Criar um elemento temporário para gerar o PDF
+      const element = document.createElement('div');
+      element.innerHTML = html;
+      document.body.appendChild(element);
+      
+      // Configurações para o PDF
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: 'historico_completo_aluguel.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2,
+          logging: true,
+          useCORS: true,
+          scrollX: 0,
+          scrollY: 0
+        },
+        jsPDF: { 
+          unit: 'mm', 
+          format: 'a4', 
+          orientation: 'landscape', // Alterado para paisagem para melhor visualização
+          putOnlyUsedFonts: true
+        }
+      };
+      
+      // Gerar o PDF
+      html2pdf().set(opt).from(element).save().then(() => {
+        // Remover o elemento temporário após a geração do PDF
+        document.body.removeChild(element);
+      });
+    }
+
+    function salvarNoGoogleSheets(dados) {
+      const url = "https://script.google.com/macros/s/AKfycbyfhztX3ZILYcyS7DkS_rVfEWruituv86SY71gk3cgjx563BEC6YzXkOhOfcb4hcqo2QQ/exec";
+      
+      const payload = {
+        operador: dados.operador,
+        tipo: dados.tipo,
+        diasPrevistos: dados.diasPrevistos,
+        diasTrabalhados: dados.diasTrabalhados,
+        valorPorDia: dados.valorPorDia,
+        faltasExtras: dados.faltasExtras || 0,
+        descontoCaju: dados.descontoCaju || 0,
+        outrosDescontos: dados.outrosDescontos || 0,
+        justificativa: dados.justificativa || '',
+        valorFinal: dados.valorFinal,
+        dataRegistro: dados.dataRegistro || new Date().toISOString()
+      };
+
+      fetch(url, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(() => console.log("Dados enviados para o Google Sheets com sucesso!"))
+      .catch(error => console.error("Erro ao enviar para o Google Sheets:", error));
+    }
+
+    // Função para sincronizar todo o histórico com o Google Sheets
+    function sincronizarHistoricoCompleto() {
+      const historico = JSON.parse(localStorage.getItem("historicoAluguel") || "[]");
+      
+      // Verificar se há registros para sincronizar
+      if (historico.length === 0) {
+        alert("Nenhum registro no histórico para sincronizar");
+        return;
+      }
+      
+      console.log(`Iniciando sincronização de ${historico.length} registros...`);
+      
+      // Enviar cada registro individualmente
+      historico.forEach((registro, index) => {
+        // Adicionar um pequeno atraso entre as requisições para evitar sobrecarga
+        setTimeout(() => {
+          salvarNoGoogleSheets(registro);
+        }, index * 500); // 500ms de intervalo entre requisições
+      });
+      
+      alert(`Sincronização iniciada! ${historico.length} registros estão sendo enviados para a planilha.`);
     }
 
     // Atualiza filtro ao carregar
     atualizarFiltroOperadores();
+    mostrarHistorico();
   </script>
 </body>
 </html>
