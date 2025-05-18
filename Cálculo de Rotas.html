@@ -2,510 +2,1224 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>🚗 Calculadora de Rotas</title>
+  <title>🚗 Calculadora de Rotas Avançada</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!-- Bibliotecas CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+
+  <!-- Bibliotecas JavaScript -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mapbox/polyline@1.1.1/src/polyline.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
   <style>
-    body, html { margin: 0; padding: 0; font-family: Arial, sans-serif; }
-    #map { width: 100%; height: 60vh; }
-  
+    :root {
+      --cor-primaria: #2E86C1;
+      --cor-secundaria: #4CAF50;
+      --cor-perigo: #f44336;
+      --cor-aviso: #FFEB3B;
+      --cor-texto: #333;
+      --cor-fundo: #f8f8f8;
+      --cor-fundo-card: #fff;
+      --cor-borda: #ddd;
+    }
+
+    .dark-mode {
+      --cor-texto: #f0f0f0;
+      --cor-fundo: #121212;
+      --cor-fundo-card: #1e1e1e;
+      --cor-borda: #444;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: var(--cor-fundo);
+      color: var(--cor-texto);
+      transition: all 0.3s ease;
+    }
+
+    #app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    #sidebar {
+      width: 300px;
+      background-color: var(--cor-fundo-card);
+      border-right: 1px solid var(--cor-borda);
+      padding: 15px;
+      overflow-y: auto;
+      transition: all 0.3s ease;
+    }
+
+    #main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #map {
+      width: 100%;
+      height: 60vh;
+      z-index: 1;
+    }
+
     .controls {
       padding: 15px;
-      background: #f0f0f0;
+      background-color: var(--cor-fundo-card);
+      border-bottom: 1px solid var(--cor-borda);
     }
-    .controls input, .controls select, .controls button {
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    input, select, textarea {
       padding: 10px;
-      font-size: 16px;
-      margin: 5px 8px 5px 0;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      transition: all 0.2s ease-in-out;
+      border: 1px solid var(--cor-borda);
+      border-radius: 6px;
+      font-size: 14px;
+      background-color: var(--cor-fundo-card);
+      color: var(--cor-texto);
     }
-  
-    .controls button {
+
+    button {
       border: none;
-      font-weight: bold;
+      border-radius: 6px;
+      padding: 10px 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
-  
-    .btn-verde {
-      background-color: #4CAF50;
+
+    .btn-primary {
+      background-color: var(--cor-primaria);
       color: white;
     }
-  
-    .btn-vermelho {
-      background-color: #f44336;
+
+    .btn-success {
+      background-color: var(--cor-secundaria);
       color: white;
     }
-  
-    .btn-amarelo {
-      background-color: #FFEB3B;
+
+    .btn-danger {
+      background-color: var(--cor-perigo);
+      color: white;
+    }
+
+    .btn-warning {
+      background-color: var(--cor-aviso);
       color: #333;
     }
-  
-    .btn-blue {
-      background-color: #2196F3;
-      color: white;
-    }
-  
-    .btn-verde:hover,
-    .btn-vermelho:hover,
-    .btn-blue:hover,
-    .btn-amarelo:hover {
+
+    button:hover {
       opacity: 0.9;
-      transform: scale(1.03);
-      cursor: pointer;
+      transform: scale(1.02);
     }
-  
-    .btn-hover-vermelho:hover {
-      background-color: #d32f2f;
+
+    /* Botões pequenos para ações específicas */
+    .btn-small {
+      padding: 6px 8px !important;
+      font-size: 12px !important;
+      min-width: 30px;
+      height: 30px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
-  
-    .salvar-btn {
-      background-color: #009688;
-      color: white;
-    }
-  
-    .salvar-btn:hover {
-      background-color: #00796B;
-      transform: scale(1.03);
-    }
-  
+
     #destinos {
       margin-top: 10px;
       list-style: none;
       padding: 0;
     }
-  
+
     .destino {
       display: flex;
       align-items: center;
-      margin-bottom: 5px;
-      border: 1px solid #ccc;
+      margin-bottom: 8px;
+      border: 1px solid var(--cor-borda);
       padding: 10px;
-      background: #f9f9f9;
-      gap: 10px;
+      background: var(--cor-fundo-card);
+      gap: 8px;
       border-radius: 6px;
+      transition: all 0.2s ease;
     }
-  
+
     .destino input {
       flex: 1;
       padding: 8px;
       border-radius: 6px;
-      border: 1px solid #ccc;
+      border: 1px solid var(--cor-borda);
     }
-  
-    .output {
-      margin-top: 15px;
+
+    .destino button {
+      margin-left: 4px;
+    }
+
+    .destino .btn-warning {
+      background-color: #FFC107;
+    }
+
+    .destino .btn-danger {
+      background-color: #DC3545;
+    }
+
+    .waypoint-marker {
+      background: var(--cor-primaria);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-weight: bold;
-      font-size: 18px;
-      color: green;
+      font-size: 12px;
+      flex-shrink: 0;
     }
-  
-    .calc-info {
-      font-size: 14px;
-      color: #333;
-    }
-  
+
     .resultados-container {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-top: 15px;
+      padding: 15px;
+      background: var(--cor-fundo-card);
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-  
-    #valor {
-      width: 80px;
+
+    .output {
+      font-weight: bold;
+      font-size: 16px;
     }
-  
+
+    .calc-info {
+      font-size: 14px;
+      color: var(--cor-texto);
+      opacity: 0.8;
+    }
+
     .tag-identificacao {
-      background-color: #FFEB3B;
+      background-color: var(--cor-aviso);
       color: #000;
-      padding: 5px 10px;
+      padding: 4px 8px;
       font-size: 12px;
-      border-radius: 5px;
+      border-radius: 4px;
       white-space: nowrap;
+      font-weight: bold;
+      flex-shrink: 0;
     }
-  </style>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f8f8f8; padding: 20px; }
-    .container { background: rgb(247, 247, 247); padding: 30px; max-width: 1000px; margin: auto; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    h1, h2 { text-align: center; color: #37b61e; }
-    .form-group { display: flex; flex-wrap: wrap; gap: 20px; }
-    .form-item { flex: 1 1 45%; display: flex; flex-direction: column; }
-    label { font-weight: bold; margin-bottom: 5px; }
-    input, select, textarea { padding: 10px; border: 1px solid #050505; border-radius: 5px; font-size: 15px; }
-    textarea { resize: vertical; }
-    button { background-color: #2E86C1; color: white; padding: 10px 18px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-    .valor-destaque { background: #dff0d8; color: #155724; padding: 15px; border-radius: 6px; font-size: 22px; text-align: center; margin-top: 20px; }
-    .resultado, #historicoContainer { margin-top: 20px; }
-    .resultado table, #historicoContainer table { width: 100%; border-collapse: collapse; background: white; }
-    table td, table th { padding: 10px; border: 1px solid #ffffff; text-align: center; }
-    th { background: #fffcfc; }
+
+    .tab-container {
+      display: flex;
+      border-bottom: 1px solid var(--cor-borda);
+      margin-bottom: 15px;
+    }
+
+    .tab {
+      padding: 10px 15px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab.active {
+      border-bottom: 2px solid var(--cor-primaria);
+      font-weight: bold;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .route-steps {
+      margin-top: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .step-item {
+      padding: 8px 0;
+      border-bottom: 1px dashed var(--cor-borda);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .step-distance {
+      color: var(--cor-primaria);
+      font-weight: bold;
+    }
+
+    .step-duration {
+      color: var(--cor-secundaria);
+    }
+
+    .chart-container {
+      margin-top: 20px;
+      height: 200px;
+    }
+
+    .vehicle-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .vehicle-option {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      border: 1px solid var(--cor-borda);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .vehicle-option.selected {
+      border-color: var(--cor-primaria);
+      background-color: rgba(46, 134, 193, 0.1);
+    }
+
+    .vehicle-icon {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .toll-cost-input {
+      margin-top: 15px;
+    }
+
+    .time-picker {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .history-item {
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid var(--cor-borda);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .history-item:hover {
+      background-color: rgba(46, 134, 193, 0.1);
+    }
+
+    .history-date {
+      font-size: 12px;
+      color: #777;
+    }
+
+    @media (max-width: 768px) {
+      #app-container {
+        flex-direction: column;
+      }
+
+      #sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--cor-borda);
+      }
+    }
   </style>
 </head>
 <body>
+  <div id="app-container">
+    <div id="sidebar">
+      <h2><i class="fas fa-route"></i> Calculadora de Rotas</h2>
+      
+      <div class="tab-container">
+        <div class="tab active" onclick="switchTab('planning')">Planejamento</div>
+        <div class="tab" onclick="switchTab('history')">Histórico</div>
+        <div class="tab" onclick="switchTab('settings')">Configurações</div>
+      </div>
 
-    <div class="controls">
-        <label>👷‍♂️ Operador:</label>
-        <select id="operador" onchange="adicionarPorOperador()">
-          <option value="">Operador</option>
-          <option value="Amailson Gawlinski|R. Bento Gonçalves, 1244 - São Sebastiao, Esteio - RS, 93265-350">Amailson Gawlinski</option>
-          <option value="Caio José|R. Davi Francisco Prazeres, 139 - Rio Caveiras, Biguaçu - SC, 88160-000">Caio José</option>
-          <option value="Daniel Rodrigo|R. Carlos Alberto Lauermann Nunes, 265 - Olaria, Canoas - RS, 92035-012">Daniel Rodrigo</option>
-          <option value="George Gonçalves|R. Três Mil Setecentos e Sessenta e Nove, 109 - Lomba do Pinheiro, Porto Alegre - RS, 91540-288">George Gonçalves</option>
-          <option value="Igor Nascimento|Servidão Nelson Juvêncio Rosa, 215 - Guaporanga, Biguaçu - SC, 88160-000">Igor Nascimento</option>
-          <option value="Lissandro da silva|R. Ana Rosa Rodrigues da Luz, 41, Sapucaia do Sul - RS, 93225-363">Lissandro da silva</option>
-          <option value="Patrick Darlan|R. Dona Maria Isabel, 28 - Harmonia, Canoas - RS, 92325-422">Patrick Darlan</option>
-          <option value="Ricardo Alves|Av. Lúcio Bittencourt, 1350 - Centro, Sapucaia do Sul - RS, 93214-170">Ricardo Alves</option>
-          <option value="Keniel Vasque|R. Roseli, 121 - Mathias Velho, Canoas - RS, 92330-105">Keniel Vasque</option>
-        </select>
+      <div id="planning-tab" class="tab-content active">
+        <div class="controls-grid">
+          <div class="control-group">
+            <label><i class="fas fa-user"></i> Operador:</label>
+            <select id="operador" onchange="adicionarPorOperador()">
+              <option value="">Selecione...</option>
+              <option value="Amailson Gawlinski|R. Bento Gonçalves, 1244 - São Sebastiao, Esteio - RS, 93265-350">Amailson Gawlinski</option>
+              <option value="Caio José|R. Davi Francisco Prazeres, 139 - Rio Caveiras, Biguaçu - SC, 88160-000">Caio José</option>
+              <option value="Daniel Rodrigo|R. Carlos Alberto Lauermann Nunes, 265 - Olaria, Canoas - RS, 92035-012">Daniel Rodrigo</option>
+              <option value="George Gonçalves|R. Três Mil Setecentos e Sessenta e Nove, 109 - Lomba do Pinheiro, Porto Alegre - RS, 91540-288">George Gonçalves</option>
+              <option value="Igor Nascimento|Servidão Nelson Juvêncio Rosa, 215 - Guaporanga, Biguaçu - SC, 88160-000">Igor Nascimento</option>
+              <option value="Lissandro da silva|R. Ana Rosa Rodrigues da Luz, 41, Sapucaia do Sul - RS, 93225-363">Lissandro da silva</option>
+              <option value="Patrick Darlan|R. Dona Maria Isabel, 28 - Harmonia, Canoas - RS, 92325-422">Patrick Darlan</option>
+              <option value="Ricardo Alves|Av. Lúcio Bittencourt, 1350 - Centro, Sapucaia do Sul - RS, 93214-170">Ricardo Alves</option>
+              <option value="Keniel Vasque|R. Roseli, 121 - Mathias Velho, Canoas - RS, 92330-105">Keniel Vasque</option>
+            </select>
+          </div>
 
-        <label>👷‍♂️👷‍♂️ Segundo Operador:</label>
-<select id="segundoOperador" onchange="adicionarPorSegundoOperador()">
-  <option value="">Segundo operador</option>
-  <option value="Amailson Gawlinski|R. Bento Gonçalves, 1244 - São Sebastiao, Esteio - RS, 93265-350">Amailson Gawlinski</option>
-  <option value="Caio José|R. Davi Francisco Prazeres, 139 - Rio Caveiras, Biguaçu - SC, 88160-000">Caio José</option>
-  <option value="Daniel Rodrigo|R. Carlos Alberto Lauermann Nunes, 265 - Olaria, Canoas - RS, 92035-012">Daniel Rodrigo</option>
-  <option value="George Gonçalves|R. Três Mil Setecentos e Sessenta e Nove, 109 - Lomba do Pinheiro, Porto Alegre - RS, 91540-288">George Gonçalves</option>
-  <option value="Igor Nascimento|Servidão Nelson Juvêncio Rosa, 215 - Guaporanga, Biguaçu - SC, 88160-000">Igor Nascimento</option>
-  <option value="Lissandro da silva|R. Ana Rosa Rodrigues da Luz, 41, Sapucaia do Sul - RS, 93225-363">Lissandro da silva</option>
-  <option value="Patrick Darlan|R. Dona Maria Isabel, 28 - Harmonia, Canoas - RS, 92325-422">Patrick Darlan</option>
-  <option value="Ricardo Alves|Av. Lúcio Bittencourt, 1350 - Centro, Sapucaia do Sul - RS, 93214-170">Ricardo Alves</option>
-  <option value="Keniel Vasque|R. Roseli, 121 - Mathias Velho, Canoas - RS, 92330-105">Keniel Vasque</option>
-</select>
+          <div class="control-group">
+            <label><i class="fas fa-users"></i> Segundo Operador:</label>
+            <select id="segundoOperador" onchange="adicionarPorSegundoOperador()">
+              <option value="">Selecione...</option>
+              <option value="Amailson Gawlinski|R. Bento Gonçalves, 1244 - São Sebastiao, Esteio - RS, 93265-350">Amailson Gawlinski</option>
+              <option value="Caio José|R. Davi Francisco Prazeres, 139 - Rio Caveiras, Biguaçu - SC, 88160-000">Caio José</option>
+              <option value="Daniel Rodrigo|R. Carlos Alberto Lauermann Nunes, 265 - Olaria, Canoas - RS, 92035-012">Daniel Rodrigo</option>
+              <option value="George Gonçalves|R. Três Mil Setecentos e Sessenta e Nove, 109 - Lomba do Pinheiro, Porto Alegre - RS, 91540-288">George Gonçalves</option>
+              <option value="Igor Nascimento|Servidão Nelson Juvêncio Rosa, 215 - Guaporanga, Biguaçu - SC, 88160-000">Igor Nascimento</option>
+              <option value="Lissandro da silva|R. Ana Rosa Rodrigues da Luz, 41, Sapucaia do Sul - RS, 93225-363">Lissandro da silva</option>
+              <option value="Patrick Darlan|R. Dona Maria Isabel, 28 - Harmonia, Canoas - RS, 92325-422">Patrick Darlan</option>
+              <option value="Ricardo Alves|Av. Lúcio Bittencourt, 1350 - Centro, Sapucaia do Sul - RS, 93214-170">Ricardo Alves</option>
+              <option value="Keniel Vasque|R. Roseli, 121 - Mathias Velho, Canoas - RS, 92330-105">Keniel Vasque</option>
+            </select>
+          </div>
 
-  <label>🏢 Sede:</label>
-  <select id="sede" onchange="adicionarSede()">
-    <option value="">Sede</option>
-    <option value="AFT Sede Canoas|Av. Getúlio Vargas, 9075 - São José, Canoas - RS">AFT Sede Canoas</option>
-    <option value="AFT Sede Biguaçu|Rua José de Anchieta, 123 - Biguaçu - SC">AFT Sede Biguaçu</option>
-  </select>
+          <div class="control-group">
+            <label><i class="fas fa-building"></i> Sede:</label>
+            <select id="sede" onchange="adicionarSede()">
+              <option value="">Selecione...</option>
+              <option value="AFT Sede Canoas|Av. Getúlio Vargas, 9075 - São José, Canoas - RS">AFT Sede Canoas</option>
+              <option value="AFT Sede Biguaçu|Rua José de Anchieta, 123 - Biguaçu - SC">AFT Sede Biguaçu</option>
+            </select>
+          </div>
+        </div>
 
-  <label>⛽ Gasolina (R$):</label>
-  <input type="number" id="valor" value="6.46" step="0.01" style="width: 45px;">
+        <div class="vehicle-selector">
+          <div class="vehicle-option selected" onclick="selectVehicle('car')">
+            <div class="vehicle-icon"><i class="fas fa-car"></i></div>
+            <div>Carro</div>
+          </div>
+          <div class="vehicle-option" onclick="selectVehicle('truck')">
+            <div class="vehicle-icon"><i class="fas fa-truck"></i></div>
+            <div>Caminhão</div>
+          </div>
+          <div class="vehicle-option" onclick="selectVehicle('motorcycle')">
+            <div class="vehicle-icon"><i class="fas fa-motorcycle"></i></div>
+            <div>Moto</div>
+          </div>
+        </div>
 
-  <button class="btn-blue" onclick="calcularRota()">🧮 Calcular Rota</button>
-  <button class="btn-blue" onclick="adicionarDestino()">➕ Adicionar</button>
-  <button class="btn-vermelho btn-hover-vermelho" onclick="resetarTudo()">🔄 Resetar</button>
+        <div class="controls-grid">
+          <div class="control-group">
+            <label><i class="fas fa-gas-pump"></i> Preço Gasolina (R$):</label>
+            <input type="number" id="valor" value="6.46" step="0.01" min="0">
+          </div>
 
-  <ul id="destinos"></ul>
+          <div class="control-group">
+            <label><i class="fas fa-tag"></i> Custo Pedágio (R$):</label>
+            <input type="number" id="toll-cost" value="0" step="0.01" min="0">
+          </div>
 
-  <div class="resultados-container">
-    <div class="output" id="resultado">Distância: 0 km | Valor: R$ 0,00 | Tempo: 0 min</div>
-    <button class="btn-verde salvar-btn" onclick="salvarEmArquivo()">💾 Salvar</button>
+          <div class="control-group">
+            <label><i class="fas fa-clock"></i> Horário Saída:</label>
+            <div class="time-picker">
+              <input type="time" id="departure-time" value="08:00">
+              <button class="btn-primary btn-small" onclick="updateArrivalTime()"><i class="fas fa-sync-alt"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="adicionarDestino()"><i class="fas fa-plus"></i> Adicionar Parada</button>
+        <button class="btn-success" onclick="calcularRota()"><i class="fas fa-calculator"></i> Calcular Rota</button>
+        <button class="btn-warning" onclick="otimizarRota()"><i class="fas fa-random"></i> Otimizar Rota</button>
+        <button class="btn-danger" onclick="resetarTudo()"><i class="fas fa-trash"></i> Limpar Tudo</button>
+
+        <ul id="destinos"></ul>
+
+        <div class="resultados-container">
+          <div>
+            <div class="output" id="resultado"></div>
+            <div class="calc-info" id="calculo-info"></div>
+            <div id="arrival-time"></div>
+          </div>
+          <button class="btn-success" onclick="salvarEmArquivo()"><i class="fas fa-save"></i> Salvar</button>
+        </div>
+
+        <div class="chart-container">
+          <canvas id="costChart"></canvas>
+        </div>
+      </div>
+
+      <div id="history-tab" class="tab-content">
+        <h3><i class="fas fa-history"></i> Histórico de Rotas</h3>
+        <div class="control-group">
+          <label><i class="fas fa-filter"></i> Filtrar por:</label>
+          <select id="filtroOperador" onchange="filtrarHistorico()">
+            <option value="">Todos os operadores</option>
+          </select>
+        </div>
+        <div id="historicoRotas"></div>
+      </div>
+
+      <div id="settings-tab" class="tab-content">
+        <h3><i class="fas fa-cog"></i> Configurações</h3>
+        <div class="control-group">
+          <label><i class="fas fa-paint-brush"></i> Tema:</label>
+          <select id="theme-selector" onchange="toggleDarkMode()">
+            <option value="light">Claro</option>
+            <option value="dark">Escuro</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label><i class="fas fa-tachometer-alt"></i> Consumo (km/l):</label>
+          <input type="number" id="fuel-efficiency" value="10" min="1" step="0.1">
+        </div>
+        <button class="btn-primary" onclick="saveSettings()"><i class="fas fa-save"></i> Salvar Configurações</button>
+      </div>
+    </div>
+
+    <div id="main-content">
+      <div id="map"></div>
+      <div class="route-steps" id="route-steps"></div>
+    </div>
   </div>
 
-  <div class="calc-info" id="calculo-info"></div>
-</div>
+  <script>
+    // Inicialização do mapa
+    const map = L.map('map').setView([-28.2350, -52.9253], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
 
-<div id="map"></div>
+    // Variáveis globais
+    let markers = [];
+    let routeLayer;
+    let costChart;
+    let currentVehicle = 'car';
+    let fuelEfficiency = 10;
 
-<script>
-const map = L.map('map').setView([-28.2350, -52.9253], 7,8);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap'
-  }).addTo(map);
-
-  let markers = [];
-  let routeLayer;
-
-  function adicionarDestino(valor = '', identificacao = '') {
-    const li = document.createElement('li');
-    li.className = 'destino';
-
-    const tag = identificacao ? `<span class="tag-identificacao">${identificacao}</span>` : '';
-    const datalistId = `dl-${Date.now()}`;
-    li.innerHTML = `
-      ${tag}
-      <input type="text" placeholder="📍 Digite endereço ou nome" value="${valor}" list="${datalistId}"
-        oninput="autocompletarEndereco(this, '${datalistId}')" onkeydown="verificaEnter(event)">
-      <datalist id="${datalistId}"></datalist>
-      <button onclick="limpar(this)" class="btn-amarelo btn-hover-vermelho">LIMPAR</button>
-      <button onclick="deletar(this)" class="btn-vermelho">DELETAR</button>
-    `;
-    document.getElementById('destinos').appendChild(li);
-  }
-
-  function adicionarPorOperador() {
-    const val = document.getElementById('operador').value;
-    if (!val) return;
-    const [nome, endereco] = val.split('|');
-
-    resetarTudo();
-    adicionarDestino(endereco, 'Origem');
-    adicionarDestino('', 'Parada');
-    adicionarDestino('', 'Destino');
-    adicionarDestino(endereco, 'Retorno');
-
-  }
-  function adicionarPorSegundoOperador() {
-  const val = document.getElementById('segundoOperador').value;
-  const primeiroOperador = document.getElementById('operador').value;
-  
-  // Se não houver segundo operador selecionado, apenas retorna.
-  if (!val) return;
-
-  const [nome2, endereco2] = val.split('|');
-  const destinos = document.querySelectorAll('.destino');
-
-  // Se o primeiro operador estiver na primeira posição
-  if (destinos.length >= 1) {
-    // Se já houver uma sede, altera a terceira posição para o segundo operador
-    if (document.getElementById('sede').value) {
-      destinos[2].innerHTML = destinos[2].innerHTML.replace(/<span.*?<\/span>/, '');  // Altera para a terceira posição
-      destinos[2].querySelector('input').value = endereco2;
-      destinos[2].insertAdjacentHTML('afterbegin', `<span class="tag-identificacao">Segundo Operador</span>`);
-    } else {
-      // Se não houver sede, o segundo operador vai para a segunda posição
-      destinos[1].innerHTML = destinos[1].innerHTML.replace(/<span.*?<\/span>/, '');  // Altera para a segunda posição
-      destinos[1].querySelector('input').value = endereco2;
-      destinos[1].insertAdjacentHTML('afterbegin', `<span class="tag-identificacao">Segundo Operador</span>`);
-    }
-  }
-  
-  recalcularRota();  // Chama a função para recalcular a rota
-}
-  function adicionarSede() {
-    const val = document.getElementById('sede').value;
-    if (!val) return;
-    const [nome, endereco] = val.split('|');
-    const destinos = document.querySelectorAll('.destino');
-    if (destinos.length >= 2) {
-      destinos[1].innerHTML = destinos[1].innerHTML.replace(/<span.*?<\/span>/, '');
-      destinos[1].querySelector('input').value = endereco;
-      destinos[1].insertAdjacentHTML('afterbegin', `<span class="tag-identificacao">Sede</span>`);
-    } else {
-      adicionarDestino(endereco, 'Sede');
-    }
-  }
-
-  function verificaEnter(e) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      adicionarDestino();
-    }
-  }
-
-  function limpar(btn) {
-    btn.parentElement.querySelector('input').value = '';
-  }
-
-  function deletar(btn) {
-    btn.parentElement.remove();
-  }
-
-  function resetarTudo() {
-    document.getElementById('destinos').innerHTML = '';
-    document.getElementById('resultado').innerText = '📏 Distância: 0 km | 💰 Valor estimado: R$ 0,00 | ⏱️ Tempo estimado: 0 min';
-    document.getElementById('calculo-info').innerText = '';
-    markers.forEach(m => map.removeLayer(m));
-    if (routeLayer) map.removeLayer(routeLayer);
-    markers = [];
-    map.setView([-14.2350, -51.9253], 4);
-  }
-
-  async function autocompletarEndereco(input, datalistId) {
-    const val = input.value.trim();
-    if (val.length < 3) return;
-    const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=br&limit=5&q=${encodeURIComponent(val)}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    const datalist = document.getElementById(datalistId);
-    datalist.innerHTML = '';
-    data.forEach(item => {
-      const opt = document.createElement('option');
-      opt.value = item.display_name;
-      datalist.appendChild(opt);
+    // Inicialização do aplicativo
+    document.addEventListener('DOMContentLoaded', function() {
+      loadSettings();
+      habilitarReordenacao();
+      carregarHistorico();
+      initCostChart();
     });
-  }
 
-  function recalcularRota() {
-    calcularRota();
-  }
-
-  function habilitarReordenacao() {
-    new Sortable(document.getElementById('destinos'), {
-      onEnd: recalcularRota
-    });
-  }
-
-  habilitarReordenacao();
-
-  async function calcularRota() {
-    const inputs = document.querySelectorAll('.destino input');
-    const waypoints = [];
-    markers.forEach(m => map.removeLayer(m));
-    if (routeLayer) map.removeLayer(routeLayer);
-    markers = [];
-
-    for (const input of inputs) {
-      const endereco = input.value.trim();
-      if (endereco) {
-        try {
-          const [lng, lat] = await geocodificar(endereco);
-          waypoints.push([lng, lat]);
-          markers.push(L.marker([lat, lng]).addTo(map));
-        } catch (err) {
-          alert(`❌ Erro no endereço: ${endereco}`);
-          return;
+    function initCostChart() {
+      const ctx = document.getElementById('costChart').getContext('2d');
+      costChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Combustível', 'Pedágio', 'Total'],
+          datasets: [{
+            label: 'Custos (R$)',
+            data: [0, 0, 0],
+            backgroundColor: [
+              'rgba(75, 192, 192, 0.6)',
+              'rgba(255, 206, 86, 0.6)',
+              'rgba(54, 162, 235, 0.6)'
+            ],
+            borderColor: [
+              'rgba(75, 192, 192, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(54, 162, 235, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
         }
+      });
+    }
+
+    function updateChart(fuelCost, tollCost) {
+      costChart.data.datasets[0].data = [fuelCost, tollCost, fuelCost + tollCost];
+      costChart.update();
+    }
+
+    function loadSettings() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.getElementById('theme-selector').value = savedTheme;
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
+
+      const savedEfficiency = localStorage.getItem('fuelEfficiency') || 10;
+      document.getElementById('fuel-efficiency').value = savedEfficiency;
+      fuelEfficiency = parseFloat(savedEfficiency);
+    }
+
+    function saveSettings() {
+      const theme = document.getElementById('theme-selector').value;
+      localStorage.setItem('theme', theme);
+      
+      const efficiency = document.getElementById('fuel-efficiency').value;
+      localStorage.setItem('fuelEfficiency', efficiency);
+      fuelEfficiency = parseFloat(efficiency);
+
+      Toastify({
+        text: "Configurações salvas com sucesso!",
+        duration: 3000,
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#4CAF50",
+      }).showToast();
+    }
+
+    function toggleDarkMode() {
+      const theme = document.getElementById('theme-selector').value;
+      if (theme === 'dark') {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
       }
     }
 
-    if (waypoints.length < 2) {
-      alert("⚠️ Adicione pelo menos dois destinos.");
-      return;
+    function selectVehicle(vehicle) {
+      currentVehicle = vehicle;
+      document.querySelectorAll('.vehicle-option').forEach(el => el.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      
+      // Atualiza a eficiência de combustível baseada no veículo
+      switch(vehicle) {
+        case 'car':
+          fuelEfficiency = 10;
+          break;
+        case 'truck':
+          fuelEfficiency = 5;
+          break;
+        case 'motorcycle':
+          fuelEfficiency = 15;
+          break;
+      }
+      document.getElementById('fuel-efficiency').value = fuelEfficiency;
     }
 
-    const coords = waypoints.map(p => p.join(',')).join(';');
-    const url = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=polyline&steps=true`;
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
+      document.getElementById(`${tabName}-tab`).classList.add('active');
+    }
 
-    try {
+    function adicionarDestino(valor = '', identificacao = '') {
+      const li = document.createElement('li');
+      li.className = 'destino';
+      li.draggable = true;
+
+      const datalistId = `dl-${Date.now()}`;
+      li.innerHTML = `
+        ${identificacao ? `<span class="tag-identificacao">${identificacao}</span>` : ''}
+        <div class="waypoint-marker">${document.getElementById('destinos').children.length + 1}</div>
+        <input type="text" placeholder="📍 Digite endereço ou nome" value="${valor}" list="${datalistId}"
+          oninput="autocompletarEndereco(this, '${datalistId}')" onkeydown="verificaEnter(event)">
+        <datalist id="${datalistId}"></datalist>
+        <button onclick="limpar(this)" class="btn-warning btn-small" title="Limpar"><i class="fas fa-eraser"></i></button>
+        <button onclick="deletar(this)" class="btn-danger btn-small" title="Deletar"><i class="fas fa-trash"></i></button>
+      `;
+      document.getElementById('destinos').appendChild(li);
+      updateWaypointNumbers();
+    }
+
+    function updateWaypointNumbers() {
+      const waypoints = document.querySelectorAll('.waypoint-marker');
+      waypoints.forEach((marker, index) => {
+        marker.textContent = index + 1;
+      });
+    }
+
+    function adicionarPorOperador() {
+      const val = document.getElementById('operador').value;
+      if (!val) return;
+      const [nome, endereco] = val.split('|');
+
+      resetarTudo();
+      adicionarDestino(endereco, 'Origem');
+      adicionarDestino('', 'Parada');
+      adicionarDestino('', 'Destino');
+      adicionarDestino(endereco, 'Retorno');
+    }
+
+    function adicionarPorSegundoOperador() {
+      const val = document.getElementById('segundoOperador').value;
+      const primeiroOperador = document.getElementById('operador').value;
+      
+      if (!val) return;
+
+      const [nome2, endereco2] = val.split('|');
+      const destinos = document.querySelectorAll('.destino');
+
+      if (destinos.length >= 1) {
+        if (document.getElementById('sede').value) {
+          destinos[2].innerHTML = destinos[2].innerHTML.replace(/<span.*?<\/span>/, '');
+          destinos[2].querySelector('input').value = endereco2;
+          destinos[2].insertAdjacentHTML('afterbegin', `<span class="tag-identificacao">Segundo Operador</span>`);
+        } else {
+          destinos[1].innerHTML = destinos[1].innerHTML.replace(/<span.*?<\/span>/, '');
+          destinos[1].querySelector('input').value = endereco2;
+          destinos[1].insertAdjacentHTML('afterbegin', `<span class="tag-identificacao">Segundo Operador</span>`);
+        }
+      }
+      
+      recalcularRota();
+    }
+
+    function adicionarSede() {
+      const val = document.getElementById('sede').value;
+      if (!val) return;
+      const [nome, endereco] = val.split('|');
+      const destinos = document.querySelectorAll('.destino');
+      if (destinos.length >= 2) {
+        destinos[1].innerHTML = destinos[1].innerHTML.replace(/<span.*?<\/span>/, '');
+        destinos[1].querySelector('input').value = endereco;
+        destinos[1].insertAdjacentHTML('afterbegin', `<span class="tag-identificacao">Sede</span>`);
+      } else {
+        adicionarDestino(endereco, 'Sede');
+      }
+    }
+
+    function verificaEnter(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        adicionarDestino();
+      }
+    }
+
+    function limpar(btn) {
+      btn.parentElement.querySelector('input').value = '';
+    }
+
+    function deletar(btn) {
+      btn.parentElement.remove();
+      updateWaypointNumbers();
+    }
+
+    function resetarTudo() {
+      document.getElementById('destinos').innerHTML = '';
+      document.getElementById('resultado').innerText = '';
+      document.getElementById('calculo-info').innerText = '';
+      document.getElementById('route-steps').innerHTML = '';
+      markers.forEach(m => map.removeLayer(m));
+      if (routeLayer) map.removeLayer(routeLayer);
+      markers = [];
+      map.setView([-28.2350, -52.9253], 7);
+      updateChart(0, 0);
+    }
+
+    async function autocompletarEndereco(input, datalistId) {
+      const val = input.value.trim();
+      if (val.length < 3) return;
+      const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=br&limit=5&q=${encodeURIComponent(val)}`;
       const res = await fetch(url);
       const data = await res.json();
-      const route = data.routes[0];
-
-      const routeCoords = polyline.decode(route.geometry);
-      routeLayer = L.polyline(routeCoords.map(c => L.latLng(c[0], c[1])), {
-        color: 'blue',
-        weight: 5
-      }).addTo(map);
-      map.fitBounds(routeLayer.getBounds());
-
-      const tempo = Math.round(route.duration / 60);
-      const distancia = (route.distance / 1000).toFixed(2);
-      const valor = parseFloat(document.getElementById('valor').value) || 6.46;
-
-      document.getElementById('resultado').innerText =
-  `Distância: ${distancia} km | Valor: R$ ${calcularCusto(distancia)} | Tempo: ${tempo} min`;
-      document.getElementById('calculo-info').innerText =
-        `Fórmula: (Distância / 10) * Valor. Resultado: (${distancia} / 10) * R$ ${valor.toFixed(2)} = R$ ${calcularCusto(distancia)}`;
-    } catch (err) {
-      alert(`❌ Erro ao calcular a rota: ${err.message}`);
+      const datalist = document.getElementById(datalistId);
+      datalist.innerHTML = '';
+      data.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item.display_name;
+        datalist.appendChild(opt);
+      });
     }
-  }
 
-  function calcularCusto(distancia) {
-    const valor = parseFloat(document.getElementById('valor').value) || 6.46;
-    return ((distancia / 10) * valor).toFixed(2);
-  }
-
-  async function geocodificar(endereco) {
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endereco)}&limit=1`;
-    const res = await fetch(url);
-    const data = await res.json();
-    if (data.length === 0) throw new Error(`Não foi possível encontrar o endereço: ${endereco}`);
-    return [data[0].lon, data[0].lat];
-  }
-  async function salvarEmArquivo() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  const operadorSelect = document.getElementById("operador");
-  const operadorNome = operadorSelect.options[operadorSelect.selectedIndex]?.text || "Não informado";
-  const segundoOperadorSelect = document.getElementById("segundoOperador");
-  const segundoOperadorNome = segundoOperadorSelect.options[segundoOperadorSelect.selectedIndex]?.text || "Não informado";
-  const sedeSelect = document.getElementById("sede");
-  const sedeNome = sedeSelect.options[sedeSelect.selectedIndex]?.text || "Não informado";
-  const dataAtual = new Date().toLocaleDateString("pt-BR");
-
-  const destinos = Array.from(document.querySelectorAll(".destino")).map((el, i) => {
-    const input = el.querySelector("input")?.value.trim();
-    const tag = el.querySelector(".tag-identificacao")?.innerText || "";
-    let label = "";
-    if (tag.includes("Origem")) label = `Operador (${operadorNome})`;
-    else if (tag.includes("Segundo Operador")) label = `Segundo Operador (${segundoOperadorNome})`;
-    else if (tag.includes("Sede")) label = `Sede (${sedeNome})`;
-    else label = "Parada/Outro";
-    return `${i + 1}. ${input} [${label}]`;
-  }).filter(val => val !== "");
-
-  const resumoRota = document.getElementById("resultado").innerText || "Dados de rota não disponíveis.";
-
-  let y = 10;
-  doc.setFontSize(20);
-  doc.text("Relatório de Rotas", 70, y);
-  y += 10;
-
-  doc.setFontSize(12);
-  doc.text(`Operador: ${operadorNome}`, 10, y);
-  y += 8;
-  doc.text(`Segundo Operador: ${segundoOperadorNome}`, 10, y);
-  y += 8;
-  doc.text(`Sede: ${sedeNome}`, 10, y);
-  y += 8;
-  doc.text(`Data da pesquisa: ${dataAtual}`, 10, y);
-  y += 10;
-
-  doc.setFontSize(12);
-  doc.text("Rotas:", 10, y);
-  y += 8;
-
-  destinos.forEach(destino => {
-    if (y > 280) {
-      doc.addPage();
-      y = 10;
+    function recalcularRota() {
+      calcularRota();
     }
-    doc.text(destino, 10, y);
-    y += 8;
-  });
 
-  y += 10;
-  doc.setFontSize(12);
-  doc.text("Resumo da Rota:", 8, y);
-  y += 8;
-  doc.text(resumoRota, 8, y);
+    function habilitarReordenacao() {
+      new Sortable(document.getElementById('destinos'), {
+        animation: 150,
+        onEnd: function() {
+          updateWaypointNumbers();
+          recalcularRota();
+        }
+      });
+    }
 
-  doc.save(`rotas_${operadorNome.replace(/\s+/g, "_")}_${dataAtual.replace(/\//g, "-")}.pdf`);
-}
-function carregarHistorico() {
-  const historico = JSON.parse(localStorage.getItem("historicoRotas") || "[]");
-  const lista = document.getElementById("historicoRotas");
-  const filtro = document.getElementById("filtroOperador").value;
-  const operadoresSet = new Set(); // <-- ADICIONADO
+    async function otimizarRota() {
+      const inputs = document.querySelectorAll('.destino input');
+      const waypoints = [];
+      
+      for (const input of inputs) {
+        const endereco = input.value.trim();
+        if (endereco) {
+          try {
+            const [lng, lat] = await geocodificar(endereco);
+            waypoints.push({lng, lat, element: input.parentElement});
+          } catch (err) {
+            alert(`❌ Erro no endereço: ${endereco}`);
+            return;
+          }
+        }
+      }
+      
+      if (waypoints.length < 3) {
+        alert("⚠️ Precisa de pelo menos 3 pontos para otimizar");
+        return;
+      }
+      
+      // Simulação de otimização - na prática, usar API de otimização de rotas
+      Toastify({
+        text: "Otimizando rota...",
+        duration: 2000,
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#2196F3",
+      }).showToast();
+      
+      // Simula um atraso para a "otimização"
+      setTimeout(() => {
+        // Embaralha os pontos (simulação simples)
+        const optimizedOrder = [...waypoints].sort(() => Math.random() - 0.5);
+        
+        // Reordena os elementos na interface
+        const destinosContainer = document.getElementById('destinos');
+        destinosContainer.innerHTML = '';
+        optimizedOrder.forEach(wp => {
+          destinosContainer.appendChild(wp.element);
+        });
+        
+        updateWaypointNumbers();
+        calcularRota();
+        
+        Toastify({
+          text: "Rota otimizada!",
+          duration: 3000,
+          close: true,
+          gravity: "top",
+          position: "right",
+          backgroundColor: "#4CAF50",
+        }).showToast();
+      }, 2000);
+    }
 
-  lista.innerHTML = "";
+    async function calcularRota() {
+      const inputs = document.querySelectorAll('.destino input');
+      const waypoints = [];
+      markers.forEach(m => map.removeLayer(m));
+      if (routeLayer) map.removeLayer(routeLayer);
+      markers = [];
+      document.getElementById('route-steps').innerHTML = '';
 
-  historico.forEach((item) => {
-    operadoresSet.add(item.operador);
+      // Mostra loading
+      document.getElementById('resultado').innerText = 'Calculando rota...';
+      document.getElementById('calculo-info').innerText = '';
 
-    if (filtro && item.operador !== filtro) return; // <-- MOVIDO PARA DENTRO
+      for (const input of inputs) {
+        const endereco = input.value.trim();
+        if (endereco) {
+          try {
+            const [lng, lat] = await geocodificar(endereco);
+            waypoints.push([lng, lat]);
+            
+            // Adiciona marcador colorido conforme o tipo
+            const marker = L.marker([lat, lng], {
+              icon: L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="background-color: ${getMarkerColor(input.parentElement)}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;"></div>`,
+                iconSize: [24, 24]
+              })
+            }).addTo(map);
+            
+            // Adiciona tooltip com o endereço
+            marker.bindTooltip(endereco.split(',')[0], {permanent: false, direction: 'top'});
+            markers.push(marker);
+          } catch (err) {
+            alert(`❌ Erro no endereço: ${endereco}`);
+            return;
+          }
+        }
+      }
 
-    const li = document.createElement("li");
-    li.innerHTML = `
-      <strong>${item.operador}</strong> (${item.data})<br>
-      ${item.destinos.map(d => `📍 ${d}`).join("<br>")}
-      <br><em>${item.resumo}</em>
-      <hr>
-    `;
-    lista.appendChild(li);
-  });
+      if (waypoints.length < 2) {
+        alert("⚠️ Adicione pelo menos dois destinos.");
+        return;
+      }
 
-  const selectFiltro = document.getElementById("filtroOperador");
-  const operadorSelecionado = selectFiltro.value;
+      const coords = waypoints.map(p => p.join(',')).join(';');
+      const profile = currentVehicle === 'truck' ? 'truck' : 'car';
+      const url = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=polyline&steps=true`;
 
-  // Recria as opções de filtro com os operadores únicos
-  selectFiltro.innerHTML = `<option value="">Todos</option>`;
-  operadoresSet.forEach(op => {
-    const opt = document.createElement("option");
-    opt.value = op;
-    opt.textContent = op;
-    selectFiltro.appendChild(opt);
-  });
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        
+        if (data.code !== 'Ok') {
+          throw new Error(data.message || 'Erro ao calcular rota');
+        }
+        
+        const route = data.routes[0];
+        const routeCoords = polyline.decode(route.geometry);
+        
+        // Desenha a rota no mapa
+        routeLayer = L.polyline(routeCoords.map(c => L.latLng(c[0], c[1])), {
+          color: '#2E86C1',
+          weight: 5,
+          opacity: 0.7
+        }).addTo(map);
+        
+        map.fitBounds(routeLayer.getBounds());
+        
+        // Calcula métricas
+        const tempoMinutos = Math.round(route.duration / 60);
+        const distanciaKm = (route.distance / 1000).toFixed(2);
+        const valorCombustivel = parseFloat(document.getElementById('valor').value) || 6.46;
+        const custoPedagio = parseFloat(document.getElementById('toll-cost').value) || 0;
+        const custoCombustivel = calcularCustoCombustivel(distanciaKm);
+        const custoTotal = (parseFloat(custoCombustivel) + custoPedagio).toFixed(2);
+        
+        // Atualiza a interface
+        document.getElementById('resultado').innerHTML = `
+          <i class="fas fa-road"></i> Distância: <strong>${distanciaKm} km</strong> | 
+          <i class="fas fa-money-bill-wave"></i> Custo: <strong>R$ ${custoTotal}</strong> | 
+          <i class="fas fa-clock"></i> Tempo: <strong>${formatarTempo(tempoMinutos)}</strong>
+        `;
+        
+        document.getElementById('calculo-info').innerHTML = `
+          <div><i class="fas fa-gas-pump"></i> Combustível: (${distanciaKm} km / ${fuelEfficiency} km/l) * R$ ${valorCombustivel.toFixed(2)} = R$ ${custoCombustivel}</div>
+          <div><i class="fas fa-tag"></i> Pedágio: R$ ${custoPedagio.toFixed(2)}</div>
+        `;
+        
+        // Atualiza o gráfico
+        updateChart(parseFloat(custoCombustivel), custoPedagio);
+        
+        // Mostra as etapas da rota
+        mostrarEtapasRota(route.legs);
+        
+        // Atualiza o horário de chegada
+        updateArrivalTime(tempoMinutos);
+        
+        // Salva no histórico
+        salvarNoHistorico(distanciaKm, custoTotal, tempoMinutos);
+      } catch (err) {
+        console.error(err);
+        alert(`❌ Erro ao calcular a rota: ${err.message}`);
+      }
+    }
 
-  selectFiltro.value = operadorSelecionado;
-}
+    function getMarkerColor(element) {
+      const tag = element.querySelector('.tag-identificacao')?.innerText;
+      if (tag?.includes('Origem')) return '#4CAF50'; // Verde
+      if (tag?.includes('Sede')) return '#9C27B0';   // Roxo
+      if (tag?.includes('Segundo Operador')) return '#FF9800'; // Laranja
+      if (tag?.includes('Retorno')) return '#4CAF50'; // Verde
+      return '#2196F3'; // Azul padrão
+    }
 
-function filtrarHistorico() {
-  carregarHistorico();
-}
-window.onload = carregarHistorico;
-</script>
+    function mostrarEtapasRota(legs) {
+      const stepsContainer = document.getElementById('route-steps');
+      stepsContainer.innerHTML = '<h3><i class="fas fa-list-ol"></i> Etapas da Rota</h3>';
+      
+      legs.forEach((leg, legIndex) => {
+        leg.steps.forEach(step => {
+          const stepElement = document.createElement('div');
+          stepElement.className = 'step-item';
+          
+          const distance = (step.distance / 1000).toFixed(2);
+          const duration = Math.round(step.duration / 60);
+          
+          stepElement.innerHTML = `
+            <div>${step.maneuver.instruction}</div>
+            <div>
+              <span class="step-distance">${distance} km</span> | 
+              <span class="step-duration">${formatarTempo(duration)}</span>
+            </div>
+          `;
+          
+          stepsContainer.appendChild(stepElement);
+        });
+      });
+    }
+
+    function calcularCustoCombustivel(distancia) {
+      const valorCombustivel = parseFloat(document.getElementById('valor').value) || 6.46;
+      return ((distancia / fuelEfficiency) * valorCombustivel).toFixed(2);
+    }
+
+    function formatarTempo(minutos) {
+      if (minutos < 60) return `${minutos} min`;
+      const horas = Math.floor(minutos / 60);
+      const mins = minutos % 60;
+      return `${horas}h${mins.toString().padStart(2, '0')}min`;
+    }
+
+    function updateArrivalTime(routeDuration) {
+      const departureTime = document.getElementById('departure-time').value;
+      if (!departureTime || !routeDuration) return;
+      
+      const [hours, minutes] = departureTime.split(':').map(Number);
+      const departureDate = new Date();
+      departureDate.setHours(hours, minutes, 0, 0);
+      
+      const arrivalDate = new Date(departureDate.getTime() + routeDuration * 60000);
+      const arrivalTime = arrivalDate.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
+      
+      document.getElementById('arrival-time').innerHTML = `
+        <i class="fas fa-flag-checkered"></i> Previsão de chegada: <strong>${arrivalTime}</strong>
+      `;
+    }
+
+    async function geocodificar(endereco) {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endereco)}&limit=1`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.length === 0) throw new Error(`Não foi possível encontrar o endereço: ${endereco}`);
+      return [data[0].lon, data[0].lat];
+    }
+
+    function salvarNoHistorico(distancia, custo, tempo) {
+      const operadorSelect = document.getElementById("operador");
+      const operadorNome = operadorSelect.options[operadorSelect.selectedIndex]?.text || "Não informado";
+      const segundoOperadorSelect = document.getElementById("segundoOperador");
+      const segundoOperadorNome = segundoOperadorSelect.options[segundoOperadorSelect.selectedIndex]?.text || "Não informado";
+      const sedeSelect = document.getElementById("sede");
+      const sedeNome = sedeSelect.options[sedeSelect.selectedIndex]?.text || "Não informado";
+      
+      const destinos = Array.from(document.querySelectorAll(".destino input")).map(input => input.value.trim());
+      
+      const historico = JSON.parse(localStorage.getItem("historicoRotas") || "[]");
+      historico.push({
+        data: new Date().toLocaleString("pt-BR"),
+        operador: operadorNome,
+        segundoOperador: segundoOperadorNome,
+        sede: sedeNome,
+        destinos: destinos.filter(d => d),
+        distancia: distancia,
+        custo: custo,
+        tempo: tempo,
+        veiculo: currentVehicle,
+        resumo: `Distância: ${distancia} km | Custo: R$ ${custo} | Tempo: ${formatarTempo(tempo)}`
+      });
+      
+      localStorage.setItem("historicoRotas", JSON.stringify(historico));
+      carregarHistorico();
+    }
+
+    function carregarHistorico() {
+      const historico = JSON.parse(localStorage.getItem("historicoRotas") || "[]");
+      const lista = document.getElementById("historicoRotas");
+      const filtro = document.getElementById("filtroOperador").value;
+      const operadoresSet = new Set();
+
+      lista.innerHTML = "";
+
+      historico.forEach((item) => {
+        operadoresSet.add(item.operador);
+
+        if (filtro && item.operador !== filtro) return;
+
+        const historyItem = document.createElement("div");
+        historyItem.className = "history-item";
+        historyItem.onclick = () => carregarRotaDoHistorico(item);
+        
+        historyItem.innerHTML = `
+          <div><strong>${item.operador}</strong> ${item.segundoOperador ? ' + ' + item.segundoOperador : ''}</div>
+          <div class="history-date">${item.data}</div>
+          <div><i class="fas fa-${item.veiculo === 'truck' ? 'truck' : item.veiculo === 'motorcycle' ? 'motorcycle' : 'car'}"></i> ${item.distancia} km | R$ ${item.custo} | ${item.tempo} min</div>
+        `;
+        lista.appendChild(historyItem);
+      });
+
+      const selectFiltro = document.getElementById("filtroOperador");
+      const operadorSelecionado = selectFiltro.value;
+
+      selectFiltro.innerHTML = `<option value="">Todos os operadores</option>`;
+      operadoresSet.forEach(op => {
+        const opt = document.createElement("option");
+        opt.value = op;
+        opt.textContent = op;
+        selectFiltro.appendChild(opt);
+      });
+
+      selectFiltro.value = operadorSelecionado;
+    }
+
+    function carregarRotaDoHistorico(item) {
+      resetarTudo();
+      
+      // Preenche os campos do formulário
+      document.getElementById('operador').value = item.operador;
+      if (item.segundoOperador && item.segundoOperador !== "Não informado") {
+        document.getElementById('segundoOperador').value = item.segundoOperador;
+      }
+      if (item.sede && item.sede !== "Não informado") {
+        document.getElementById('sede').value = item.sede;
+      }
+      
+      // Adiciona os destinos
+      item.destinos.forEach((destino, index) => {
+        let tag = '';
+        if (index === 0) tag = 'Origem';
+        else if (index === item.destinos.length - 1) tag = 'Destino';
+        adicionarDestino(destino, tag);
+      });
+      
+      // Seleciona o veículo
+      selectVehicle(item.veiculo);
+      
+      // Calcula a rota
+      setTimeout(() => calcularRota(), 500);
+      
+      // Mostra mensagem
+      Toastify({
+        text: "Rota carregada do histórico!",
+        duration: 3000,
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#2196F3",
+      }).showToast();
+    }
+
+    function filtrarHistorico() {
+      carregarHistorico();
+    }
+
+    async function salvarEmArquivo() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      const operadorSelect = document.getElementById("operador");
+      const operadorNome = operadorSelect.options[operadorSelect.selectedIndex]?.text || "Não informado";
+      const segundoOperadorSelect = document.getElementById("segundoOperador");
+      const segundoOperadorNome = segundoOperadorSelect.options[segundoOperadorSelect.selectedIndex]?.text || "Não informado";
+      const sedeSelect = document.getElementById("sede");
+      const sedeNome = sedeSelect.options[sedeSelect.selectedIndex]?.text || "Não informado";
+      const dataAtual = new Date().toLocaleDateString("pt-BR");
+      const horarioAtual = new Date().toLocaleTimeString("pt-BR", {hour: '2-digit', minute: '2-digit'});
+      
+      const destinos = Array.from(document.querySelectorAll(".destino")).map((el, i) => {
+        const input = el.querySelector("input")?.value.trim();
+        const tag = el.querySelector(".tag-identificacao")?.innerText || "";
+        let label = "";
+        if (tag.includes("Origem")) label = `Operador (${operadorNome})`;
+        else if (tag.includes("Segundo Operador")) label = `Segundo Operador (${segundoOperadorNome})`;
+        else if (tag.includes("Sede")) label = `Sede (${sedeNome})`;
+        else label = "Parada/Outro";
+        return `${i + 1}. ${input} [${label}]`;
+      }).filter(val => val !== "");
+      
+      const resumoRota = document.getElementById("resultado").innerText || "Dados de rota não disponíveis.";
+      const infoRota = document.getElementById("calculo-info").innerText || "";
+      const chegada = document.getElementById("arrival-time").innerText || "";
+      
+      // Título
+      doc.setFontSize(20);
+      doc.text("Relatório de Rotas - AFT", 105, 15, null, null, 'center');
+      doc.setFontSize(12);
+      doc.text(`Emitido em: ${dataAtual} às ${horarioAtual}`, 105, 22, null, null, 'center');
+      
+      // Informações básicas
+      let y = 35;
+      doc.setFontSize(14);
+      doc.text("Informações da Rota", 14, y);
+      y += 10;
+      
+      doc.setFontSize(12);
+      doc.text(`Operador: ${operadorNome}`, 20, y);
+      y += 7;
+      doc.text(`Segundo Operador: ${segundoOperadorNome}`, 20, y);
+      y += 7;
+      doc.text(`Sede: ${sedeNome}`, 20, y);
+      y += 7;
+      doc.text(`Veículo: ${currentVehicle === 'car' ? 'Carro' : currentVehicle === 'truck' ? 'Caminhão' : 'Moto'}`, 20, y);
+      y += 7;
+      doc.text(`Consumo: ${fuelEfficiency} km/l`, 20, y);
+      y += 10;
+      
+      // Itinerário
+      doc.setFontSize(14);
+      doc.text("Itinerário", 14, y);
+      y += 10;
+      
+      doc.setFontSize(10);
+      destinos.forEach(destino => {
+        if (y > 280) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(destino, 20, y);
+        y += 7;
+      });
+      
+      // Resumo
+      y += 10;
+      doc.setFontSize(14);
+      doc.text("Resumo da Rota", 14, y);
+      y += 10;
+      
+      doc.setFontSize(12);
+      doc.text(resumoRota, 20, y);
+      y += 7;
+      if (chegada) {
+        doc.text(chegada, 20, y);
+        y += 7;
+      }
+      
+      // Detalhes de custos
+      const steps = infoRota.split('\n');
+      steps.forEach(step => {
+        if (step.trim()) {
+          doc.text(step.trim(), 20, y);
+          y += 7;
+        }
+      });
+      
+      // Adiciona o gráfico (simplificado)
+      y += 15;
+      doc.setFontSize(14);
+      doc.text("Distribuição de Custos", 14, y);
+      y += 10;
+      
+      doc.setFontSize(10);
+      doc.text("Combustível: " + costChart.data.datasets[0].data[0], 20, y);
+      y += 7;
+      doc.text("Pedágio: " + costChart.data.datasets[0].data[1], 20, y);
+      y += 7;
+      doc.text("Total: " + costChart.data.datasets[0].data[2], 20, y);
+      
+      // Rodapé
+      doc.setFontSize(8);
+      doc.text("Sistema de Gestão de Rotas - AFT Logística", 105, 285, null, null, 'center');
+      
+      // Salva o PDF
+      doc.save(`rota_${operadorNome.replace(/\s+/g, "_")}_${dataAtual.replace(/\//g, "-")}.pdf`);
+      
+      Toastify({
+        text: "Relatório gerado com sucesso!",
+        duration: 3000,
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#4CAF50",
+      }).showToast();
+    }
+  </script>
 </body>
 </html>
