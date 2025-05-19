@@ -125,12 +125,13 @@
 
     <!-- Botões com níveis de permissão -->
     <a href="vale-alimentacao.html" class="btn" data-permission="5">🍽️ Vale-Alimentação</a>
-    <a href="Erros por Operador.html" class="btn" data-permission="5">❌ Erros por Operador</a>
+    <a href="Erros por Operador.html" class="btn" data-permission="2,3,5">❌ Erros por Operador</a>
     <a href="Aluguel de Veículos.html" class="btn" data-permission="5">🚗 Aluguel de Veículos</a>
     <a href="Cálculo de Rotas.html" class="btn" data-permission="5">📍 Cálculo de Rotas</a>
   </div>
 
   <script>
+    // Recupera o nível de permissão salvo no login
     const userPermissionLevel = parseInt(localStorage.getItem('userPermissionLevel') || '0');
 
     if (!userPermissionLevel || isNaN(userPermissionLevel)) {
@@ -138,6 +139,7 @@
       window.location.href = "index.html";
     }
 
+    // Oculta botões cujo nível de acesso for maior que o do usuário
     document.querySelectorAll(".btn").forEach(btn => {
       const requiredLevel = parseInt(btn.getAttribute("data-permission"));
       if (userPermissionLevel < requiredLevel) {
