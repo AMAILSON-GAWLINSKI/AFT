@@ -250,8 +250,10 @@
       <label>👷 Operador:</label>
       <select id="operador" required>
         <option value="">Selecione um operador</option>
+        <option value="Amailson Gawlinski">Amailson Gawlinski</option>
         <option value="Caio José">Caio José</option>
         <option value="Daniel Rodrigo">Daniel Rodrigo</option>
+        <option value="George Gonçalves">George Gonçalves</option>
         <option value="Igor Nascimento">Igor Nascimento</option>
         <option value="Lissandro da Silva">Lissandro da Silva</option>
         <option value="Patrick Darlan">Patrick Darlan</option>
@@ -490,6 +492,10 @@
     // Gera ID único numérico aleatório
     const idUnico = gerarID();
     
+    // Calcula os valores monetários
+    const valorDescontado = erro !== "SEM ERROS" ? (deducoes[erro] || 0) : 0;
+    const valorFinal = baseValor - valorDescontado;
+    
     // Cria o objeto do erro com ID único
     const novoErro = { 
       id: idUnico,
@@ -499,7 +505,9 @@
       repetido: repetido, 
       correcao: correcao, 
       obs: obs, 
-      marcaErro: marcaErro 
+      marcaErro: marcaErro,
+      valor_total_descontado: valorDescontado,
+      valor_final_pago: valorFinal
     };
     
     // Adiciona ao array de registros
@@ -964,30 +972,43 @@
     
     return { operadores, erros };
   }
+
+  // Função para salvar no Supabase com todos os campos
   async function salvarNoSupabase(erro) {
-  try {
-    await fetch("https://nsfliimhsokyzhacnfdg.supabase.co/rest/v1/erros_operador", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zZmxpaW1oc29reXpoYWNuZmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNDg3MzQsImV4cCI6MjA2MjkyNDczNH0.QqosDhPG2xK16rAfitDiW837GMIL_dh5lmDwg8cOn_8",
-        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zZmxpaW1oc29reXpoYWNuZmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNDg3MzQsImV4cCI6MjA2MjkyNDczNH0.QqosDhPG2xK16rAfitDiW837GMIL_dh5lmDwg8cOn_8"
-      },
-      body: JSON.stringify({
-        operador: erro.operador,
-        erro: erro.erro,
-        data: erro.data,
-        repetido: erro.repetido,
-        correcao: erro.correcao,
-        obs: erro.obs || null,
-        marca_erro: erro.marcaErro || null
-      })
-    });
-    console.log("Salvo no Supabase com sucesso");
-  } catch (e) {
-    console.error("Erro ao salvar no Supabase:", e);
+    try {
+      // Calcula os valores monetários
+      const valorDescontado = erro.erro !== "SEM ERROS" ? (deducoes[erro.erro] || 0) : 0;
+      const valorFinal = baseValor - valorDescontado;
+      
+      const response = await fetch("https://nsfliimhsokyzhacnfdg.supabase.co/rest/v1/erros", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zZmxpaW1oc29reXpoYWNuZmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNDg3MzQsImV4cCI6MjA2MjkyNDczNH0.QqosDhPG2xK16rAfitDiW837GMIL_dh5lmDwg8cOn_8",
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zZmxpaW1oc29reXpoYWNuZmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNDg3MzQsImV4cCI6MjA2MjkyNDczNH0.QqosDhPG2xK16rAfitDiW837GMIL_dh5lmDwg8cOn_8"
+        },
+        body: JSON.stringify({
+          operador: erro.operador,
+          erro: erro.erro,
+          data: erro.data,
+          repetido: erro.repetido,
+          correcao: erro.correcao,
+          obs: erro.obs || null,
+          marca_erro: erro.marcaErro || null,
+          valor_total_descontado: valorDescontado,
+          valor_final_pago: valorFinal
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status}`);
+      }
+      
+      console.log("Salvo no Supabase com sucesso");
+    } catch (e) {
+      console.error("Erro ao salvar no Supabase:", e);
+    }
   }
-}
 </script>
 </body>
 </html>
