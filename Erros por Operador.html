@@ -642,14 +642,25 @@
     });
   }
 
-  // Exclui um registro
+  // Exclui um registro - VERSÃO CORRIGIDA
   async function excluirRegistro(id) {
-    if (!confirm("Deseja realmente excluir este registro?")) {
+    if (!confirm("Deseja realmente excluir este registro permanentemente?")) {
       return;
     }
     
     try {
-      // Tenta excluir do Supabase
+      // 1. Remove visualmente da tabela imediatamente (feedback rápido)
+      const tbody = document.querySelector("#tabelaErros tbody");
+      const linhas = tbody.querySelectorAll("tr");
+      linhas.forEach(linha => {
+        if (linha.cells[0].textContent == id) {
+          linha.style.transition = "opacity 0.3s";
+          linha.style.opacity = "0";
+          setTimeout(() => linha.remove(), 300);
+        }
+      });
+
+      // 2. Tenta excluir do Supabase
       const response = await fetch(`${SUPABASE_URL}/rest/v1/erros?id=eq.${id}`, {
         method: "DELETE",
         headers: {
@@ -659,24 +670,59 @@
       });
       
       if (!response.ok) {
-        throw new Error(`Erro HTTP: ${response.status}`);
+        throw new Error(`Falha ao excluir no Supabase: ${response.status}`);
       }
-      
-      // Remove do array local
+
+      // 3. Atualiza os dados locais
       registros = registros.filter(r => r.id !== id);
-      
-      // Atualiza o localStorage
       salvarLocal();
-      
-      // Atualiza a interface
-      atualizarTabela(registros);
       atualizarResumo(registros);
       atualizarFiltroOperadores();
-      
-      console.log("Registro excluído com sucesso");
+
+      console.log(`Registro ${id} excluído com sucesso`);
     } catch (error) {
-      console.error("Erro ao excluir do Supabase:", error);
-      alert("Erro ao excluir o registro. Tente novamente.");
+      console.error("Erro na exclusão:", error);
+      alert("Falha ao excluir. Verifique o console para detalhes.");
+      // Recarrega a tabela para restaurar o estado anterior
+      atualizarTabela(registros);
+    }
+  }
+
+  // Limpa todos os registros - VERSÃO CORRIGIDA
+  async function limparRegistros() {
+    if (!confirm("Tem certeza que deseja apagar TODOS os registros permanentemente?\nEsta ação não pode ser desfeita!")) {
+      return;
+    }
+    
+    try {
+      // 1. Limpa visualização imediatamente
+      document.querySelector("#tabelaErros tbody").innerHTML = 
+        `<tr><td colspan="11" style="text-align: center;">Nenhum registro encontrado</td></tr>`;
+      document.getElementById("resumoConteudo").innerHTML = "<p>Nenhum registro para exibir</p>";
+
+      // 2. Tenta excluir tudo do Supabase
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/erros`, {
+        method: "DELETE",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Falha ao limpar Supabase: ${response.status}`);
+      }
+
+      // 3. Limpa dados locais
+      registros = [];
+      localStorage.removeItem("registrosErros");
+      
+      console.log("Todos registros foram excluídos");
+    } catch (error) {
+      console.error("Erro ao limpar registros:", error);
+      alert("Falha ao limpar. Verifique o console para detalhes.");
+      // Recarrega os dados para restaurar o estado anterior
+      await carregarDados();
     }
   }
 
@@ -707,40 +753,6 @@
     if (!dataISO) return "-";
     const [ano, mes, dia] = dataISO.split("-");
     return `${dia}/${mes}/${ano}`;
-  }
-
-  // Limpa todos os registros
-  async function limparRegistros() {
-    if (!confirm("Tem certeza que deseja apagar TODOS os registros? Esta ação não pode ser desfeita.")) {
-      return;
-    }
-    
-    try {
-      // Tenta excluir todos os registros do Supabase
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/erros`, {
-        method: "DELETE",
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Erro HTTP: ${response.status}`);
-      }
-      
-      // Limpa os registros locais
-      registros = [];
-      localStorage.removeItem("registrosErros");
-      
-      // Atualiza a interface
-      atualizarTabela();
-      atualizarResumo();
-      atualizarFiltroOperadores();
-    } catch (error) {
-      console.error("Erro ao limpar registros no Supabase:", error);
-      alert("Erro ao limpar todos os registros. Tente novamente.");
-    }
   }
 
   // Limpa os filtros de data
