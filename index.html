@@ -129,14 +129,14 @@
 
       // ==== PERMISSÕES ====
       // Nível 2: Visualiza apenas erro de operador
-      if (user === 'Operador' && pass === '1234') {
+      if (user === 'Operador' && pass === 'Claudia') {
         level = 2;
       }
 
       // Nível 3: Visualiza erro de operador + pode adicionar itens ao cálculo
       else if (
-        (user === 'Luana' && pass === '1234') ||
-        (user === 'Claudia' && pass === '1234')
+        (user === 'Luana' && pass === 'Luana@1978') ||
+        (user === 'Claudia' && pass === 'Claudia@1978')
       ) {
         level = 3;
       }
@@ -144,6 +144,7 @@
       // Nível 5: Acesso total
       else if (
         (user === 'amailson' && pass === '1234') ||
+        (user === 'Ricardo' && pass === 'Ricardo@1978')
         (user === 'Daniel' && pass === 'Daniel@1978')
       ) {
         level = 5;
