@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <title>Controle de Erros - AFT Química</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   <style>
     :root {
       --primary: #2E86C1;
@@ -90,13 +92,14 @@
       flex: 1;
       min-width: 120px;
       text-align: center;
+      transition: all 0.2s;
     }
     .btn-primary { background-color: var(--primary); }
     .btn-danger  { background-color: var(--danger); }
     .btn-success { background-color: var(--success); }
     .btn-gray    { background-color: #888; }
     .btn-secondary { background-color: #5A5A5A; }
-    .btn:hover { opacity: 0.9; }
+    .btn:hover { opacity: 0.9; transform: scale(1.02); }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -163,12 +166,14 @@
       color: white;
       border: none;
       border-radius: 5px;
-      padding: 5px 8px;
+      padding: 5px 10px;
       cursor: pointer;
       font-size: 0.8rem;
+      transition: all 0.2s;
     }
     .btn-excluir:hover {
-      opacity: 0.8;
+      background-color: #C0392B;
+      transform: scale(1.05);
     }
     
     /* Estilos para as novas colunas de valores */
@@ -178,6 +183,12 @@
     #tabelaErros td:nth-child(10) {
       text-align: right;
       padding-right: 15px;
+    }
+    
+    /* Efeito de transição para linhas sendo removidas */
+    tr.removing {
+      opacity: 0.5;
+      transition: opacity 0.3s ease;
     }
     
     /* Estilos específicos para telas pequenas */
@@ -341,7 +352,7 @@
     <button class="btn btn-success" onclick="adicionarErro()">➕ Adicionar</button>
     <button class="btn btn-primary" onclick="exportarPDFFiltro()">📄 PDF (Filtro)</button>
     <button class="btn btn-secondary" onclick="exportarPDFCompleto()">📤 PDF (Completo)</button>
-    <button class="btn btn-danger" onclick="limparRegistros()">🧹 Limpar Tudo</button>
+    <button class="btn btn-danger" onclick="confirmarLimpeza()">🧹 Limpar Tudo</button>
   </div>
 </div>
 
@@ -399,12 +410,16 @@
 
 </div>
 
+<!-- Bibliotecas JavaScript -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
   // Declaração de variáveis globais
   let registros = [];
   const { jsPDF } = window.jspdf;
+  const Swal = window.Swal;
   
   // Configurações do Supabase
   const SUPABASE_URL = "https://nsfliimhsokyzhacnfdg.supabase.co";
@@ -436,13 +451,6 @@
 
   // Valor base para cálculo
   const baseValor = 500;
-
-  // Função para gerar ID numérico aleatório único (5 dígitos)
-  function gerarID() {
-    const min = 10000;
-    const max = 99999;
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
 
   // Ao carregar a página
   window.onload = async function() {
@@ -542,7 +550,7 @@
     if (correcao === "Outro") {
       const campoOutro = document.getElementById("campoOutro").value.trim();
       if (!campoOutro) {
-        alert("Por favor, descreva a correção personalizada.");
+        Swal.fire('Atenção', 'Por favor, descreva a correção personalizada.', 'warning');
         return;
       }
       correcao = campoOutro;
@@ -550,7 +558,7 @@
     
     // Validação dos campos obrigatórios
     if (!operador || !erro || !data || !correcao) {
-      alert("Preencha todos os campos obrigatórios.");
+      Swal.fire('Atenção', 'Preencha todos os campos obrigatórios.', 'warning');
       return;
     }
     
@@ -601,6 +609,9 @@
         document.getElementById("obs").value = "";
         document.getElementById("marcaErro").value = "";
         
+        // Feedback ao usuário
+        Swal.fire('Sucesso', 'Erro registrado com sucesso!', 'success');
+        
         // Foca no operador para novo cadastro
         document.getElementById("operador").focus();
       } else {
@@ -608,7 +619,7 @@
       }
     } catch (error) {
       console.error("Erro ao salvar no Supabase:", error);
-      alert("Erro ao salvar o registro. Tente novamente.");
+      Swal.fire('Erro', 'Não foi possível salvar o registro. Tente novamente.', 'error');
     }
   }
 
@@ -636,31 +647,45 @@
           <td>${r.valor_total_descontado.toFixed(2)}</td>
           <td>${r.valor_final_pago.toFixed(2)}</td>
           <td class="no-print">
-            <button class="btn-excluir" onclick="excluirRegistro(${r.id})">Excluir</button>
+            <button class="btn-excluir" onclick="confirmarExclusao(${r.id})">Excluir</button>
           </td>
         </tr>`;
     });
   }
 
-  // Exclui um registro - VERSÃO CORRIGIDA
+  // Função para confirmar exclusão de um registro
+  function confirmarExclusao(id) {
+    Swal.fire({
+      title: 'Tem certeza?',
+      text: "Você não poderá reverter esta ação!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sim, excluir!',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        excluirRegistro(id);
+      }
+    });
+  }
+
+  // Função para excluir um registro
   async function excluirRegistro(id) {
-    if (!confirm("Deseja realmente excluir este registro permanentemente?")) {
-      return;
-    }
-    
     try {
-      // 1. Remove visualmente da tabela imediatamente (feedback rápido)
-      const tbody = document.querySelector("#tabelaErros tbody");
-      const linhas = tbody.querySelectorAll("tr");
+      // Encontra a linha correspondente na tabela
+      const linhas = document.querySelectorAll("#tabelaErros tbody tr");
+      let linhaParaRemover = null;
+      
       linhas.forEach(linha => {
         if (linha.cells[0].textContent == id) {
-          linha.style.transition = "opacity 0.3s";
-          linha.style.opacity = "0";
-          setTimeout(() => linha.remove(), 300);
+          linhaParaRemover = linha;
+          linha.classList.add('removing');
         }
       });
-
-      // 2. Tenta excluir do Supabase
+      
+      // Tenta excluir do Supabase
       const response = await fetch(`${SUPABASE_URL}/rest/v1/erros?id=eq.${id}`, {
         method: "DELETE",
         headers: {
@@ -670,37 +695,70 @@
       });
       
       if (!response.ok) {
-        throw new Error(`Falha ao excluir no Supabase: ${response.status}`);
+        throw new Error(`Falha ao excluir: ${response.status}`);
       }
-
-      // 3. Atualiza os dados locais
+      
+      // Remove do array local
       registros = registros.filter(r => r.id !== id);
+      
+      // Salva no localStorage
       salvarLocal();
-      atualizarResumo(registros);
-      atualizarFiltroOperadores();
-
-      console.log(`Registro ${id} excluído com sucesso`);
+      
+      // Remove a linha após um pequeno delay para a animação
+      setTimeout(() => {
+        if (linhaParaRemover) {
+          linhaParaRemover.remove();
+        }
+        
+        // Atualiza resumo e filtros
+        atualizarResumo(registros);
+        atualizarFiltroOperadores();
+        
+        // Feedback ao usuário
+        Swal.fire('Excluído!', 'O registro foi removido com sucesso.', 'success');
+      }, 300);
+      
     } catch (error) {
       console.error("Erro na exclusão:", error);
-      alert("Falha ao excluir. Verifique o console para detalhes.");
-      // Recarrega a tabela para restaurar o estado anterior
-      atualizarTabela(registros);
+      
+      // Remove a classe de animação em caso de erro
+      const linhas = document.querySelectorAll("#tabelaErros tbody tr");
+      linhas.forEach(linha => {
+        if (linha.cells[0].textContent == id) {
+          linha.classList.remove('removing');
+        }
+      });
+      
+      Swal.fire('Erro!', 'Não foi possível excluir o registro.', 'error');
     }
   }
 
-  // Limpa todos os registros - VERSÃO CORRIGIDA
-  async function limparRegistros() {
-    if (!confirm("Tem certeza que deseja apagar TODOS os registros permanentemente?\nEsta ação não pode ser desfeita!")) {
-      return;
-    }
-    
-    try {
-      // 1. Limpa visualização imediatamente
-      document.querySelector("#tabelaErros tbody").innerHTML = 
-        `<tr><td colspan="11" style="text-align: center;">Nenhum registro encontrado</td></tr>`;
-      document.getElementById("resumoConteudo").innerHTML = "<p>Nenhum registro para exibir</p>";
+  // Função para confirmar limpeza de todos os registros
+  function confirmarLimpeza() {
+    Swal.fire({
+      title: 'Tem certeza absoluta?',
+      text: "Isso apagará TODOS os registros permanentemente!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sim, limpar tudo!',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        limparRegistros();
+      }
+    });
+  }
 
-      // 2. Tenta excluir tudo do Supabase
+  // Função para limpar todos os registros
+  async function limparRegistros() {
+    try {
+      // Feedback visual
+      document.querySelector("#tabelaErros tbody").innerHTML = 
+        `<tr><td colspan="11" style="text-align: center; opacity: 0.5;">Limpando registros...</td></tr>`;
+      
+      // Exclui tudo do Supabase
       const response = await fetch(`${SUPABASE_URL}/rest/v1/erros`, {
         method: "DELETE",
         headers: {
@@ -710,18 +768,26 @@
       });
       
       if (!response.ok) {
-        throw new Error(`Falha ao limpar Supabase: ${response.status}`);
+        throw new Error(`Erro ao limpar: ${response.status}`);
       }
-
-      // 3. Limpa dados locais
+      
+      // Limpa dados locais
       registros = [];
       localStorage.removeItem("registrosErros");
       
-      console.log("Todos registros foram excluídos");
+      // Atualiza a interface
+      atualizarTabela(registros);
+      atualizarResumo(registros);
+      atualizarFiltroOperadores();
+      
+      // Feedback ao usuário
+      Swal.fire('Limpeza concluída!', 'Todos os registros foram removidos.', 'success');
+      
     } catch (error) {
-      console.error("Erro ao limpar registros:", error);
-      alert("Falha ao limpar. Verifique o console para detalhes.");
-      // Recarrega os dados para restaurar o estado anterior
+      console.error("Erro ao limpar:", error);
+      Swal.fire('Erro!', 'Não foi possível limpar os registros.', 'error');
+      
+      // Restaura os dados
       await carregarDados();
     }
   }
@@ -914,7 +980,7 @@
     }
     
     if (dados.length === 0) {
-      alert("Não há registros para exportar com os filtros atuais.");
+      Swal.fire('Atenção', 'Não há registros para exportar com os filtros atuais.', 'warning');
       return;
     }
     
@@ -928,7 +994,7 @@
   // Exporta PDF completo (com tabela e resumo)
   function exportarPDFCompleto() {
     if (registros.length === 0) {
-      alert("Não há registros para exportar.");
+      Swal.fire('Atenção', 'Não há registros para exportar.', 'warning');
       return;
     }
     gerarPDF(registros, "Relatório de Erros (Completo)", true);
