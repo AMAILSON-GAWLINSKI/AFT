@@ -263,8 +263,10 @@
       <label>👷 Operador:</label>
       <select id="operador" required>
         <option value="">Selecione um operador</option>
+        <option value="Amailson Gawlinski">Amailson Gawlinski</option>
         <option value="Caio José">Caio José</option>
         <option value="Daniel Rodrigo">Daniel Rodrigo</option>
+        <option value="George Gonçalves">George Gonçalves</option>
         <option value="Igor Nascimento">Igor Nascimento</option>
         <option value="Lissandro da Silva">Lissandro da Silva</option>
         <option value="Patrick Darlan">Patrick Darlan</option>
@@ -439,18 +441,15 @@
   }
 
   // Ao carregar a página
-  window.onload = function() {
+  window.onload = async function() {
     // Define a data atual como padrão
     const hoje = new Date().toISOString().split('T')[0];
     document.getElementById('data').value = hoje;
     document.getElementById('filtroDataInicio').value = hoje;
     document.getElementById('filtroDataFim').value = hoje;
     
-    // Carrega os dados salvos
-    carregarLocal();
-    
-    // Atualiza o filtro de operadores
-    atualizarFiltroOperadores();
+    // Carrega os dados do Supabase (com fallback para localStorage)
+    await carregarDados();
     
     // Configura o evento para mostrar/ocultar campo "Outro"
     document.getElementById("correcao").addEventListener("change", function() {
@@ -461,13 +460,61 @@
     });
   };
 
+  // Carrega dados do Supabase com fallback para localStorage
+  async function carregarDados() {
+    try {
+      // Tenta carregar do Supabase
+      const response = await fetch("https://nsfliimhsokyzhacnfdg.supabase.co/rest/v1/erros?select=*", {
+        headers: {
+          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zZmxpaW1oc29reXpoYWNuZmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNDg3MzQsImV4cCI6MjA2MjkyNDczNH0.QqosDhPG2xK16rAfitDiW837GMIL_dh5lmDwg8cOn_8",
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zZmxpaW1oc29reXpoYWNuZmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNDg3MzQsImV4cCI6MjA2MjkyNDczNH0.QqosDhPG2xK16rAfitDiW837GMIL_dh5lmDwg8cOn_8"
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status}`);
+      }
+      
+      const dadosSupabase = await response.json();
+      
+      // Verifica se há dados no Supabase
+      if (dadosSupabase && dadosSupabase.length > 0) {
+        registros = dadosSupabase.map(item => ({
+          id: item.id || gerarID(),
+          operador: item.operador,
+          erro: item.erro,
+          data: item.data,
+          repetido: item.repetido,
+          correcao: item.correcao,
+          obs: item.obs || "",
+          marcaErro: item.marca_erro || "",
+          valor_total_descontado: item.valor_total_descontado || 0,
+          valor_final_pago: item.valor_final_pago || baseValor
+        }));
+        
+        // Salva no localStorage como backup
+        salvarLocal();
+      } else {
+        // Se não houver dados no Supabase, tenta carregar do localStorage
+        carregarLocal();
+      }
+    } catch (error) {
+      console.error("Erro ao carregar do Supabase, usando localStorage:", error);
+      // Se houver erro, usa o localStorage como fallback
+      carregarLocal();
+    }
+    
+    // Atualiza a interface
+    atualizarTabela(registros);
+    atualizarResumo(registros);
+    atualizarFiltroOperadores();
+  }
+
   // Carrega dados do localStorage
   function carregarLocal() {
     const dadosLocais = localStorage.getItem("registrosErros");
     if (dadosLocais) {
       registros = JSON.parse(dadosLocais);
-      atualizarTabela(registros);
-      atualizarResumo(registros);
     }
   }
 
@@ -477,7 +524,7 @@
   }
 
   // Adiciona um novo erro
-  function adicionarErro() {
+  async function adicionarErro() {
     // Obtém os valores dos campos
     const operador = document.getElementById("operador").value;
     const erro = document.getElementById("erro").value;
@@ -524,28 +571,37 @@
       valor_final_pago: valorFinal
     };
     
-    // Adiciona ao array de registros
-    registros.push(novoErro);
-    salvarNoSupabase(novoErro);
-    
-    // Salva e atualiza a interface
-    salvarLocal();
-    atualizarTabela(registros);
-    atualizarResumo(registros);
-    atualizarFiltroOperadores();
-    
-    // Limpa o formulário (exceto a data)
-    document.getElementById("operador").value = "";
-    document.getElementById("erro").value = "SEM ERROS";
-    document.getElementById("repetido").value = "Não";
-    document.getElementById("correcao").value = "";
-    document.getElementById("campoOutro").value = "";
-    document.getElementById("campoOutro").style.display = "none";
-    document.getElementById("obs").value = "";
-    document.getElementById("marcaErro").value = "";
-    
-    // Foca no operador para novo cadastro
-    document.getElementById("operador").focus();
+    try {
+      // Tenta salvar no Supabase primeiro
+      await salvarNoSupabase(novoErro);
+      
+      // Se chegou aqui, foi salvo com sucesso no Supabase
+      registros.push(novoErro);
+      
+      // Salva no localStorage como backup
+      salvarLocal();
+      
+      // Atualiza a interface
+      atualizarTabela(registros);
+      atualizarResumo(registros);
+      atualizarFiltroOperadores();
+      
+      // Limpa o formulário (exceto a data)
+      document.getElementById("operador").value = "";
+      document.getElementById("erro").value = "SEM ERROS";
+      document.getElementById("repetido").value = "Não";
+      document.getElementById("correcao").value = "";
+      document.getElementById("campoOutro").value = "";
+      document.getElementById("campoOutro").style.display = "none";
+      document.getElementById("obs").value = "";
+      document.getElementById("marcaErro").value = "";
+      
+      // Foca no operador para novo cadastro
+      document.getElementById("operador").focus();
+    } catch (error) {
+      console.error("Erro ao salvar no Supabase:", error);
+      alert("Erro ao salvar o registro. Tente novamente.");
+    }
   }
 
   // Atualiza a tabela de erros
@@ -559,9 +615,6 @@
     }
     
     lista.forEach((r) => {
-      // Encontra o índice do registro no array original (registros)
-      const index = registros.findIndex(reg => reg.id === r.id);
-      
       tbody.innerHTML += `
         <tr>
           <td>${r.id}</td>
@@ -575,20 +628,45 @@
           <td>${r.valor_total_descontado.toFixed(2)}</td>
           <td>${r.valor_final_pago.toFixed(2)}</td>
           <td class="no-print">
-            <button class="btn-excluir" onclick="excluirRegistro(${index})">Excluir</button>
+            <button class="btn-excluir" onclick="excluirRegistro(${r.id})">Excluir</button>
           </td>
         </tr>`;
     });
   }
 
   // Exclui um registro
-  function excluirRegistro(index) {
-    if (confirm("Deseja realmente excluir este registro?")) {
-      registros.splice(index, 1);
+  async function excluirRegistro(id) {
+    if (!confirm("Deseja realmente excluir este registro?")) {
+      return;
+    }
+    
+    try {
+      // Tenta excluir do Supabase
+      const response = await fetch(`https://nsfliimhsokyzhacnfdg.supabase.co/rest/v1/erros?id=eq.${id}`, {
+        method: "DELETE",
+        headers: {
+          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zZmxpaW1oc29reXpoYWNuZmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNDg3MzQsImV4cCI6MjA2MjkyNDczNH0.QqosDhPG2xK16rAfitDiW837GMIL_dh5lmDwg8cOn_8",
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zZmxpaW1oc29reXpoYWNuZmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNDg3MzQsImV4cCI6MjA2MjkyNDczNH0.QqosDhPG2xK16rAfitDiW837GMIL_dh5lmDwg8cOn_8"
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status}`);
+      }
+      
+      // Remove do array local
+      registros = registros.filter(r => r.id !== id);
+      
+      // Atualiza o localStorage
       salvarLocal();
+      
+      // Atualiza a interface
       atualizarTabela(registros);
       atualizarResumo(registros);
       atualizarFiltroOperadores();
+    } catch (error) {
+      console.error("Erro ao excluir do Supabase:", error);
+      alert("Erro ao excluir o registro. Tente novamente.");
     }
   }
 
@@ -622,13 +700,36 @@
   }
 
   // Limpa todos os registros
-  function limparRegistros() {
-    if (confirm("Tem certeza que deseja apagar TODOS os registros? Esta ação não pode ser desfeita.")) {
+  async function limparRegistros() {
+    if (!confirm("Tem certeza que deseja apagar TODOS os registros? Esta ação não pode ser desfeita.")) {
+      return;
+    }
+    
+    try {
+      // Tenta excluir todos os registros do Supabase
+      const response = await fetch("https://nsfliimhsokyzhacnfdg.supabase.co/rest/v1/erros", {
+        method: "DELETE",
+        headers: {
+          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zZmxpaW1oc29reXpoYWNuZmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNDg3MzQsImV4cCI6MjA2MjkyNDczNH0.QqosDhPG2xK16rAfitDiW837GMIL_dh5lmDwg8cOn_8",
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zZmxpaW1oc29reXpoYWNuZmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNDg3MzQsImV4cCI6MjA2MjkyNDczNH0.QqosDhPG2xK16rAfitDiW837GMIL_dh5lmDwg8cOn_8"
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status}`);
+      }
+      
+      // Limpa os registros locais
       registros = [];
       localStorage.removeItem("registrosErros");
+      
+      // Atualiza a interface
       atualizarTabela();
       atualizarResumo();
       atualizarFiltroOperadores();
+    } catch (error) {
+      console.error("Erro ao limpar registros no Supabase:", error);
+      alert("Erro ao limpar todos os registros. Tente novamente.");
     }
   }
 
@@ -995,39 +1096,32 @@
 
   // Função para salvar no Supabase com todos os campos
   async function salvarNoSupabase(erro) {
-    try {
-      // Calcula os valores monetários
-      const valorDescontado = erro.erro !== "SEM ERROS" ? (deducoes[erro.erro] || 0) : 0;
-      const valorFinal = baseValor - valorDescontado;
-      
-      const response = await fetch("https://nsfliimhsokyzhacnfdg.supabase.co/rest/v1/erros", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zZmxpaW1oc29reXpoYWNuZmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNDg3MzQsImV4cCI6MjA2MjkyNDczNH0.QqosDhPG2xK16rAfitDiW837GMIL_dh5lmDwg8cOn_8",
-          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zZmxpaW1oc29reXpoYWNuZmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNDg3MzQsImV4cCI6MjA2MjkyNDczNH0.QqosDhPG2xK16rAfitDiW837GMIL_dh5lmDwg8cOn_8"
-        },
-        body: JSON.stringify({
-          operador: erro.operador,
-          erro: erro.erro,
-          data: erro.data,
-          repetido: erro.repetido,
-          correcao: erro.correcao,
-          obs: erro.obs || null,
-          marca_erro: erro.marcaErro || null,
-          valor_total_descontado: valorDescontado,
-          valor_final_pago: valorFinal
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Erro HTTP: ${response.status}`);
-      }
-      
-      console.log("Salvo no Supabase com sucesso");
-    } catch (e) {
-      console.error("Erro ao salvar no Supabase:", e);
+    const response = await fetch("https://nsfliimhsokyzhacnfdg.supabase.co/rest/v1/erros", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zZmxpaW1oc29reXpoYWNuZmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNDg3MzQsImV4cCI6MjA2MjkyNDczNH0.QqosDhPG2xK16rAfitDiW837GMIL_dh5lmDwg8cOn_8",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zZmxpaW1oc29reXpoYWNuZmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNDg3MzQsImV4cCI6MjA2MjkyNDczNH0.QqosDhPG2xK16rAfitDiW837GMIL_dh5lmDwg8cOn_8"
+      },
+      body: JSON.stringify({
+        id: erro.id,
+        operador: erro.operador,
+        erro: erro.erro,
+        data: erro.data,
+        repetido: erro.repetido,
+        correcao: erro.correcao,
+        obs: erro.obs || null,
+        marca_erro: erro.marcaErro || null,
+        valor_total_descontado: erro.valor_total_descontado,
+        valor_final_pago: erro.valor_final_pago
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Erro HTTP: ${response.status}`);
     }
+    
+    return response.json();
   }
 </script>
 </body>
