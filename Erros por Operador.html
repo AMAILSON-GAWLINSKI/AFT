@@ -171,6 +171,15 @@
       opacity: 0.8;
     }
     
+    /* Estilos para as novas colunas de valores */
+    #tabelaErros th:nth-child(9), 
+    #tabelaErros td:nth-child(9),
+    #tabelaErros th:nth-child(10), 
+    #tabelaErros td:nth-child(10) {
+      text-align: right;
+      padding-right: 15px;
+    }
+    
     /* Estilos específicos para telas pequenas */
     @media (max-width: 768px) {
       .form-col {
@@ -185,7 +194,11 @@
       #tabelaErros th:nth-child(4), 
       #tabelaErros td:nth-child(4),
       #tabelaErros th:nth-child(8),
-      #tabelaErros td:nth-child(8) {
+      #tabelaErros td:nth-child(8),
+      #tabelaErros th:nth-child(9),
+      #tabelaErros td:nth-child(9),
+      #tabelaErros th:nth-child(10),
+      #tabelaErros td:nth-child(10) {
         display: none;
       }
       .btn {
@@ -368,6 +381,8 @@
         <th>Repetido</th>
         <th>Correção</th>
         <th>Observações</th>
+        <th>Total Descontado (R$)</th>
+        <th>Valor Final (R$)</th>
         <th class="no-print">Ações</th>
       </tr>
     </thead>
@@ -540,7 +555,7 @@
     tbody.innerHTML = "";
     
     if (lista.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="9" style="text-align: center;">Nenhum registro encontrado</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="11" style="text-align: center;">Nenhum registro encontrado</td></tr>`;
       return;
     }
     
@@ -558,6 +573,8 @@
           <td>${r.repetido}</td>
           <td>${r.correcao}</td>
           <td>${r.obs || "-"}</td>
+          <td>${r.valor_total_descontado.toFixed(2)}</td>
+          <td>${r.valor_final_pago.toFixed(2)}</td>
           <td class="no-print">
             <button class="btn-excluir" onclick="excluirRegistro(${index})">Excluir</button>
           </td>
@@ -830,7 +847,7 @@
     doc.text(`Total de registros: ${dados.length}`, doc.internal.pageSize.width / 2, 27, { align: 'center' });
     
     // Tabela de registros
-    const headers = [["ID", "Operador", "Erro", "Marca Erro", "Data", "Repetido", "Correção", "Observações"]];
+    const headers = [["ID", "Operador", "Erro", "Marca Erro", "Data", "Repetido", "Correção", "Observações", "Desconto (R$)", "Valor Final (R$)"]];
     
     const dataTabela = dados.map(r => {
       return [
@@ -841,7 +858,9 @@
         formatarDataBR(r.data),
         r.repetido,
         r.correcao,
-        r.obs || "-"
+        r.obs || "-",
+        r.valor_total_descontado.toFixed(2),
+        r.valor_final_pago.toFixed(2)
       ];
     });
     
@@ -872,7 +891,9 @@
         4: { cellWidth: 15 },
         5: { cellWidth: 15 },
         6: { cellWidth: 30 },
-        7: { cellWidth: 40 }
+        7: { cellWidth: 40 },
+        8: { cellWidth: 20, halign: 'right' },
+        9: { cellWidth: 20, halign: 'right' }
       }
     });
     
