@@ -374,9 +374,6 @@ button:active {
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <!-- SweetAlert2 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
   <div class="container">
@@ -497,19 +494,14 @@ button:active {
     let diasMarcados = {};
     let mesesSelecionados = [];
     
-    async function adicionarMes() {
+    function adicionarMes() {
       const mesSelecionadoInput = document.getElementById('mesSelecionado');
       if (!mesSelecionadoInput.value) return;
       
       const mesSelecionado = mesSelecionadoInput.value;
       
       if (mesesSelecionados.includes(mesSelecionado)) {
-        await Swal.fire({
-          icon: 'warning',
-          title: 'Atenção',
-          text: 'Este mês já foi adicionado!',
-          confirmButtonColor: '#28a745'
-        });
+        alert('Este mês já foi adicionado!');
         return;
       }
       
@@ -826,39 +818,18 @@ button:active {
       gerarCalendario();
     }
 
-    async function calcularVA() {
+    function calcularVA() {
       const nome = document.getElementById('beneficiario').value;
       const valorDia = parseFloat(document.getElementById('valorDiario').value);
       const tipoDesconto = document.getElementById('tipoDesconto').value;
       const valorDescontoInput = document.getElementById('valorDesconto').value;
       const qtdDescontos4h = parseInt(document.getElementById('qtdDescontos4h').value || 0);
       
-      if (!nome) { 
-        await Swal.fire({
-          icon: 'warning',
-          title: 'Atenção',
-          text: 'Por favor, selecione um operador.',
-          confirmButtonColor: '#28a745'
-        });
-        return; 
-      }
-      if (isNaN(valorDia) || valorDia <= 0) { 
-        await Swal.fire({
-          icon: 'warning',
-          title: 'Atenção',
-          text: 'Por favor, insira um valor diário válido.',
-          confirmButtonColor: '#28a745'
-        });
-        return; 
-      }
+      if (!nome) { alert('Por favor, selecione um operador.'); return; }
+      if (isNaN(valorDia) || valorDia <= 0) { alert('Por favor, insira um valor diário válido.'); return; }
       
       if (mesesSelecionados.length === 0) {
-        await Swal.fire({
-          icon: 'warning',
-          title: 'Atenção',
-          text: 'Por favor, adicione pelo menos um mês usando o botão "Adicionar Mês".',
-          confirmButtonColor: '#28a745'
-        });
+        alert('Por favor, adicione pelo menos um mês usando o botão "Adicionar Mês".');
         return;
       }
       
@@ -871,17 +842,12 @@ button:active {
         if (diasDoMes.length > 0) {
           totalDiasTrabalhados += diasDoMes.length;
           mesesComDias.push(mes);
-          todosDiasSelecionados = [...todosDiasSelecionados, ...diasDoMes.map(dia => `${mes}-${String(dia).padStart(2, '0')}`];
+          todosDiasSelecionados = [...todosDiasSelecionados, ...diasDoMes.map(dia => `${mes}-${String(dia).padStart(2, '0')}`)];
         }
       }
       
       if (totalDiasTrabalhados === 0) {
-        await Swal.fire({
-          icon: 'warning',
-          title: 'Atenção',
-          text: 'Por favor, selecione pelo menos um dia trabalhado nos meses adicionados.',
-          confirmButtonColor: '#28a745'
-        });
+        alert('Por favor, selecione pelo menos um dia trabalhado nos meses adicionados.');
         return;
       }
       
@@ -965,14 +931,6 @@ button:active {
 
       document.getElementById('btnExportar').style.display = 'block';
       document.getElementById('btnExportarCompleto').style.display = 'block';
-      
-      // Mostrar confirmação com SweetAlert
-      await Swal.fire({
-        icon: 'success',
-        title: 'Cálculo concluído!',
-        text: `O valor líquido a receber é R$ ${totalLiquido.toFixed(2)}`,
-        confirmButtonColor: '#28a745'
-      });
     }
 
     function atualizarHistorico() {
@@ -992,9 +950,9 @@ button:active {
                 const excluirBtn = document.createElement('button');
                 excluirBtn.textContent = 'Excluir';
                 excluirBtn.classList.add('btn-excluir');
-                excluirBtn.onclick = async (event) => {
+                excluirBtn.onclick = (event) => {
                     event.stopPropagation();
-                    await excluirItemHistorico(item.id);
+                    excluirItemHistorico(item.id);
                 };
                 li.appendChild(excluirBtn);
             }
@@ -1016,29 +974,11 @@ button:active {
     }
 }
 
-    async function excluirItemHistorico(id) {
-         const { isConfirmed } = await Swal.fire({
-           title: 'Confirmação',
-           text: 'Tem certeza que deseja excluir este item do histórico local?',
-           icon: 'warning',
-           showCancelButton: true,
-           confirmButtonColor: '#28a745',
-           cancelButtonColor: '#dc3545',
-           confirmButtonText: 'Sim, excluir',
-           cancelButtonText: 'Cancelar'
-         });
-         
-         if (isConfirmed) {
+    function excluirItemHistorico(id) {
+         if (confirm('Tem certeza que deseja excluir este item do histórico local?')) {
              historicoVA = historicoVA.filter(item => item.id !== id);
              localStorage.setItem('historicoVA', JSON.stringify(historicoVA));
              atualizarHistorico();
-             
-             await Swal.fire({
-               icon: 'success',
-               title: 'Excluído!',
-               text: 'O item foi removido do histórico.',
-               confirmButtonColor: '#28a745'
-             });
          }
     }
 
@@ -1072,19 +1012,8 @@ button:active {
         atualizarHistorico();
     }
 
-    async function limparCampos() {
-      const { isConfirmed } = await Swal.fire({
-        title: 'Confirmação',
-        text: 'Isso limpará todos os campos e o histórico local. Deseja continuar?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#28a745',
-        cancelButtonColor: '#dc3545',
-        confirmButtonText: 'Sim, limpar tudo',
-        cancelButtonText: 'Cancelar'
-      });
-      
-      if (isConfirmed) {
+    function limparCampos() {
+      if (confirm('Isso limpará todos os campos e o histórico local. Deseja continuar?')) {
           document.getElementById('beneficiario').value = '';
           document.getElementById('valorDiario').value = '28.00';
           document.getElementById('tipoDesconto').value = 'percentual';
@@ -1104,13 +1033,6 @@ button:active {
           atualizarHistorico();
 
           document.getElementById('btnExportar').style.display = 'none';
-          
-          await Swal.fire({
-            icon: 'success',
-            title: 'Limpeza concluída!',
-            text: 'Todos os campos foram resetados.',
-            confirmButtonColor: '#28a745'
-          });
       }
     }
 
@@ -1132,13 +1054,6 @@ button:active {
             
             const nomeOperador = document.getElementById('beneficiario').value.replace(' ', '_') || 'calculo';
             pdf.save(`vale_alimentacao_${nomeOperador}_${new Date().toISOString().slice(0, 10)}.pdf`);
-            
-            Swal.fire({
-              icon: 'success',
-              title: 'PDF gerado!',
-              text: 'O arquivo foi baixado com sucesso.',
-              confirmButtonColor: '#28a745'
-            });
         });
     }
 
@@ -1168,13 +1083,6 @@ button:active {
         }
 
         doc.save(`historico_va_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.pdf`);
-        
-        Swal.fire({
-          icon: 'success',
-          title: 'Histórico exportado!',
-          text: 'O arquivo PDF foi baixado com sucesso.',
-          confirmButtonColor: '#28a745'
-        });
     }
 
     document.getElementById('filtroHistorico').addEventListener('input', filtrarHistorico);
