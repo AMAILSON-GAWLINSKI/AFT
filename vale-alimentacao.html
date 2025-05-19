@@ -4,142 +4,142 @@
   <meta charset="UTF-8">
   <title>Vale Alimentação</title>
   <style>
-  /* === TODO SEU CSS === */
+  /* === SEU CSS === */
   * {
-  box-sizing: border-box;
-}
+    box-sizing: border-box;
+  }
 
-body {
-  margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f0f2f5;
-  padding: 40px 20px;
-  color: #333;
-}
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    padding: 40px 20px;
+    color: #333;
+  }
 
-.container {
-  max-width: 700px;
-  margin: auto;
-  background: #ffffff;
-  padding: 30px;
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-}
+  .container {
+    max-width: 700px;
+    margin: auto;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
 
-h1 {
-  text-align: center;
-  color: #37b61e;
-  margin-bottom: 20px;
-}
+  h1 {
+    text-align: center;
+    color: #37b61e;
+    margin-bottom: 20px;
+  }
 
-h2 {
-  text-align: center;
-  margin-bottom: 30px;
-  color: #222;
-}
+  h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #222;
+  }
 
-h4 {
+  h4 {
     color: #ff8c00;
     margin-bottom: 15px;
     border-bottom: 1px solid #eee;
     padding-bottom: 5px;
-}
+  }
 
-.form-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.form-row {
+  .form-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
     margin-bottom: 20px;
-}
+  }
 
-.form-col {
+  .form-row {
+    margin-bottom: 20px;
+  }
+
+  .form-col {
     display: flex;
     flex-direction: column;
-}
+  }
 
-.form-control, .form-half {
-  flex: 1 1 100%;
-}
+  .form-control, .form-half {
+    flex: 1 1 100%;
+  }
 
-.form-half {
-  flex: 1 1 calc(50% - 10px);
-}
+  .form-half {
+    flex: 1 1 calc(50% - 10px);
+  }
 
-label {
-  font-weight: 600;
-  display: block;
-  margin-bottom: 6px;
-}
+  label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+  }
 
-input[type="number"],
-input[type="text"],
-input[type="month"],
-select {
-  width: 100%;
-  padding: 12px;
-  font-size: 15px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
+  input[type="number"],
+  input[type="text"],
+  input[type="month"],
+  select {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
 
-input:focus, select:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
-  outline: none;
-}
+  input:focus, select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+    outline: none;
+  }
 
-button {
-  padding: 12px 18px;
-  font-size: 15px;
-  font-weight: bold;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s ease;
-}
+  button {
+    padding: 12px 18px;
+    font-size: 15px;
+    font-weight: bold;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+  }
 
-button:active {
+  button:active {
     transform: scale(0.98);
-}
+  }
 
-.btn-calcular {
-  background-color: #28a745;
-  color: #fff;
-  width: 100%;
-}
-.btn-calcular:hover {
+  .btn-calcular {
+    background-color: #28a745;
+    color: #fff;
+    width: 100%;
+  }
+  .btn-calcular:hover {
     background-color: #218838;
-}
+  }
 
-.btn-exportar,
-.btn-exportar-completo {
-  background-color: #007bff;
-  color: #fff;
-  width: 100%;
-  margin-top: 10px;
-  display: none;
-}
-.btn-exportar:hover,
-.btn-exportar-completo:hover {
+  .btn-exportar,
+  .btn-exportar-completo {
+    background-color: #007bff;
+    color: #fff;
+    width: 100%;
+    margin-top: 10px;
+    display: none;
+  }
+  .btn-exportar:hover,
+  .btn-exportar-completo:hover {
     background-color: #0056b3;
-}
+  }
 
-.btn-limpar {
-  background-color: #dc3545;
-  color: #fff;
-  width: 100%;
-  margin-top: 20px;
-}
-.btn-limpar:hover {
+  .btn-limpar {
+    background-color: #dc3545;
+    color: #fff;
+    width: 100%;
+    margin-top: 20px;
+  }
+  .btn-limpar:hover {
     background-color: #c82333;
-}
+  }
 
-.btn-atualizar-dados {
+  .btn-atualizar-dados {
     background-color: #17a2b8;
     color: white;
     padding: 8px 15px;
@@ -147,150 +147,150 @@ button:active {
     margin-bottom: 10px;
     width: auto;
     display: inline-block;
-}
-.btn-atualizar-dados:hover {
+  }
+  .btn-atualizar-dados:hover {
     background-color: #117a8b;
-}
+  }
 
-.resultado {
-  margin-top: 30px;
-  padding: 20px;
-  background: #e9f7ef;
-  border-left: 5px solid #2e7d32;
-  border-radius: 8px;
-  display: none;
-  line-height: 1.6;
-}
-.resultado strong {
+  .resultado {
+    margin-top: 30px;
+    padding: 20px;
+    background: #e9f7ef;
+    border-left: 5px solid #2e7d32;
+    border-radius: 8px;
+    display: none;
+    line-height: 1.6;
+  }
+  .resultado strong {
     color: #155724;
-}
+  }
 
-#calendario {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
-  margin-top: 10px;
-  background-color: #ffffff;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #eee;
-}
+  #calendario {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-top: 10px;
+    background-color: #ffffff;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+  }
 
-#calendario div,
-#calendario button {
-  text-align: center;
-  padding: 8px;
-  border-radius: 6px;
-  font-size: 13px;
-}
+  #calendario div,
+  #calendario button {
+    text-align: center;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 13px;
+  }
 
-#calendario div {
-  font-weight: bold;
-  background-color: #6c757d;
-  color: #ffffff;
-}
+  #calendario div {
+    font-weight: bold;
+    background-color: #6c757d;
+    color: #ffffff;
+  }
 
-#calendario button {
-  border: 1px solid #ccc;
-  background-color: #f8f9fa;
-  color: #333;
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-#calendario button:hover:not(:disabled) {
+  #calendario button {
+    border: 1px solid #ccc;
+    background-color: #f8f9fa;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  #calendario button:hover:not(:disabled) {
     background-color: #e2e6ea;
-}
+  }
 
-#calendario button.ativo {
-  background-color: #28a745;
-  color: #ffffff;
-  font-weight: bold;
-  border-color: #1c7430;
-}
+  #calendario button.ativo {
+    background-color: #28a745;
+    color: #ffffff;
+    font-weight: bold;
+    border-color: #1c7430;
+  }
 
-#calendario button.feriado,
-#calendario button.feriado-movel {
-  background-color: #f5c6cb;
-  color: #721c24;
-  cursor: not-allowed;
-  font-weight: bold;
-  border: 1px dashed #f194a1;
-  text-decoration: line-through;
-}
-#calendario button.feriado:hover,
-#calendario button.feriado-movel:hover {
+  #calendario button.feriado,
+  #calendario button.feriado-movel {
     background-color: #f5c6cb;
-}
+    color: #721c24;
+    cursor: not-allowed;
+    font-weight: bold;
+    border: 1px dashed #f194a1;
+    text-decoration: line-through;
+  }
+  #calendario button.feriado:hover,
+  #calendario button.feriado-movel:hover {
+    background-color: #f5c6cb;
+  }
 
-#filtroHistorico {
-  margin: 10px 0;
-  padding: 10px;
-  width: 100%;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-}
+  #filtroHistorico {
+    margin: 10px 0;
+    padding: 10px;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+  }
 
-.btn-excluir {
-  margin-left: 10px;
-  background-color: #ff4d4d;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: background-color 0.2s ease;
-}
-.btn-excluir:hover {
+  .btn-excluir {
+    margin-left: 10px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.2s ease;
+  }
+  .btn-excluir:hover {
     background-color: #e60000;
-}
+  }
 
-.filtros-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 10px 0 20px 0;
-  padding: 15px;
-  background-color: #e9ecef;
-  border-radius: 8px;
-  align-items: center;
-}
+  .filtros-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 10px 0 20px 0;
+    padding: 15px;
+    background-color: #e9ecef;
+    border-radius: 8px;
+    align-items: center;
+  }
 
-.filtros-container input,
-.filtros-container select {
-  flex: 1 1 auto;
-  min-width: 120px;
-  padding: 10px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #fff;
-}
+  .filtros-container input,
+  .filtros-container select {
+    flex: 1 1 auto;
+    min-width: 120px;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+  }
 
-.filtros-container > div {
-  display: flex;
-  gap: 10px;
-  flex: 1;
-  min-width: 250px;
-}
+  .filtros-container > div {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+    min-width: 250px;
+  }
 
-#historico {
+  #historico {
     margin-top: 30px;
     padding: 20px;
     background: #fff3cd;
     border-left: 5px solid #ffeeba;
     border-radius: 8px;
     display: none;
-}
+  }
 
-#listaHistorico {
+  #listaHistorico {
     list-style: none;
     padding-left: 0;
     margin-top: 15px;
-}
+  }
 
-#listaHistorico li {
+  #listaHistorico li {
     background-color: #ffffff;
     padding: 12px 15px;
     margin-bottom: 8px;
@@ -301,12 +301,12 @@ button:active {
     align-items: center;
     font-size: 14px;
     color: #555;
-}
-#listaHistorico li:last-child {
+  }
+  #listaHistorico li:last-child {
     margin-bottom: 0;
-}
+  }
 
-#dados-container {
+  #dados-container {
     margin-top: 15px;
     max-height: 400px;
     overflow-y: auto;
@@ -314,49 +314,49 @@ button:active {
     padding: 10px;
     background-color: #f8f9fa;
     border-radius: 8px;
-}
-#dados-container table {
+  }
+  #dados-container table {
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
-}
-#dados-container th, #dados-container td {
+  }
+  #dados-container th, #dados-container td {
     border: 1px solid #ddd;
     padding: 6px 8px;
     text-align: left;
-}
-#dados-container th {
+  }
+  #dados-container th {
     background-color: #e9ecef;
     position: sticky;
     top: 0;
     z-index: 1;
-}
+  }
 
-.meses-selecionados-container {
+  .meses-selecionados-container {
     margin-top: 15px;
     padding: 10px;
     background-color: #f8f9fa;
     border-radius: 8px;
     border: 1px solid #ddd;
-}
+  }
 
-.meses-selecionados-list {
+  .meses-selecionados-list {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 10px;
-}
+  }
 
-.mes-selecionado-tag {
+  .mes-selecionado-tag {
     background-color: #e2e6ea;
     padding: 5px 10px;
     border-radius: 16px;
     display: flex;
     align-items: center;
     font-size: 14px;
-}
+  }
 
-.mes-selecionado-tag button {
+  .mes-selecionado-tag button {
     background: none;
     border: none;
     color: #6c757d;
@@ -364,13 +364,12 @@ button:active {
     padding: 0;
     font-size: 12px;
     cursor: pointer;
-}
+  }
 
-.mes-selecionado-tag button:hover {
+  .mes-selecionado-tag button:hover {
     color: #dc3545;
-}
-
-  /* === FIM DO SEU CSS === */
+  }
+  /* === FIM DO CSS === */
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -379,105 +378,110 @@ button:active {
   <div class="container">
     <h1>VALE ALIMENTAÇÃO</h1>
     <div class="form-row">
-        <div class="form-col">
-          <label for="beneficiario">👷 Operador:</label>
-          <select id="beneficiario">
-            <option value="">Selecione um operador</option>
-            <option value="Caio José">Caio José</option>
-            <option value="Daniel Rodrigo">Daniel Rodrigo</option>
-            <option value="Igor Nascimento">Igor Nascimento</option>
-            <option value="Lissandro da Silva">Lissandro da Silva</option>
-            <option value="Luana Parcianello">Luana Parcianello</option>
-            <option value="Patrick Darlan">Patrick Darlan</option>
-            <option value="Ricardo Alves">Ricardo Alves</option>
-            <option value="Keniel Vasque">Keniel Vasque</option>
-          </select>
-        </div>
+      <div class="form-col">
+        <label for="beneficiario">👷 Operador:</label>
+        <select id="beneficiario">
+          <option value="">Selecione um operador</option>
+          <option value="Amailson Gawlinski">Amailson Gawlinski</option>
+          <option value="Caio José">Caio José</option>
+          <option value="Daniel Rodrigo">Daniel Rodrigo</option>
+          <option value="George Gonçalves">George Gonçalves</option>
+          <option value="Igor Nascimento">Igor Nascimento</option>
+          <option value="Lissandro da Silva">Lissandro da Silva</option>
+          <option value="Luana Parcianello">Luana Parcianello</option>
+          <option value="Patrick Darlan">Patrick Darlan</option>
+          <option value="Ricardo Alves">Ricardo Alves</option>
+          <option value="Keniel Vasque">Keniel Vasque</option>
+        </select>
       </div>
-
-      <div class="form-group">
-        <div class="form-half">
-          <label for="valorDiario">💵 Valor do Benefício por Dia (R$):</label>
-          <input type="number" id="valorDiario" value="28.00" step="0.01">
-        </div>
-        <div class="form-half">
-          <label for="tipoDesconto">💲 Tipo de Desconto:</label>
-          <select id="tipoDesconto">
-            <option value="percentual">Percentual (%)</option>
-            <option value="fixo">Valor Fixo (R$)</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <div class="form-half"> <label for="valorDesconto">🔖 Valor do Desconto:</label>
-          <input type="number" id="valorDesconto" step="0.01" placeholder="Ex: 5 (para %) ou 150 (para R$)">
-        </div>
-        <div class="form-half"> <label for="qtdDescontos4h">⏱️ Dias com -4h trabalhadas:</label> <input type="number" id="qtdDescontos4h" min="0" step="1" placeholder="Nº de dias">
-        </div>
-      </div>
-
-      <div class="form-control" style="margin-bottom: 20px;"> 
-        <label>📅 Selecione os Dias Trabalhados:</label>
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-          <button onclick="mudarMes(-1)" style="padding: 8px 12px; font-size: 18px;">⬅️</button>
-          <input type="month" id="mesSelecionado" onchange="gerarCalendario()">
-          <button onclick="mudarMes(1)" style="padding: 8px 12px; font-size: 18px;">➡️</button>
-          <button onclick="adicionarMes()" style="padding: 8px 12px; font-size: 14px;">➕ Adicionar Mês</button>
-        </div>
-        <div id="calendario"></div>
-        
-        <!-- Área para mostrar os meses selecionados -->
-        <div id="mesesSelecionadosContainer" class="meses-selecionados-container" style="display: none;">
-          <label>Meses Selecionados:</label>
-          <div id="mesesSelecionadosList" class="meses-selecionados-list"></div>
-        </div>
-      </div>
-
-<div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
-  <button onclick="calcularVA()" style="background-color: #28a745; color: #fff; padding: 12px 18px; font-size: 15px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer;">➕ CALCULAR</button>
-  <button id="btnExportar" onclick="exportarPDF()" style="background-color: #007bff; color: #fff; padding: 12px 18px; font-size: 15px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; display: none;">📄 SALVAR CÁLCULO</button>
-  <button id="btnExportarCompleto" onclick="exportarPDFCompleto()" style="background-color: #007bff; color: #fff; padding: 12px 18px; font-size: 15px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; display: none;">📤 SALVAR HISTÓRICO</button>
-</div>
-
-<div id="resultado" class="resultado"></div>
-<div id="historico" class="historico">
-  <h4>📝 Histórico de Cálculos Locais</h4>
-  <div class="filtros-container">
-    <input type="text" id="filtroHistorico" placeholder="Filtrar por nome ou ID..." style="margin: 0;">
-    
-    <div style="display: flex; gap: 10px; align-items: center;">
-      <select id="filtroMesHistorico" onchange="filtrarHistorico()" style="flex: 1;">
-        <option value="">Todos os meses</option>
-        <option value="0">Janeiro</option>
-        <option value="1">Fevereiro</option>
-        <option value="2">Março</option>
-        <option value="3">Abril</option>
-        <option value="4">Maio</option>
-        <option value="5">Junho</option>
-        <option value="6">Julho</option>
-        <option value="7">Agosto</option>
-        <option value="8">Setembro</option>
-        <option value="9">Outubro</option>
-        <option value="10">Novembro</option>
-        <option value="11">Dezembro</option>
-      </select>
-
-      <select id="filtroAnoHistorico" onchange="filtrarHistorico()" style="flex: 1;">
-        <option value="">Todos os anos</option>
-        <script>
-          const anoAtual = new Date().getFullYear();
-          for (let i = anoAtual - 5; i <= anoAtual + 1; i++) {
-            document.write(`<option value="${i}">${i}</option>`);
-          }
-        </script>
-      </select>
     </div>
-  </div>
 
-  <ul id="listaHistorico"></ul>
-</div>
-<button id="btnLimpar" class="btn-limpar" onclick="limparCampos()">🧹 LIMPAR TUDO</button>
+    <div class="form-group">
+      <div class="form-half">
+        <label for="valorDiario">💵 Valor do Benefício por Dia (R$):</label>
+        <input type="number" id="valorDiario" value="28.00" step="0.01">
+      </div>
+      <div class="form-half">
+        <label for="tipoDesconto">💲 Tipo de Desconto:</label>
+        <select id="tipoDesconto">
+          <option value="percentual">Percentual (%)</option>
+          <option value="fixo">Valor Fixo (R$)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="form-half">
+        <label for="valorDesconto">🔖 Valor do Desconto:</label>
+        <input type="number" id="valorDesconto" step="0.01" placeholder="Ex: 5 (para %) ou 150 (para R$)">
+      </div>
+      <div class="form-half">
+        <label for="qtdDescontos4h">⏱️ Dias com -4h trabalhadas:</label>
+        <input type="number" id="qtdDescontos4h" min="0" step="1" placeholder="Nº de dias">
+      </div>
+    </div>
+
+    <div class="form-control" style="margin-bottom: 20px;">
+      <label>📅 Selecione os Dias Trabalhados:</label>
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+        <button onclick="mudarMes(-1)" style="padding: 8px 12px; font-size: 18px;">⬅️</button>
+        <input type="month" id="mesSelecionado" onchange="gerarCalendario()">
+        <button onclick="mudarMes(1)" style="padding: 8px 12px; font-size: 18px;">➡️</button>
+        <button onclick="adicionarMes()" style="padding: 8px 12px; font-size: 14px;">➕ Adicionar Mês</button>
+      </div>
+      <div id="calendario"></div>
+      
+      <!-- Área para mostrar os meses selecionados -->
+      <div id="mesesSelecionadosContainer" class="meses-selecionados-container" style="display: none;">
+        <label>Meses Selecionados:</label>
+        <div id="mesesSelecionadosList" class="meses-selecionados-list"></div>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+      <button onclick="calcularVA()" class="btn-calcular">➕ CALCULAR</button>
+      <button id="btnExportar" onclick="exportarPDF()" class="btn-exportar">📄 SALVAR CÁLCULO</button>
+      <button id="btnExportarCompleto" onclick="exportarPDFCompleto()" class="btn-exportar-completo">📤 SALVAR HISTÓRICO</button>
+    </div>
+
+    <div id="resultado" class="resultado"></div>
+    <div id="historico" class="historico">
+      <h4>📝 Histórico de Cálculos Locais</h4>
+      <div class="filtros-container">
+        <input type="text" id="filtroHistorico" placeholder="Filtrar por nome ou ID..." style="margin: 0;">
+        
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <select id="filtroMesHistorico" onchange="filtrarHistorico()" style="flex: 1;">
+            <option value="">Todos os meses</option>
+            <option value="0">Janeiro</option>
+            <option value="1">Fevereiro</option>
+            <option value="2">Março</option>
+            <option value="3">Abril</option>
+            <option value="4">Maio</option>
+            <option value="5">Junho</option>
+            <option value="6">Julho</option>
+            <option value="7">Agosto</option>
+            <option value="8">Setembro</option>
+            <option value="9">Outubro</option>
+            <option value="10">Novembro</option>
+            <option value="11">Dezembro</option>
+          </select>
+
+          <select id="filtroAnoHistorico" onchange="filtrarHistorico()" style="flex: 1;">
+            <option value="">Todos os anos</option>
+            <script>
+              const anoAtual = new Date().getFullYear();
+              for (let i = anoAtual - 5; i <= anoAtual + 1; i++) {
+                document.write(`<option value="${i}">${i}</option>`);
+              }
+            </script>
+          </select>
+        </div>
+      </div>
+
+      <ul id="listaHistorico"></ul>
+    </div>
+    <button id="btnLimpar" class="btn-limpar" onclick="limparCampos()">🧹 LIMPAR TUDO</button>
   </div>
 
   <script>
@@ -573,181 +577,156 @@ button:active {
         "2025-03-04": "Carnaval",
         "2025-04-18": "Sexta-feira Santa",
         "2025-06-19": "Corpus Christi",
-
-    "2026-02-13": "Sexta-feira de Carnaval",
-    "2026-02-16": "Segunda-feira de Carnaval",
-    "2026-02-17": "Terça-feira de Carnaval",
-    "2026-02-18": "Quarta-feira de Cinzas",
-    "2026-04-03": "Sexta-feira Santa",
-    "2026-06-04": "Corpus Christi",
-
-    "2027-02-05": "Sexta-feira de Carnaval",
-    "2027-02-08": "Segunda-feira de Carnaval",
-    "2027-02-09": "Terça-feira de Carnaval",
-    "2027-02-10": "Quarta-feira de Cinzas",
-    "2027-03-26": "Sexta-feira Santa",
-    "2027-05-27": "Corpus Christi",
-
-    "2028-02-25": "Sexta-feira de Carnaval",
-    "2028-02-28": "Segunda-feira de Carnaval",
-    "2028-02-29": "Terça-feira de Carnaval",
-    "2028-03-01": "Quarta-feira de Cinzas",
-    "2028-04-14": "Sexta-feira Santa",
-    "2028-06-15": "Corpus Christi",
-
-    "2029-02-09": "Sexta-feira de Carnaval",
-    "2029-02-12": "Segunda-feira de Carnaval",
-    "2029-02-13": "Terça-feira de Carnaval",
-    "2029-02-14": "Quarta-feira de Cinzas",
-    "2029-03-30": "Sexta-feira Santa",
-    "2029-05-31": "Corpus Christi",
-
-    "2030-03-01": "Sexta-feira de Carnaval",
-    "2030-03-04": "Segunda-feira de Carnaval",
-    "2030-03-05": "Terça-feira de Carnaval",
-    "2030-03-06": "Quarta-feira de Cinzas",
-    "2030-04-19": "Sexta-feira Santa",
-    "2030-06-20": "Corpus Christi",
-
-    "2031-02-21": "Sexta-feira de Carnaval",
-    "2031-02-24": "Segunda-feira de Carnaval",
-    "2031-02-25": "Terça-feira de Carnaval",
-    "2031-02-26": "Quarta-feira de Cinzas",
-    "2031-04-11": "Sexta-feira Santa",
-    "2031-06-12": "Corpus Christi",
-
-    "2032-02-06": "Sexta-feira de Carnaval",
-    "2032-02-09": "Segunda-feira de Carnaval",
-    "2032-02-10": "Terça-feira de Carnaval",
-    "2032-02-11": "Quarta-feira de Cinzas",
-    "2032-03-26": "Sexta-feira Santa",
-    "2032-05-27": "Corpus Christi",
-
-    "2033-02-25": "Sexta-feira de Carnaval",
-    "2033-02-28": "Segunda-feira de Carnaval",
-    "2033-03-01": "Terça-feira de Carnaval",
-    "2033-03-02": "Quarta-feira de Cinzas",
-    "2033-04-15": "Sexta-feira Santa",
-    "2033-06-16": "Corpus Christi",
-
-    "2034-02-10": "Sexta-feira de Carnaval",
-    "2034-02-13": "Segunda-feira de Carnaval",
-    "2034-02-14": "Terça-feira de Carnaval",
-    "2034-02-15": "Quarta-feira de Cinzas",
-    "2034-03-31": "Sexta-feira Santa",
-    "2034-06-01": "Corpus Christi",
-
-    "2035-03-02": "Sexta-feira de Carnaval",
-    "2035-03-05": "Segunda-feira de Carnaval",
-    "2035-03-06": "Terça-feira de Carnaval",
-    "2035-03-07": "Quarta-feira de Cinzas",
-    "2035-04-20": "Sexta-feira Santa",
-    "2035-06-21": "Corpus Christi",
-
-    "2036-02-22": "Sexta-feira de Carnaval",
-    "2036-02-25": "Segunda-feira de Carnaval",
-    "2036-02-26": "Terça-feira de Carnaval",
-    "2036-02-27": "Quarta-feira de Cinzas",
-    "2036-04-11": "Sexta-feira Santa",
-    "2036-06-12": "Corpus Christi",
-
-    "2037-02-06": "Sexta-feira de Carnaval",
-    "2037-02-09": "Segunda-feira de Carnaval",
-    "2037-02-10": "Terça-feira de Carnaval",
-    "2037-02-11": "Quarta-feira de Cinzas",
-    "2037-03-27": "Sexta-feira Santa",
-    "2037-05-28": "Corpus Christi",
-
-    "2038-02-26": "Sexta-feira de Carnaval",
-    "2038-03-01": "Segunda-feira de Carnaval",
-    "2038-03-02": "Terça-feira de Carnaval",
-    "2038-03-03": "Quarta-feira de Cinzas",
-    "2038-04-16": "Sexta-feira Santa",
-    "2038-06-17": "Corpus Christi",
-
-    "2039-02-11": "Sexta-feira de Carnaval",
-    "2039-02-14": "Segunda-feira de Carnaval",
-    "2039-02-15": "Terça-feira de Carnaval",
-    "2039-02-16": "Quarta-feira de Cinzas",
-    "2039-04-01": "Sexta-feira Santa",
-    "2039-06-02": "Corpus Christi",
-
-    "2040-03-02": "Sexta-feira de Carnaval",
-    "2040-03-05": "Segunda-feira de Carnaval",
-    "2040-03-06": "Terça-feira de Carnaval",
-    "2040-03-07": "Quarta-feira de Cinzas",
-    "2040-04-20": "Sexta-feira Santa",
-    "2040-06-21": "Corpus Christi",
-
-    "2041-02-15": "Sexta-feira de Carnaval",
-    "2041-02-18": "Segunda-feira de Carnaval",
-    "2041-02-19": "Terça-feira de Carnaval",
-    "2041-02-20": "Quarta-feira de Cinzas",
-    "2041-04-05": "Sexta-feira Santa",
-    "2041-06-06": "Corpus Christi",
-
-    "2042-02-07": "Sexta-feira de Carnaval",
-    "2042-02-10": "Segunda-feira de Carnaval",
-    "2042-02-11": "Terça-feira de Carnaval",
-    "2042-02-12": "Quarta-feira de Cinzas",
-    "2042-03-28": "Sexta-feira Santa",
-    "2042-05-29": "Corpus Christi",
-
-    "2043-02-27": "Sexta-feira de Carnaval",
-    "2043-03-02": "Segunda-feira de Carnaval",
-    "2043-03-03": "Terça-feira de Carnaval",
-    "2043-03-04": "Quarta-feira de Cinzas",
-    "2043-04-17": "Sexta-feira Santa",
-    "2043-06-18": "Corpus Christi",
-
-    "2044-02-12": "Sexta-feira de Carnaval",
-    "2044-02-15": "Segunda-feira de Carnaval",
-    "2044-02-16": "Terça-feira de Carnaval",
-    "2044-02-17": "Quarta-feira de Cinzas",
-    "2044-04-01": "Sexta-feira Santa",
-    "2044-06-02": "Corpus Christi",
-
-    "2045-03-03": "Sexta-feira de Carnaval",
-    "2045-03-06": "Segunda-feira de Carnaval",
-    "2045-03-07": "Terça-feira de Carnaval",
-    "2045-03-08": "Quarta-feira de Cinzas",
-    "2045-04-21": "Sexta-feira Santa",
-    "2045-06-22": "Corpus Christi",
-
-    "2046-02-16": "Sexta-feira de Carnaval",
-    "2046-02-19": "Segunda-feira de Carnaval",
-    "2046-02-20": "Terça-feira de Carnaval",
-    "2046-02-21": "Quarta-feira de Cinzas",
-    "2046-04-06": "Sexta-feira Santa",
-    "2046-06-07": "Corpus Christi",
-
-    "2047-02-08": "Sexta-feira de Carnaval",
-    "2047-02-11": "Segunda-feira de Carnaval",
-    "2047-02-12": "Terça-feira de Carnaval",
-    "2047-02-13": "Quarta-feira de Cinzas",
-    "2047-03-29": "Sexta-feira Santa",
-    "2047-05-30": "Corpus Christi",
-
-    "2048-02-28": "Sexta-feira de Carnaval",
-    "2048-03-02": "Segunda-feira de Carnaval",
-    "2048-03-03": "Terça-feira de Carnaval",
-    "2048-03-04": "Quarta-feira de Cinzas",
-    "2048-04-17": "Sexta-feira Santa",
-    "2048-06-18": "Corpus Christi",
-
-    "2049-02-13": "Sexta-feira de Carnaval",
-    "2049-02-16": "Segunda-feira de Carnaval",
-    "2049-02-17": "Terça-feira de Carnaval",
-    "2049-02-18": "Quarta-feira de Cinzas",
-    "2049-04-02": "Sexta-feira Santa",
-    "2049-06-03": "Corpus Christi",
-
-    "2050-03-04": "Sexta-feira de Carnaval",
-    "2050-03-07": "Segunda-feira de Carnaval",
-    "2050-03-08": "Terça-feira de Carnaval",
-    "2050-03-09": "Quarta-feira de Cinzas",
-    "2050-04-22": "Sexta-feira Santa",
-    "2050-06-23": "Corpus Christi"
+        "2026-02-13": "Sexta-feira de Carnaval",
+        "2026-02-16": "Segunda-feira de Carnaval",
+        "2026-02-17": "Terça-feira de Carnaval",
+        "2026-02-18": "Quarta-feira de Cinzas",
+        "2026-04-03": "Sexta-feira Santa",
+        "2026-06-04": "Corpus Christi",
+        "2027-02-05": "Sexta-feira de Carnaval",
+        "2027-02-08": "Segunda-feira de Carnaval",
+        "2027-02-09": "Terça-feira de Carnaval",
+        "2027-02-10": "Quarta-feira de Cinzas",
+        "2027-03-26": "Sexta-feira Santa",
+        "2027-05-27": "Corpus Christi",
+        "2028-02-25": "Sexta-feira de Carnaval",
+        "2028-02-28": "Segunda-feira de Carnaval",
+        "2028-02-29": "Terça-feira de Carnaval",
+        "2028-03-01": "Quarta-feira de Cinzas",
+        "2028-04-14": "Sexta-feira Santa",
+        "2028-06-15": "Corpus Christi",
+        "2029-02-09": "Sexta-feira de Carnaval",
+        "2029-02-12": "Segunda-feira de Carnaval",
+        "2029-02-13": "Terça-feira de Carnaval",
+        "2029-02-14": "Quarta-feira de Cinzas",
+        "2029-03-30": "Sexta-feira Santa",
+        "2029-05-31": "Corpus Christi",
+        "2030-03-01": "Sexta-feira de Carnaval",
+        "2030-03-04": "Segunda-feira de Carnaval",
+        "2030-03-05": "Terça-feira de Carnaval",
+        "2030-03-06": "Quarta-feira de Cinzas",
+        "2030-04-19": "Sexta-feira Santa",
+        "2030-06-20": "Corpus Christi",
+        "2031-02-21": "Sexta-feira de Carnaval",
+        "2031-02-24": "Segunda-feira de Carnaval",
+        "2031-02-25": "Terça-feira de Carnaval",
+        "2031-02-26": "Quarta-feira de Cinzas",
+        "2031-04-11": "Sexta-feira Santa",
+        "2031-06-12": "Corpus Christi",
+        "2032-02-06": "Sexta-feira de Carnaval",
+        "2032-02-09": "Segunda-feira de Carnaval",
+        "2032-02-10": "Terça-feira de Carnaval",
+        "2032-02-11": "Quarta-feira de Cinzas",
+        "2032-03-26": "Sexta-feira Santa",
+        "2032-05-27": "Corpus Christi",
+        "2033-02-25": "Sexta-feira de Carnaval",
+        "2033-02-28": "Segunda-feira de Carnaval",
+        "2033-03-01": "Terça-feira de Carnaval",
+        "2033-03-02": "Quarta-feira de Cinzas",
+        "2033-04-15": "Sexta-feira Santa",
+        "2033-06-16": "Corpus Christi",
+        "2034-02-10": "Sexta-feira de Carnaval",
+        "2034-02-13": "Segunda-feira de Carnaval",
+        "2034-02-14": "Terça-feira de Carnaval",
+        "2034-02-15": "Quarta-feira de Cinzas",
+        "2034-03-31": "Sexta-feira Santa",
+        "2034-06-01": "Corpus Christi",
+        "2035-03-02": "Sexta-feira de Carnaval",
+        "2035-03-05": "Segunda-feira de Carnaval",
+        "2035-03-06": "Terça-feira de Carnaval",
+        "2035-03-07": "Quarta-feira de Cinzas",
+        "2035-04-20": "Sexta-feira Santa",
+        "2035-06-21": "Corpus Christi",
+        "2036-02-22": "Sexta-feira de Carnaval",
+        "2036-02-25": "Segunda-feira de Carnaval",
+        "2036-02-26": "Terça-feira de Carnaval",
+        "2036-02-27": "Quarta-feira de Cinzas",
+        "2036-04-11": "Sexta-feira Santa",
+        "2036-06-12": "Corpus Christi",
+        "2037-02-06": "Sexta-feira de Carnaval",
+        "2037-02-09": "Segunda-feira de Carnaval",
+        "2037-02-10": "Terça-feira de Carnaval",
+        "2037-02-11": "Quarta-feira de Cinzas",
+        "2037-03-27": "Sexta-feira Santa",
+        "2037-05-28": "Corpus Christi",
+        "2038-02-26": "Sexta-feira de Carnaval",
+        "2038-03-01": "Segunda-feira de Carnaval",
+        "2038-03-02": "Terça-feira de Carnaval",
+        "2038-03-03": "Quarta-feira de Cinzas",
+        "2038-04-16": "Sexta-feira Santa",
+        "2038-06-17": "Corpus Christi",
+        "2039-02-11": "Sexta-feira de Carnaval",
+        "2039-02-14": "Segunda-feira de Carnaval",
+        "2039-02-15": "Terça-feira de Carnaval",
+        "2039-02-16": "Quarta-feira de Cinzas",
+        "2039-04-01": "Sexta-feira Santa",
+        "2039-06-02": "Corpus Christi",
+        "2040-03-02": "Sexta-feira de Carnaval",
+        "2040-03-05": "Segunda-feira de Carnaval",
+        "2040-03-06": "Terça-feira de Carnaval",
+        "2040-03-07": "Quarta-feira de Cinzas",
+        "2040-04-20": "Sexta-feira Santa",
+        "2040-06-21": "Corpus Christi",
+        "2041-02-15": "Sexta-feira de Carnaval",
+        "2041-02-18": "Segunda-feira de Carnaval",
+        "2041-02-19": "Terça-feira de Carnaval",
+        "2041-02-20": "Quarta-feira de Cinzas",
+        "2041-04-05": "Sexta-feira Santa",
+        "2041-06-06": "Corpus Christi",
+        "2042-02-07": "Sexta-feira de Carnaval",
+        "2042-02-10": "Segunda-feira de Carnaval",
+        "2042-02-11": "Terça-feira de Carnaval",
+        "2042-02-12": "Quarta-feira de Cinzas",
+        "2042-03-28": "Sexta-feira Santa",
+        "2042-05-29": "Corpus Christi",
+        "2043-02-27": "Sexta-feira de Carnaval",
+        "2043-03-02": "Segunda-feira de Carnaval",
+        "2043-03-03": "Terça-feira de Carnaval",
+        "2043-03-04": "Quarta-feira de Cinzas",
+        "2043-04-17": "Sexta-feira Santa",
+        "2043-06-18": "Corpus Christi",
+        "2044-02-12": "Sexta-feira de Carnaval",
+        "2044-02-15": "Segunda-feira de Carnaval",
+        "2044-02-16": "Terça-feira de Carnaval",
+        "2044-02-17": "Quarta-feira de Cinzas",
+        "2044-04-01": "Sexta-feira Santa",
+        "2044-06-02": "Corpus Christi",
+        "2045-03-03": "Sexta-feira de Carnaval",
+        "2045-03-06": "Segunda-feira de Carnaval",
+        "2045-03-07": "Terça-feira de Carnaval",
+        "2045-03-08": "Quarta-feira de Cinzas",
+        "2045-04-21": "Sexta-feira Santa",
+        "2045-06-22": "Corpus Christi",
+        "2046-02-16": "Sexta-feira de Carnaval",
+        "2046-02-19": "Segunda-feira de Carnaval",
+        "2046-02-20": "Terça-feira de Carnaval",
+        "2046-02-21": "Quarta-feira de Cinzas",
+        "2046-04-06": "Sexta-feira Santa",
+        "2046-06-07": "Corpus Christi",
+        "2047-02-08": "Sexta-feira de Carnaval",
+        "2047-02-11": "Segunda-feira de Carnaval",
+        "2047-02-12": "Terça-feira de Carnaval",
+        "2047-02-13": "Quarta-feira de Cinzas",
+        "2047-03-29": "Sexta-feira Santa",
+        "2047-05-30": "Corpus Christi",
+        "2048-02-28": "Sexta-feira de Carnaval",
+        "2048-03-02": "Segunda-feira de Carnaval",
+        "2048-03-03": "Terça-feira de Carnaval",
+        "2048-03-04": "Quarta-feira de Cinzas",
+        "2048-04-17": "Sexta-feira Santa",
+        "2048-06-18": "Corpus Christi",
+        "2049-02-13": "Sexta-feira de Carnaval",
+        "2049-02-16": "Segunda-feira de Carnaval",
+        "2049-02-17": "Terça-feira de Carnaval",
+        "2049-02-18": "Quarta-feira de Cinzas",
+        "2049-04-02": "Sexta-feira Santa",
+        "2049-06-03": "Corpus Christi",
+        "2050-03-04": "Sexta-feira de Carnaval",
+        "2050-03-07": "Segunda-feira de Carnaval",
+        "2050-03-08": "Terça-feira de Carnaval",
+        "2050-03-09": "Quarta-feira de Cinzas",
+        "2050-04-22": "Sexta-feira Santa",
+        "2050-06-23": "Corpus Christi"
       };
 
       for (let i = 0; i < primeiroDiaSemana; i++) {
