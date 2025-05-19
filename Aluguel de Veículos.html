@@ -5,10 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Aluguel de Veículos</title>
 
+  <!-- Bibliotecas CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+  <!-- Bibliotecas JavaScript -->
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
     :root {
@@ -375,7 +380,7 @@
         </select>
         <button onclick="mostrarHistorico()">🔄 Atualizar</button>
         <button onclick="exportarHistoricoPDF()">📤 Exportar Histórico</button>
-        <button class="btn-limpar" onclick="limparHistorico()">🧹 Limpar Histórico</button>
+        <button class="btn-limpar" onclick="confirmarLimpezaHistorico()">🧹 Limpar Histórico</button>
         <button onclick="sincronizarHistoricoCompleto()">🔄 Sincronizar com Planilha</button>
       </div>
 
@@ -384,6 +389,7 @@
   </div>
 
   <script>
+    const Swal = window.Swal;
     let diasSelecionados = [];
 
     // Feriados fixos (dia/mês)
@@ -483,7 +489,7 @@
         .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
-    function calcularValor() {
+    async function calcularValor() {
       const operador = document.getElementById("operador").value;
       const tipo = document.getElementById("tipo").value;
       const diasTrabalhadosInput = document.getElementById("diasReais");
@@ -497,19 +503,40 @@
       const idCalculo = gerarID();
 
       if (!operador || !tipo || diasSelecionados.length === 0) {
-        alert("Preencha todos os campos obrigatórios.");
+        await Swal.fire({
+          icon: 'warning',
+          title: 'Campos obrigatórios',
+          text: 'Preencha todos os campos obrigatórios.',
+          confirmButtonColor: '#3085d6'
+        });
         return;
       }
 
       if (diasTrabalhados === 0) {
-        if (!confirm("Dias trabalhados está como 0. Isso significa que o operador não trabalhou nenhum dia. Deseja continuar?")) {
+        const { isConfirmed } = await Swal.fire({
+          icon: 'question',
+          title: 'Confirmação necessária',
+          text: 'Dias trabalhados está como 0. Isso significa que o operador não trabalhou nenhum dia. Deseja continuar?',
+          showCancelButton: true,
+          confirmButtonText: 'Sim, continuar',
+          cancelButtonText: 'Cancelar',
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33'
+        });
+        
+        if (!isConfirmed) {
           diasTrabalhadosInput.focus();
           return;
         }
       }
 
       if ((faltasExtras > 0 || descontoCaju > 0 || outrosDescontos > 0) && justificativa.trim() === "") {
-        alert("Justifique os descontos aplicados.");
+        await Swal.fire({
+          icon: 'warning',
+          title: 'Justificativa necessária',
+          text: 'Por favor, justifique os descontos aplicados.',
+          confirmButtonColor: '#3085d6'
+        });
         return;
       }
 
@@ -562,6 +589,13 @@
         valorPorDia: valorPorDia.toFixed(2), faltasExtras, descontoCaju, outrosDescontos,
         justificativa, valorFinal: valorFinal.toFixed(2)
       });
+
+      await Swal.fire({
+        icon: 'success',
+        title: 'Cálculo concluído!',
+        text: `O valor do aluguel foi calculado com sucesso. ID: ${idCalculo}`,
+        confirmButtonColor: '#3085d6'
+      });
     }
 
     function salvarHistorico(dados) {
@@ -605,7 +639,7 @@
           <td>${h.diasTrabalhados}</td><td>R$ ${parseFloat(h.valorPorDia).toFixed(2).replace('.', ',')}</td>
           <td>R$ ${totalDescontos.toFixed(2).replace('.', ',')}</td>
           <td>R$ ${parseFloat(h.valorFinal).toFixed(2).replace('.', ',')}</td>
-          <td class="no-print"><button class="btn-excluir" onclick="removerRegistro(${idxOriginal})">Excluir</button></td>
+          <td class="no-print"><button class="btn-excluir" onclick="confirmarExclusaoRegistro(${idxOriginal})">Excluir</button></td>
         </tr>`;
       }
 
@@ -614,18 +648,56 @@
       document.getElementById("historicoContainer").style.display = filtrado.length > 0 ? "block" : "none";
     }
 
-    function removerRegistro(index) {
-      if (confirm("Tem certeza que deseja excluir este registro?")) {
+    async function confirmarExclusaoRegistro(index) {
+      const { isConfirmed } = await Swal.fire({
+        title: 'Tem certeza?',
+        text: "Você não poderá reverter esta ação!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sim, excluir!',
+        cancelButtonText: 'Cancelar'
+      });
+      
+      if (isConfirmed) {
         const historico = JSON.parse(localStorage.getItem("historicoAluguel") || "[]");
         historico.splice(index, 1);
         localStorage.setItem("historicoAluguel", JSON.stringify(historico));
+        
+        await Swal.fire({
+          icon: 'success',
+          title: 'Excluído!',
+          text: 'O registro foi removido com sucesso.',
+          confirmButtonColor: '#3085d6'
+        });
+        
         mostrarHistorico();
       }
     }
 
-    function limparHistorico() {
-      if (confirm("Tem certeza que deseja apagar todo o histórico?")) {
+    async function confirmarLimpezaHistorico() {
+      const { isConfirmed } = await Swal.fire({
+        title: 'Tem certeza absoluta?',
+        text: "Isso apagará TODOS os registros permanentemente!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sim, limpar tudo!',
+        cancelButtonText: 'Cancelar'
+      });
+      
+      if (isConfirmed) {
         localStorage.removeItem("historicoAluguel");
+        
+        await Swal.fire({
+          icon: 'success',
+          title: 'Histórico limpo!',
+          text: 'Todos os registros foram removidos com sucesso.',
+          confirmButtonColor: '#3085d6'
+        });
+        
         mostrarHistorico();
       }
     }
@@ -648,11 +720,11 @@
       if (!elemento) return;
       
       const opt = {
-        margin: [0, 0, 0, 0], // [top, left, bottom, right] em mm
+        margin: [0, 0, 0, 0],
         filename: 'comprovante_aluguel_veiculo.pdf',
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { 
-          scale: 7, // Aumenta a qualidade
+          scale: 7,
           logging: false,
           useCORS: true
         },
@@ -668,9 +740,20 @@
       html2pdf().set(opt).from(elemento).save();
     }
 
-    function exportarHistoricoPDF() {
+    async function exportarHistoricoPDF() {
       // Obter todos os dados do histórico
       const historico = JSON.parse(localStorage.getItem("historicoAluguel") || "[]");
+      
+      // Verificar se há registros para exportar
+      if (historico.length === 0) {
+        await Swal.fire({
+          icon: 'warning',
+          title: 'Nenhum registro',
+          text: 'Não há registros no histórico para exportar.',
+          confirmButtonColor: '#3085d6'
+        });
+        return;
+      }
       
       // Ordenar do mais recente para o mais antigo
       historico.sort((a, b) => new Date(b.data) - new Date(a.data));
@@ -746,7 +829,7 @@
         jsPDF: { 
           unit: 'mm', 
           format: 'a4', 
-          orientation: 'landscape', // Alterado para paisagem para melhor visualização
+          orientation: 'landscape',
           putOnlyUsedFonts: true
         }
       };
@@ -755,6 +838,13 @@
       html2pdf().set(opt).from(element).save().then(() => {
         // Remover o elemento temporário após a geração do PDF
         document.body.removeChild(element);
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'PDF gerado!',
+          text: 'O histórico foi exportado com sucesso.',
+          confirmButtonColor: '#3085d6'
+        });
       });
     }
 
@@ -787,27 +877,78 @@
       .catch(error => console.error("Erro ao enviar para o Google Sheets:", error));
     }
 
-    // Função para sincronizar todo o histórico com o Google Sheets
-    function sincronizarHistoricoCompleto() {
+    async function sincronizarHistoricoCompleto() {
       const historico = JSON.parse(localStorage.getItem("historicoAluguel") || "[]");
       
       // Verificar se há registros para sincronizar
       if (historico.length === 0) {
-        alert("Nenhum registro no histórico para sincronizar");
+        await Swal.fire({
+          icon: 'warning',
+          title: 'Nenhum registro',
+          text: 'Não há registros no histórico para sincronizar.',
+          confirmButtonColor: '#3085d6'
+        });
         return;
       }
       
-      console.log(`Iniciando sincronização de ${historico.length} registros...`);
-      
-      // Enviar cada registro individualmente
-      historico.forEach((registro, index) => {
-        // Adicionar um pequeno atraso entre as requisições para evitar sobrecarga
-        setTimeout(() => {
-          salvarNoGoogleSheets(registro);
-        }, index * 500); // 500ms de intervalo entre requisições
+      const { isConfirmed } = await Swal.fire({
+        title: 'Confirmar sincronização',
+        html: `Deseja sincronizar <b>${historico.length}</b> registros com a planilha?<br><small>Esta operação pode levar alguns minutos.</small>`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, sincronizar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33'
       });
       
-      alert(`Sincronização iniciada! ${historico.length} registros estão sendo enviados para a planilha.`);
+      if (!isConfirmed) return;
+      
+      const loadingSwal = Swal.fire({
+        title: 'Sincronizando...',
+        html: `Enviando <b>0/${historico.length}</b> registros`,
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      
+      // Enviar cada registro individualmente
+      let enviados = 0;
+      const promises = historico.map((registro, index) => {
+        return new Promise(resolve => {
+          setTimeout(async () => {
+            try {
+              await salvarNoGoogleSheets(registro);
+              enviados++;
+              
+              if (loadingSwal.isVisible()) {
+                Swal.update({
+                  html: `Enviando <b>${enviados}/${historico.length}</b> registros`
+                });
+              }
+              
+              resolve(true);
+            } catch (error) {
+              resolve(false);
+            }
+          }, index * 500); // 500ms de intervalo entre requisições
+        });
+      });
+      
+      Promise.all(promises).then(results => {
+        const sucessos = results.filter(Boolean).length;
+        const falhas = historico.length - sucessos;
+        
+        Swal.fire({
+          title: 'Sincronização concluída!',
+          html: `Resultado:<br><br>
+                <b>${sucessos}</b> registros sincronizados com sucesso<br>
+                <b>${falhas}</b> registros não sincronizados`,
+          icon: sucessos === historico.length ? 'success' : falhas === historico.length ? 'error' : 'warning',
+          confirmButtonColor: '#3085d6'
+        });
+      });
     }
 
     // Atualiza filtro ao carregar
