@@ -170,6 +170,11 @@
     .btn-excluir:hover {
       opacity: 0.8;
     }
+    .deleting {
+      background-color: #FFEBEE !important;
+      opacity: 0.6;
+      transition: opacity 0.5s, background-color 0.3s;
+    }
     
     /* Estilos para as novas colunas de valores */
     #tabelaErros th:nth-child(9), 
@@ -642,25 +647,25 @@
     });
   }
 
-  // Exclui um registro - VERSÃO COM FALLBACK PARA LOCAL
+  // Exclui um registro individual com confirmação
   async function excluirRegistro(id) {
-    if (!confirm("Deseja realmente excluir este registro permanentemente?")) {
+    // Mostra mensagem de confirmação detalhada
+    const confirmacao = confirm(`ATENÇÃO!\n\nDeseja realmente excluir o registro ${id} permanentemente?\nEsta ação não pode ser desfeita.`);
+    
+    if (!confirmacao) {
+      console.log(`Exclusão do registro ${id} cancelada pelo usuário`);
       return;
     }
     
     try {
-      // 1. Remove visualmente da tabela imediatamente (feedback rápido)
+      // 1. Feedback visual imediato - marca a linha para exclusão
       const tbody = document.querySelector("#tabelaErros tbody");
-      const linhas = tbody.querySelectorAll("tr");
-      linhas.forEach(linha => {
-        if (linha.cells[0].textContent == id) {
-          linha.style.transition = "opacity 0.3s";
-          linha.style.opacity = "0";
-          setTimeout(() => linha.remove(), 300);
-        }
-      });
+      const linha = Array.from(tbody.querySelectorAll("tr")).find(tr => tr.cells[0].textContent == id);
+      if (linha) {
+        linha.classList.add("deleting");
+      }
 
-      // 2. Tenta excluir do Supabase
+      // 2. Tenta excluir do Supabase primeiro
       const response = await fetch(`${SUPABASE_URL}/rest/v1/erros?id=eq.${id}`, {
         method: "DELETE",
         headers: {
@@ -670,49 +675,75 @@
       });
       
       if (!response.ok) {
-        console.warn("Falha ao excluir no Supabase, excluindo localmente...");
-        throw new Error(`Falha ao excluir no Supabase: ${response.status}`);
+        console.warn("Falha ao excluir no Supabase, tentando excluir localmente...");
+        throw new Error(`Erro ${response.status} ao excluir no Supabase`);
       }
 
-      // 3. Se exclusão no Supabase foi bem-sucedida, atualiza os dados locais
+      // 3. Remove do array local e atualiza localStorage
       registros = registros.filter(r => r.id !== id);
       salvarLocal();
+      
+      // 4. Efeito visual de remoção
+      if (linha) {
+        linha.style.opacity = "0";
+        setTimeout(() => linha.remove(), 500);
+      }
+      
+      // 5. Atualiza resumo e filtros
       atualizarResumo(registros);
       atualizarFiltroOperadores();
-
-      console.log(`Registro ${id} excluído com sucesso`);
-    } catch (error) {
-      console.error("Erro na exclusão:", error);
       
-      // 4. Se houve erro no Supabase, tenta excluir localmente
+      console.log(`Registro ${id} excluído com sucesso`);
+      alert(`Registro ${id} excluído com sucesso!`);
+      
+    } catch (error) {
+      console.error("Erro ao excluir no Supabase:", error);
+      
+      // 6. Fallback: tenta excluir localmente se falhar no Supabase
       try {
         registros = registros.filter(r => r.id !== id);
         salvarLocal();
+        atualizarTabela(registros);
         atualizarResumo(registros);
         atualizarFiltroOperadores();
+        
         console.log(`Registro ${id} excluído localmente`);
+        alert(`Registro ${id} excluído localmente (falha na conexão com o servidor)`);
+        
       } catch (localError) {
         console.error("Falha ao excluir localmente:", localError);
         alert("Falha ao excluir o registro. Verifique o console para detalhes.");
-        // Recarrega a tabela para restaurar o estado anterior
-        atualizarTabela(registros);
+        
+        // Remove a classe de deleção se falhar
+        const linha = Array.from(document.querySelectorAll("#tabelaErros tr")).find(tr => tr.cells[0].textContent == id);
+        if (linha) linha.classList.remove("deleting");
       }
     }
   }
 
-  // Limpa todos os registros - VERSÃO COM FALLBACK PARA LOCAL
+  // Limpa todos os registros com confirmação reforçada
   async function limparRegistros() {
-    if (!confirm("Tem certeza que deseja apagar TODOS os registros permanentemente?\nEsta ação não pode ser desfeita!")) {
+    // Mensagem de confirmação detalhada
+    const confirmacao = confirm(
+      "ATENÇÃO!\n\nTem certeza que deseja apagar TODOS os registros permanentemente?\n" +
+      "Esta ação não pode ser desfeita e afetará todos os operadores!\n\n" +
+      "Clique em OK para confirmar ou Cancelar para abortar."
+    );
+    
+    if (!confirmacao) {
+      console.log("Limpeza de registros cancelada pelo usuário");
       return;
     }
     
     try {
-      // 1. Limpa visualização imediatamente
-      document.querySelector("#tabelaErros tbody").innerHTML = 
-        `<tr><td colspan="11" style="text-align: center;">Nenhum registro encontrado</td></tr>`;
-      document.getElementById("resumoConteudo").innerHTML = "<p>Nenhum registro para exibir</p>";
+      // 1. Feedback visual imediato
+      const tbody = document.querySelector("#tabelaErros tbody");
+      const linhas = tbody.querySelectorAll("tr");
+      linhas.forEach(tr => tr.classList.add("deleting"));
+      
+      document.getElementById("resumoConteudo").innerHTML = "<p>Excluindo registros...</p>";
 
-      // 2. Tenta excluir tudo do Supabase
+      // 2. Tenta excluir tudo do Supabase primeiro
       const response = await fetch(`${SUPABASE_URL}/rest/v1/erros`, {
         method: "DELETE",
         headers: {
@@ -722,28 +753,43 @@
       });
       
       if (!response.ok) {
-        console.warn("Falha ao limpar Supabase, limpando localmente...");
-        throw new Error(`Falha ao limpar Supabase: ${response.status}`);
+        console.warn("Falha ao limpar Supabase, tentando limpar localmente...");
+        throw new Error(`Erro ${response.status} ao limpar Supabase`);
       }
 
       // 3. Limpa dados locais
       registros = [];
       localStorage.removeItem("registrosErros");
       
+      // 4. Efeito visual de remoção
+      setTimeout(() => {
+        tbody.innerHTML = `<tr><td colspan="11" style="text-align: center;">Nenhum registro encontrado</td></tr>`;
+        document.getElementById("resumoConteudo").innerHTML = "<p>Nenhum registro para exibir</p>";
+      }, 500);
+      
       console.log("Todos registros foram excluídos");
+      alert("Todos os registros foram excluídos com sucesso!");
+      
     } catch (error) {
       console.error("Erro ao limpar registros:", error);
       
-      // 4. Se houve erro no Supabase, tenta limpar localmente
+      // 5. Fallback: limpeza local se falhar no Supabase
       try {
         registros = [];
         localStorage.removeItem("registrosErros");
+        atualizarTabela(registros);
+        atualizarResumo(registros);
+        
         console.log("Todos registros foram excluídos localmente");
+        alert("Todos os registros foram excluídos localmente (falha na conexão com o servidor)");
+        
       } catch (localError) {
         console.error("Falha ao limpar localmente:", localError);
         alert("Falha ao limpar registros. Verifique o console para detalhes.");
-        // Recarrega os dados para restaurar o estado anterior
-        await carregarDados();
+        
+        // Remove a classe de deleção se falhar
+        const linhas = document.querySelectorAll("#tabelaErros tr");
+        linhas.forEach(tr => tr.classList.remove("deleting"));
       }
     }
   }
