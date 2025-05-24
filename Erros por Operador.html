@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Controle de Erros - AFT Química</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   <style>
     :root {
@@ -12,6 +11,7 @@
       --danger: #E74C3C;
       --success: #28B463;
       --gray: #F2F2F2;
+      --warning: #F39C12;
     }
     * {
       box-sizing: border-box;
@@ -36,10 +36,6 @@
     }
     h3 {
       font-size: 1.3rem;
-    }
-    #logo {
-      max-width: 100px;
-      height: auto;
     }
     .container {
       max-width: 1100px;
@@ -95,10 +91,11 @@
       transition: all 0.2s;
     }
     .btn-primary { background-color: var(--primary); }
-    .btn-danger  { background-color: var(--danger); }
+    .btn-danger { background-color: var(--danger); }
     .btn-success { background-color: var(--success); }
-    .btn-gray    { background-color: #888; }
+    .btn-gray { background-color: #888; }
     .btn-secondary { background-color: #5A5A5A; }
+    .btn-warning { background-color: var(--warning); }
     .btn:hover { opacity: 0.9; transform: scale(1.02); }
     table {
       width: 100%;
@@ -170,13 +167,23 @@
       cursor: pointer;
       font-size: 0.8rem;
       transition: all 0.2s;
+      margin: 2px;
     }
-    .btn-excluir:hover {
-      background-color: #C0392B;
+    .btn-editar {
+      background-color: #2E86C1;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+      margin: 2px;
+    }
+    .btn-excluir:hover, .btn-editar:hover {
+      opacity: 0.8;
       transform: scale(1.05);
     }
-    
-    /* Estilos para as novas colunas de valores */
     #tabelaErros th:nth-child(9), 
     #tabelaErros td:nth-child(9),
     #tabelaErros th:nth-child(10), 
@@ -184,14 +191,19 @@
       text-align: right;
       padding-right: 15px;
     }
-    
-    /* Efeito de transição para linhas sendo removidas */
-    tr.removing {
-      opacity: 0.5;
-      transition: opacity 0.3s ease;
+    .alert-duplicata {
+      background-color: #F39C12;
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      margin: 10px 0;
+      display: none;
+      text-align: center;
+      font-weight: bold;
     }
-    
-    /* Estilos específicos para telas pequenas */
+    tr.editando {
+      background-color: rgba(46, 134, 193, 0.1) !important;
+    }
     @media (max-width: 768px) {
       .form-col {
         min-width: 100%;
@@ -218,8 +230,6 @@
         min-width: 100px;
       }
     }
-    
-    /* Estilos para telas muito pequenas (menos de 480px) */
     @media (max-width: 480px) {
       body {
         padding: 10px;
@@ -251,8 +261,6 @@
         padding: 8px 5px;
       }
     }
-    
-    /* Melhorias para tabelas em dispositivos móveis */
     @media (max-width: 768px) {
       table {
         display: block;
@@ -267,8 +275,10 @@
 
 <h1 style="color: #38a738c9;">CONTROLE DE ERROS</h1>
 
-<!-- Formulário de cadastro -->
 <div class="card">
+  <div id="alertDuplicata" class="alert-duplicata">
+    ATENÇÃO: Já existe um registro com este operador, erro e data. Isso pode gerar uma duplicata!
+  </div>
   <div class="form-row">
     <div class="form-col">
       <label>👷 Operador:</label>
@@ -287,7 +297,6 @@
       <label>❌ Erro:</label>
       <select id="erro" required>
         <option value="SEM ERROS">SEM ERROS</option>
-        <option value="Cacancelamento de agenda sem justificativa">Cacancelamento de agenda sem justificativa</option>
         <option value="Não avisou o atraso com 30 min. De antecedência">Não avisou o atraso com 30 min. De antecedência</option>
         <option value="Chegou atrasado na empresa">Chegou atrasado na empresa</option>
         <option value="Não usou o produto certo no serviço">Não usou o produto certo no serviço</option>
@@ -348,13 +357,15 @@
     </div>
   </div>
   <div class="btn-row">
-    <button class="btn btn-success" onclick="adicionarErro()">➕ Adicionar</button>
+    <button id="btnAdicionar" class="btn btn-success" onclick="adicionarErro()">➕ Adicionar</button>
+    <button id="btnAtualizar" class="btn btn-warning" onclick="atualizarErro()" style="display: none;">🔄 Atualizar</button>
+    <button id="btnCancelar" class="btn btn-gray" onclick="cancelarEdicao()" style="display: none;">❌ Cancelar</button>
     <button class="btn btn-primary" onclick="exportarPDFFiltro()">📄 PDF (Filtro)</button>
     <button class="btn btn-secondary" onclick="exportarPDFCompleto()">📤 PDF (Completo)</button>
+    <button class="btn btn-danger" onclick="confirmarLimpeza()">🧹 Limpar Tudo</button>
   </div>
 </div>
 
-<!-- Filtros -->
 <div class="card">
   <h3>🔍 Filtros</h3>
   <div class="form-row">
@@ -393,13 +404,13 @@
         <th>Observações</th>
         <th>Total Descontado (R$)</th>
         <th>Valor Final (R$)</th>
+        <th class="no-print">Ações</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
 </div>
 
-<!-- Resumo dos valores -->
 <div id="resumo" class="card">
   <h3>📈 Resumo dos Valores</h3>
   <div id="resumoConteudo"></div>
@@ -407,7 +418,6 @@
 
 </div>
 
-<!-- Bibliotecas JavaScript -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -415,6 +425,7 @@
 <script>
   // Declaração de variáveis globais
   let registros = [];
+  let registroEditando = null;
   const { jsPDF } = window.jspdf;
   const Swal = window.Swal;
   
@@ -424,7 +435,6 @@
   
   // Tabela de deduções (valores em reais)
   const deducoes = {
-    "Cacancelamento de agenda sem justificativa": 150,
     "Não avisou o atraso com 30 min. De antecedência": 25,
     "Chegou atrasado na empresa": 25,
     "Não usou o produto certo no serviço": 50,
@@ -468,7 +478,36 @@
         document.getElementById("campoOutro").value = "";
       }
     });
+    
+    // Adiciona eventos para verificar duplicatas em tempo real
+    document.getElementById("operador").addEventListener("change", verificarDuplicata);
+    document.getElementById("erro").addEventListener("change", verificarDuplicata);
+    document.getElementById("data").addEventListener("change", verificarDuplicata);
   };
+
+  // Verifica se já existe um registro com os mesmos dados
+  function verificarDuplicata() {
+    const operador = document.getElementById("operador").value;
+    const erro = document.getElementById("erro").value;
+    const data = document.getElementById("data").value;
+    
+    if (!operador || !erro || !data) return;
+    
+    // Verifica se existe um registro com os mesmos dados (exceto o que está sendo editado)
+    const duplicata = registros.find(r => 
+      r.operador === operador && 
+      r.erro === erro && 
+      r.data === data &&
+      (!registroEditando || r.id != registroEditando.id)
+    );
+    
+    const alertDuplicata = document.getElementById("alertDuplicata");
+    if (duplicata) {
+      alertDuplicata.style.display = "block";
+    } else {
+      alertDuplicata.style.display = "none";
+    }
+  }
 
   // Carrega dados do Supabase com fallback para localStorage
   async function carregarDados() {
@@ -533,6 +572,211 @@
     localStorage.setItem("registrosErros", JSON.stringify(registros));
   }
 
+  // Prepara o formulário para edição
+  function editarRegistro(id) {
+    const registro = registros.find(r => r.id == id);
+    if (!registro) {
+      Swal.fire('Erro', 'Registro não encontrado.', 'error');
+      return;
+    }
+    
+    registroEditando = { ...registro, index: registros.findIndex(r => r.id == id) };
+    
+    // Preenche o formulário
+    document.getElementById("operador").value = registro.operador;
+    document.getElementById("erro").value = registro.erro;
+    document.getElementById("data").value = registro.data;
+    document.getElementById("repetido").value = registro.repetido;
+    document.getElementById("marcaErro").value = registro.marcaErro || "";
+    document.getElementById("obs").value = registro.obs || "";
+
+    // Trata o campo de correção
+    const correcao = registro.correcao;
+    const selectCorrecao = document.getElementById("correcao");
+    let opcaoEncontrada = false;
+    
+    // Verifica se a correção está nas opções padrão
+    for (let i = 0; i < selectCorrecao.options.length; i++) {
+      if (selectCorrecao.options[i].value === correcao) {
+        selectCorrecao.value = correcao;
+        opcaoEncontrada = true;
+        break;
+      }
+    }
+    
+    // Se não encontrou, usa a opção "Outro"
+    if (!opcaoEncontrada) {
+      selectCorrecao.value = "Outro";
+      document.getElementById("campoOutro").value = correcao;
+      document.getElementById("campoOutro").style.display = "block";
+    } else {
+      document.getElementById("campoOutro").style.display = "none";
+    }
+    
+    // Mostra botões de edição
+    document.getElementById("btnAdicionar").style.display = "none";
+    document.getElementById("btnAtualizar").style.display = "inline-block";
+    document.getElementById("btnCancelar").style.display = "inline-block";
+    
+    // Destaca a linha na tabela
+    const linhas = document.querySelectorAll("#tabelaErros tbody tr");
+    linhas.forEach(linha => {
+      if (linha.cells[0].textContent == id) {
+        linha.classList.add('editando');
+      } else {
+        linha.classList.remove('editando');
+      }
+    });
+    
+    // Verifica duplicatas e rola para o topo
+    verificarDuplicata();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Cancela a edição
+  function cancelarEdicao() {
+    registroEditando = null;
+    limparFormulario();
+    
+    // Restaura os botões
+    document.getElementById("btnAdicionar").style.display = "inline-block";
+    document.getElementById("btnAtualizar").style.display = "none";
+    document.getElementById("btnCancelar").style.display = "none";
+    
+    // Remove destaque da tabela
+    const linhas = document.querySelectorAll("#tabelaErros tbody tr");
+    linhas.forEach(linha => {
+      linha.classList.remove('editando');
+    });
+    
+    // Oculta alerta de duplicata
+    document.getElementById("alertDuplicata").style.display = "none";
+  }
+
+  // Limpa o formulário
+  function limparFormulario() {
+    document.getElementById("operador").value = "";
+    document.getElementById("erro").value = "SEM ERROS";
+    document.getElementById("data").value = new Date().toISOString().split('T')[0];
+    document.getElementById("repetido").value = "Não";
+    document.getElementById("correcao").value = "";
+    document.getElementById("campoOutro").value = "";
+    document.getElementById("campoOutro").style.display = "none";
+    document.getElementById("obs").value = "";
+    document.getElementById("marcaErro").value = "";
+  }
+
+  // Atualiza um erro existente
+  async function atualizarErro() {
+    if (!registroEditando) {
+      Swal.fire('Erro', 'Nenhum registro em edição.', 'error');
+      return;
+    }
+    
+    // Obtém valores dos campos
+    const operador = document.getElementById("operador").value;
+    const erro = document.getElementById("erro").value;
+    const data = document.getElementById("data").value;
+    const repetido = document.getElementById("repetido").value;
+    let correcao = document.getElementById("correcao").value;
+    const obs = document.getElementById("obs").value.trim();
+    const marcaErro = document.getElementById("marcaErro").value.trim();
+    
+    // Trata campo "Outro"
+    if (correcao === "Outro") {
+      correcao = document.getElementById("campoOutro").value.trim();
+      if (!correcao) {
+        Swal.fire('Atenção', 'Descreva a correção personalizada.', 'warning');
+        return;
+      }
+    }
+    
+    // Validação
+    if (!operador || !erro || !data || !correcao) {
+      Swal.fire('Atenção', 'Preencha todos os campos obrigatórios.', 'warning');
+      return;
+    }
+    
+    // Verifica duplicatas (ignorando o registro atual)
+    const duplicata = registros.find(r => 
+      r.operador === operador && 
+      r.erro === erro && 
+      r.data === data &&
+      r.id != registroEditando.id
+    );
+    
+    if (duplicata) {
+      const confirmar = await Swal.fire({
+        title: 'Possível duplicata!',
+        text: 'Já existe um registro similar. Continuar?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, atualizar',
+        cancelButtonText: 'Cancelar'
+      });
+      if (!confirmar.isConfirmed) return;
+    }
+    
+    // Calcula valores
+    const valorDescontado = erro !== "SEM ERROS" ? (deducoes[erro] || 0) : 0;
+    const valorFinal = baseValor - valorDescontado;
+    
+    // Cria objeto atualizado
+    const registroAtualizado = { 
+      ...registroEditando,
+      operador, 
+      erro, 
+      data, 
+      repetido, 
+      correcao, 
+      obs, 
+      marcaErro,
+      valor_total_descontado: valorDescontado,
+      valor_final_pago: valorFinal
+    };
+    
+    try {
+      // Atualiza no Supabase
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/erros?id=eq.${registroEditando.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`
+        },
+        body: JSON.stringify({
+          operador: operador,
+          erro: erro,
+          data: data,
+          repetido: repetido,
+          correcao: correcao,
+          obs: obs || null,
+          marca_erro: marcaErro || null,
+          valor_total_descontado: valorDescontado,
+          valor_final_pago: valorFinal
+        })
+      });
+      
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+      
+      // Atualiza localmente
+      registros[registroEditando.index] = registroAtualizado;
+      salvarLocal();
+      
+      // Atualiza interface
+      atualizarTabela();
+      atualizarResumo();
+      atualizarFiltroOperadores();
+      
+      Swal.fire('Sucesso', 'Registro atualizado!', 'success');
+      cancelarEdicao();
+      
+    } catch (error) {
+      console.error("Erro ao atualizar:", error);
+      Swal.fire('Erro', 'Falha na atualização. Tente novamente.', 'error');
+    }
+  }
+
   // Adiciona um novo erro
   async function adicionarErro() {
     // Obtém os valores dos campos
@@ -558,6 +802,28 @@
     if (!operador || !erro || !data || !correcao) {
       Swal.fire('Atenção', 'Preencha todos os campos obrigatórios.', 'warning');
       return;
+    }
+    
+    // Verifica duplicatas
+    const duplicata = registros.find(r => 
+      r.operador === operador && 
+      r.erro === erro && 
+      r.data === data
+    );
+    
+    if (duplicata) {
+      const confirmar = await Swal.fire({
+        title: 'Possível duplicata!',
+        text: 'Já existe um registro com este operador, erro e data. Deseja continuar mesmo assim?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, adicionar',
+        cancelButtonText: 'Cancelar'
+      });
+      
+      if (!confirmar.isConfirmed) {
+        return;
+      }
     }
     
     // Calcula os valores monetários
@@ -598,14 +864,7 @@
         atualizarFiltroOperadores();
         
         // Limpa o formulário (exceto a data)
-        document.getElementById("operador").value = "";
-        document.getElementById("erro").value = "SEM ERROS";
-        document.getElementById("repetido").value = "Não";
-        document.getElementById("correcao").value = "";
-        document.getElementById("campoOutro").value = "";
-        document.getElementById("campoOutro").style.display = "none";
-        document.getElementById("obs").value = "";
-        document.getElementById("marcaErro").value = "";
+        limparFormulario();
         
         // Feedback ao usuário
         Swal.fire('Sucesso', 'Erro registrado com sucesso!', 'success');
@@ -625,12 +884,11 @@
   function atualizarTabela(lista = registros) {
     const tbody = document.querySelector("#tabelaErros tbody");
     tbody.innerHTML = "";
-    
     if (lista.length === 0) {
       tbody.innerHTML = `<tr><td colspan="11" style="text-align: center;">Nenhum registro encontrado</td></tr>`;
       return;
     }
-    
+
     lista.forEach((r) => {
       tbody.innerHTML += `
         <tr>
@@ -645,6 +903,8 @@
           <td>${r.valor_total_descontado.toFixed(2)}</td>
           <td>${r.valor_final_pago.toFixed(2)}</td>
           <td class="no-print">
+            <button class="btn-editar" onclick="editarRegistro(${r.id})">Editar</button>
+            <button class="btn-excluir" onclick="confirmarExclusao(${r.id})">Excluir</button>
           </td>
         </tr>`;
     });
@@ -696,7 +956,7 @@
       }
       
       // Remove do array local
-      registros = registros.filter(r => r.id !== id);
+      registros = registros.filter(r => r.id != id);
       
       // Salva no localStorage
       salvarLocal();
@@ -710,6 +970,11 @@
         // Atualiza resumo e filtros
         atualizarResumo(registros);
         atualizarFiltroOperadores();
+        
+        // Se estava editando o registro excluído, cancela a edição
+        if (registroEditando && registroEditando.id == id) {
+          cancelarEdicao();
+        }
         
         // Feedback ao usuário
         Swal.fire('Excluído!', 'O registro foi removido com sucesso.', 'success');
@@ -752,7 +1017,7 @@
   async function limparRegistros() {
     try {
       // Feedback visual
-      document.querySelector("#tabelaErros tbody").innerHTML = 
+      document.querySelector("#tabelaErros tbody").innerHTML =
         `<tr><td colspan="11" style="text-align: center; opacity: 0.5;">Limpando registros...</td></tr>`;
       
       // Exclui tudo do Supabase
@@ -776,6 +1041,7 @@
       atualizarTabela(registros);
       atualizarResumo(registros);
       atualizarFiltroOperadores();
+      cancelarEdicao(); // Se estava editando, cancela
       
       // Feedback ao usuário
       Swal.fire('Limpeza concluída!', 'Todos os registros foram removidos.', 'success');
@@ -793,18 +1059,17 @@
   function atualizarFiltroOperadores() {
     const selectFiltro = document.getElementById("filtroOperador");
     const operadoresUnicos = [...new Set(registros.map(r => r.operador))].sort();
-    
     // Mantém a seleção atual
     const valorAtual = selectFiltro.value;
     selectFiltro.innerHTML = `<option value="Todos">TODOS os operadores</option>`;
-    
+
     operadoresUnicos.forEach(op => {
       const opt = document.createElement("option");
       opt.value = op;
       opt.textContent = op;
       selectFiltro.appendChild(opt);
     });
-    
+
     // Restaura a seleção se ainda existir
     if (operadoresUnicos.includes(valorAtual)) {
       selectFiltro.value = valorAtual;
@@ -830,14 +1095,13 @@
     const filtroOperador = document.getElementById("filtroOperador").value;
     const inicio = document.getElementById("filtroDataInicio").value;
     const fim = document.getElementById("filtroDataFim").value;
-    
     let filtrados = registros;
-    
+
     // Aplica filtro por operador
     if (filtroOperador !== "Todos") {
       filtrados = filtrados.filter(r => r.operador === filtroOperador);
     }
-    
+
     // Aplica filtro por data
     if (inicio || fim) {
       filtrados = filtrados.filter(r => {
@@ -845,7 +1109,7 @@
         return (!inicio || dataErro >= inicio) && (!fim || dataErro <= fim);
       });
     }
-    
+
     // Atualiza a tabela e o resumo com os dados filtrados
     atualizarTabela(filtrados);
     atualizarResumo(filtrados);
@@ -854,7 +1118,6 @@
   // Atualiza o resumo exibido na página
   function atualizarResumo(lista = registros) {
     const resumoOp = {};
-    
     // Calcula totais por operador
     lista.forEach(r => {
       const op = r.operador;
@@ -875,13 +1138,13 @@
         }
       }
     });
-    
+
     for (let op in resumoOp) {
       resumoOp[op].valorFinal = Math.max(0, baseValor - resumoOp[op].desconto);
     }
-    
+
     let html = "<h4>Resumo por Operador</h4>";
-    
+
     if (Object.keys(resumoOp).length === 0) {
       html += "<p>Nenhum registro para exibir</p>";
     } else {
@@ -910,10 +1173,10 @@
       
       html += "</tbody></table></div>";
     }
-    
+
     const inicio = document.getElementById("filtroDataInicio").value;
     const fim = document.getElementById("filtroDataFim").value;
-    
+
     if (inicio || fim) {
       const resumoErros = {};
       
@@ -954,7 +1217,7 @@
         html += "</tbody></table></div>";
       }
     }
-    
+
     document.getElementById("resumoConteudo").innerHTML = html;
   }
 
@@ -963,28 +1226,27 @@
     const filtroOperador = document.getElementById("filtroOperador").value;
     const inicio = document.getElementById("filtroDataInicio").value;
     const fim = document.getElementById("filtroDataFim").value;
-    
     let dados = registros;
-    
+
     if (filtroOperador !== "Todos") {
       dados = dados.filter(r => r.operador === filtroOperador);
     }
-    
+
     if (inicio || fim) {
       dados = dados.filter(r => {
         return (!inicio || r.data >= inicio) && (!fim || r.data <= fim);
       });
     }
-    
+
     if (dados.length === 0) {
       Swal.fire('Atenção', 'Não há registros para exportar com os filtros atuais.', 'warning');
       return;
     }
-    
+
     const titulo = filtroOperador !== "Todos" ? 
       `Relatório de Erros - ${filtroOperador}` : 
       "Relatório de Erros (Filtrado)";
-    
+
     gerarPDF(dados, titulo, false);
   }
 
@@ -1003,7 +1265,6 @@
       orientation: 'landscape',
       unit: 'mm'
     });
-    
     doc.setProperties({
       title: titulo,
       subject: 'Relatório de Erros Operacionais',
@@ -1011,20 +1272,19 @@
       keywords: 'erros, operadores, relatório',
       creator: 'Sistema de Controle de Erros'
     });
-    
+
     doc.setFontSize(16);
     doc.setTextColor(46, 134, 193);
     doc.setFont("helvetica", "bold");
     doc.text(titulo, doc.internal.pageSize.width / 2, 15, { align: 'center' });
-    
+
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     doc.setFont("helvetica", "normal");
     doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, doc.internal.pageSize.width / 2, 22, { align: 'center' });
     doc.text(`Total de registros: ${dados.length}`, doc.internal.pageSize.width / 2, 27, { align: 'center' });
-    
+
     const headers = [["ID", "Operador", "Erro", "Marca Erro", "Data", "Repetido", "Correção", "Observações", "Desconto (R$)", "Valor Final (R$)"]];
-    
     const dataTabela = dados.map(r => {
       return [
         r.id.toString(),
@@ -1039,7 +1299,7 @@
         r.valor_final_pago.toFixed(2)
       ];
     });
-    
+
     doc.autoTable({
       head: headers,
       body: dataTabela,
@@ -1072,7 +1332,7 @@
         9: { cellWidth: 20, halign: 'right' }
       }
     });
-    
+
     if (incluirResumo) {
       const resumoObj = gerarResumoPDF(dados);
       
@@ -1119,7 +1379,7 @@
         });
       }
     }
-    
+
     doc.save(`${titulo.replace(/[^a-z0-9]/gi, '_')}.pdf`);
   }
 
@@ -1127,7 +1387,6 @@
   function gerarResumoPDF(dados) {
     const operadores = {};
     const erros = {};
-    
     dados.forEach(r => {
       const op = r.operador;
       
@@ -1153,11 +1412,11 @@
       }
       erros[r.erro]++;
     });
-    
+
     for (let op in operadores) {
       operadores[op].valorFinal = Math.max(0, baseValor - operadores[op].desconto);
     }
-    
+
     return { operadores, erros };
   }
 
@@ -1183,11 +1442,10 @@
         valor_final_pago: erro.valor_final_pago
       })
     });
-    
     if (!response.ok) {
       throw new Error(`Erro HTTP: ${response.status}`);
     }
-    
+
     return response.json();
   }
 </script>
