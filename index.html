@@ -122,6 +122,38 @@
   </div>
 
   <script>
+    let failedAttempts = 0;
+    const maxAttempts = 2;
+    
+    function sendEmailNotification(username) {
+      // Esta função simula o envio de um e-mail
+      // Na prática, você precisaria implementar um backend para enviar e-mails reais
+      
+      // Simulação no console
+      console.log(`E-mail de notificação enviado para: suporte.gawlinski@gmail.com`);
+      console.log(`Assunto: Tentativa de acesso falha ao sistema`);
+      console.log(`Conteúdo: O usuário ${username} tentou acessar o sistema e errou a senha ${maxAttempts} vezes.`);
+      
+      // Em um ambiente real, você usaria algo como:
+      /*
+      fetch('https://seu-servidor.com/enviar-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: 'suporte.gawlinski@gmail.com',
+          subject: 'Tentativa de acesso falha ao sistema',
+          message: `O usuário ${username} tentou acessar o sistema e errou a senha ${maxAttempts} vezes.`,
+          username: username
+        })
+      })
+      .then(response => response.json())
+      .then(data => console.log('E-mail enviado com sucesso:', data))
+      .catch(error => console.error('Erro ao enviar e-mail:', error));
+      */
+    }
+
     function login() {
       const user = document.getElementById('username').value.trim();
       const pass = document.getElementById('password').value.trim();
@@ -142,21 +174,31 @@
       }
 
       // Nível 5: Acesso total
-else if (
-  (user === 'amailson' && pass === '1234') ||
-  (user === 'Daniel' && pass === 'Daniel@1978') ||
-  (user === 'Evellyn' && pass === 'Evellyn@1978') ||
-  (user === 'Ricardo' && pass === 'Ricardo@1978') // ✅ Ricardo adicionado com nível 5
-) {
-  level = 5;
-}
+      else if (
+        (user === 'amailson' && pass === '1234') ||
+        (user === 'Daniel' && pass === 'Daniel@1978') ||
+        (user === 'Evellyn' && pass === 'Evellyn@1978') ||
+        (user === 'Ricardo' && pass === 'Ricardo@1978')
+      ) {
+        level = 5;
+      }
 
       // Erro de login
       else {
+        failedAttempts++;
         document.getElementById('errorMsg').innerText = '❌ Usuário ou senha incorretos.';
+        
+        if (failedAttempts >= maxAttempts) {
+          sendEmailNotification(user);
+          failedAttempts = 0; // Reset após enviar o e-mail
+          document.getElementById('errorMsg').innerText += ' Foi notificado o suporte sobre tentativas falhas.';
+        }
         return;
       }
 
+      // Resetar tentativas falhas após login bem-sucedido
+      failedAttempts = 0;
+      
       // Armazenar permissão e redirecionar
       localStorage.setItem('userPermissionLevel', level);
       window.location.href = 'sistema.html';
