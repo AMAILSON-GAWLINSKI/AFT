@@ -568,12 +568,8 @@
           </select>
         </div>
         <div class="form-col">
-          <label>Data Início:</label>
-          <input type="month" id="filtroDataInicio">
-        </div>
-        <div class="form-col">
-          <label>Data Fim:</label>
-          <input type="month" id="filtroDataFim">
+          <label>Data:</label>
+          <input type="month" id="filtroData">
         </div>
       </div>
       <div class="btn-row">
@@ -584,14 +580,6 @@
     
     <!-- Tabela de histórico -->
     <div class="card">
-      <h3>📝 Histórico de Cálculos</h3>
-      <div class="form-row">
-        <div class="form-col">
-          <label>Pesquisar:</label>
-          <input type="text" id="filtroTextoHistorico" placeholder="Filtrar por nome ou ID...">
-        </div>
-      </div>
-      
       <div style="overflow-x: auto;">
         <table id="tabelaHistorico">
           <thead>
@@ -1140,7 +1128,6 @@
           <td>R$ ${item.total.toFixed(2)}</td>
           <td>${new Date(item.timestamp).toLocaleString('pt-BR')}</td>
           <td class="no-print">
-            <button class="btn-editar" onclick="editarItem(${item.id})">Editar</button>
             <button class="btn-excluir" onclick="excluirItemHistorico(${item.id})">Excluir</button>
           </td>
         `;
@@ -1217,29 +1204,17 @@
     }
 
     function filtrarListaHistorico() {
-        const filtroTexto = document.getElementById('filtroTextoHistorico').value.toLowerCase();
         const filtroOperador = document.getElementById('filtroOperador').value;
-        const filtroDataInicio = document.getElementById('filtroDataInicio').value;
-        const filtroDataFim = document.getElementById('filtroDataFim').value;
+        const filtroData = document.getElementById('filtroData').value;
 
         return historicoVA.filter(item => {
-            // Filtro por texto (nome ou ID)
-            const textoMatch = 
-                item.nome.toLowerCase().includes(filtroTexto) || 
-                (item.id && item.id.toString().includes(filtroTexto));
-            
             // Filtro por operador
             const operadorMatch = filtroOperador === "Todos" || item.nome === filtroOperador;
             
             // Filtro por data
-            let dataMatch = true;
-            if (filtroDataInicio || filtroDataFim) {
-              const mesAnoItem = item.meses.split(', ')[0]; // Pega o primeiro mês
-              dataMatch = (!filtroDataInicio || mesAnoItem >= filtroDataInicio) && 
-                         (!filtroDataFim || mesAnoItem <= filtroDataFim);
-            }
+            const dataMatch = !filtroData || item.meses.split(', ')[0].startsWith(filtroData);
 
-            return textoMatch && operadorMatch && dataMatch;
+            return operadorMatch && dataMatch;
         });
     }
 
@@ -1248,10 +1223,8 @@
     }
     
     function limparFiltros() {
-      document.getElementById('filtroTextoHistorico').value = '';
       document.getElementById('filtroOperador').value = 'Todos';
-      document.getElementById('filtroDataInicio').value = '';
-      document.getElementById('filtroDataFim').value = '';
+      document.getElementById('filtroData').value = '';
       filtrarHistorico();
     }
 
@@ -1572,18 +1545,15 @@
       const hoje = new Date();
       const mesAtualISO = hoje.toISOString().slice(0, 7);
       document.getElementById('mesSelecionado').value = mesAtualISO;
-      document.getElementById('filtroDataInicio').value = mesAtualISO;
-      document.getElementById('filtroDataFim').value = mesAtualISO;
+      document.getElementById('filtroData').value = mesAtualISO;
       gerarCalendario();
       
       // Carrega dados do Supabase (com fallback para localStorage)
       carregarDados();
       
       // Configura eventos de filtro
-      document.getElementById('filtroTextoHistorico').addEventListener('input', filtrarHistorico);
       document.getElementById('filtroOperador').addEventListener('change', filtrarHistorico);
-      document.getElementById('filtroDataInicio').addEventListener('change', filtrarHistorico);
-      document.getElementById('filtroDataFim').addEventListener('change', filtrarHistorico);
+      document.getElementById('filtroData').addEventListener('change', filtrarHistorico);
     });
   </script>
 </body>
