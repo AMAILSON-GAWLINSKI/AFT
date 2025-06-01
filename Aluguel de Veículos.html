@@ -1,232 +1,412 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Aluguel de Veículos</title>
-
-  <!-- Bibliotecas CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-
-  <!-- Bibliotecas JavaScript -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+  
   <style>
     :root {
-      --primary-color: #37b61e;
-      --secondary-color: #2E86C1;
-      --danger-color: #E74C3C;
-      --text-color: #333;
-      --light-gray: #f5f5f5;
-      --border-color: #ddd;
+      --primary: #2E86C1;
+      --danger: #E74C3C;
+      --success: #28B463;
+      --warning: #F39C12;
+      --gray: #F2F2F2;
     }
     
+    /* Reset e estilos base */
     * {
       box-sizing: border-box;
+      transition: all 0.2s ease;
+      margin: 0;
+      padding: 0;
     }
-    
-    body { 
-      font-family: Arial, sans-serif; 
-      background: #ffffff; 
-      padding: 15px; 
-      color: var(--text-color);
-      line-height: 1.5;
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      color: #333;
+      min-height: 100vh;
+      padding: 15px;
+      margin: 0;
     }
-    
-    .container { 
-      background: rgb(247, 247, 247); 
-      padding: 20px; 
-      max-width: 1000px; 
-      margin: auto; 
-      border-radius: 10px; 
-      box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+
+    .container {
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+      background: #ffffff;
+      min-height: 100vh;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
-    
-    h1, h2 { 
-      text-align: center; 
-      color: var(--primary-color); 
+
+    h1, h2, h3 {
+      text-align: center;
+      color: #38a738c9;
       margin-top: 0;
     }
     
-    h1 { font-size: 1.8rem; }
-    h2 { font-size: 1.5rem; }
-    
-    .form-group { 
-      display: flex; 
-      flex-wrap: wrap; 
-      gap: 15px; 
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
     }
     
-    .form-item { 
-      flex: 1 1 100%; 
-      display: flex; 
-      flex-direction: column; 
+    h2 {
+      font-size: 1.5rem;
     }
     
-    label { 
-      font-weight: bold; 
-      margin-bottom: 5px; 
+    h3 {
+      font-size: 1.3rem;
+    }
+
+    /* Estilos do formulário */
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .form-col {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 6px;
       font-size: 0.9rem;
     }
-    
-    input, select, textarea { 
-      padding: 10px; 
-      border: 1px solid var(--border-color); 
-      border-radius: 5px; 
-      font-size: 1rem; 
+
+    input, select, textarea {
       width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
     }
-    
-    textarea { 
-      resize: vertical; 
+
+    textarea {
+      resize: vertical;
       min-height: 80px;
     }
+
+    /* Estilos de cards e tabelas */
+    .card {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 0.85rem;
+    }
+
+    th {
+      background-color: var(--primary);
+      color: white;
+      padding: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      font-size: 0.9rem;
+    }
+
+    td { 
+      padding: 8px; 
+      border-bottom: 1px solid #ddd; 
+      text-align: center;
+    }
+
+    /* Botões */
+    .btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      min-width: 120px;
+      text-align: center;
+    }
+
+    .btn-primary { background-color: var(--primary); }
+    .btn-secondary { background-color: #5A5A5A; }
+    .btn-success { background-color: var(--success); }
+    .btn-danger { background-color: var(--danger); }
+    .btn-warning { background-color: var(--warning); color: #212529; }
+    .btn-info { background-color: #17a2b8; }
+    .btn-gray { background-color: #888; }
     
-    button { 
-      background-color: var(--secondary-color); 
-      color: white; 
-      padding: 12px 20px; 
-      border: none; 
-      border-radius: 5px; 
-      cursor: pointer; 
-      font-weight: bold; 
-      margin-top: 10px; 
-      font-size: 1rem;
-      transition: background-color 0.3s;
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
       width: 100%;
     }
-    
-    button:hover {
-      background-color: #1a6ea8;
+
+    /* Resultado e resumo */
+    #resultado {
+      margin-top: 15px;
+      padding: 15px;
+      background: #e9f7ef;
+      border-left: 5px solid #2e7d32;
+      border-radius: 8px;
+      display: none;
+      line-height: 1.6;
     }
-    
-    .valor-destaque { 
-      background: #dff0d8; 
-      color: #155724; 
-      padding: 15px; 
-      border-radius: 6px; 
-      font-size: 1.2rem; 
-      text-align: center; 
-      margin-top: 20px; 
-    }
-    
-    .resultado, #historicoContainer { 
-      margin-top: 20px; 
+
+    #resumo {
+      margin-top: 15px;
+      padding: 15px;
+      background: #eef;
+      border-radius: 8px;
       overflow-x: auto;
     }
     
-    .resultado table, #historicoContainer table { 
-      width: 100%; 
-      border-collapse: collapse; 
-      background: white; 
+    /* Estilo para os botões de ação */
+    .btn-excluir {
+      background-color: #E74C3C;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    
+    .btn-editar {
+      background-color: #2E86C1;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-right: 5px;
+    }
+    
+    .btn-excluir:hover, .btn-editar:hover {
+      opacity: 0.8;
+    }
+    
+    /* Estilo para o popup */
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .popup-container {
+      background-color: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      max-width: 90%;
+      width: 400px;
+      text-align: center;
+      animation: fadeIn 0.3s;
+    }
+    
+    .popup-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    
+    .popup-message {
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    
+    .popup-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .popup-button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      min-width: 80px;
+      transition: all 0.2s;
+    }
+    
+    .popup-button:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+    
+    .popup-confirm {
+      background-color: var(--success);
+      color: white;
+    }
+    
+    .popup-cancel {
+      background-color: var(--danger);
+      color: white;
+    }
+    
+    .popup-ok {
+      background-color: var(--primary);
+      color: white;
+      width: 100%;
+    }
+    
+    .popup-highlight {
+      font-weight: bold;
+      color: var(--danger);
+    }
+    
+    .popup-details {
+      background-color: #F8F9F9;
+      padding: 10px;
+      border-radius: 5px;
+      margin: 10px 0;
+      text-align: left;
       font-size: 0.9rem;
     }
     
-    table td, table th { 
-      padding: 8px; 
-      border: 1px solid var(--border-color); 
-      text-align: left;
+    .popup-details-item {
+      margin-bottom: 5px;
     }
     
-    th { 
-      background: var(--light-gray); 
+    .popup-icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
     }
     
-    .pdf-header { 
-      text-align: center; 
-      margin-bottom: 15px; 
+    .popup-success .popup-title {
+      color: var(--success);
     }
     
-    .pdf-title { 
-      font-size: 1.1rem; 
-      font-weight: bold; 
+    .popup-warning .popup-title {
+      color: var(--warning);
     }
     
-    .pdf-subtitle { 
-      font-size: 0.9rem; 
-      color: #555; 
+    .popup-error .popup-title {
+      color: var(--danger);
     }
     
-    .pdf-footer { 
-      text-align: center; 
-      margin-top: 15px; 
-      font-size: 0.8rem; 
-      color: #777; 
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .form-col {
+        min-width: 100%;
+      }
+      
+      .btn {
+        padding: 10px 8px;
+        font-size: 0.8rem;
+        min-width: 100px;
+      }
+      
+      .btn-editar, .btn-excluir {
+        padding: 4px 6px;
+        font-size: 0.7rem;
+      }
+      
+      .popup-container {
+        width: 90%;
+        padding: 15px;
+      }
+      
+      .popup-title {
+        font-size: 1.1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      
+      .card {
+        padding: 10px;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      .popup-buttons {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .popup-button {
+        width: 100%;
+      }
+      
+      .btn-row {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+      }
     }
     
-    .btn-excluir { 
-      background-color: var(--danger-color); 
-      padding: 5px 10px; 
-      font-size: 0.8rem; 
-      margin: 2px; 
-      white-space: nowrap;
+    /* Ajuste para os botões principais */
+    .btn-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
     }
     
-    .btn-excluir:hover {
-      background-color: #c0392b;
+    .btn-principal {
+      flex: 1;
+      min-width: 150px;
     }
-    
-    .btn-limpar {
-      background-color: var(--danger-color) !important;
+
+    /* Estilo para o calendário flatpickr - ATUALIZADO */
+    .flatpickr-day.selected {
+      background: #28B463 !important;
+      color: white !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
     }
-    
-    .btn-limpar:hover {
-      background-color: #c0392b !important;
-    }
-    
-    .no-print { 
-      display: block; 
-    }
-    
-    .print-only { 
-      display: none; 
-    }
-    
-    .controls { 
-      display: flex; 
-      gap: 10px; 
-      margin-bottom: 15px; 
-      flex-wrap: wrap; 
-    }
-    
-    .controls select { 
-      padding: 8px; 
-      border-radius: 5px; 
-      flex: 1 1 200px;
-    }
-    
-    .controls button {
-      flex: 1 1 150px;
-      margin-top: 0;
-    }
-    
-    /* Estilo compacto para o resultado */
-    .resultado-compact table { 
-      width: 100%; 
-      font-size: 0.85rem; 
-    }
-    
-    .resultado-compact td, .resultado-compact th { 
-      padding: 6px; 
-    }
-    
-    .resultado-compact .total-row { 
-      font-weight: bold; 
-      background-color: var(--light-gray); 
-    }
-    
-    hr {
-      border: 0;
-      height: 1px;
-      background-color: var(--border-color);
-      margin: 20px 0;
-    }
-    
-    /* Estilos para o calendário - mantendo o mesmo estilo do vale alimentação */
+
     .flatpickr-day.feriado, 
     .flatpickr-day.feriado-movel,
     .flatpickr-day.domingo {
@@ -234,7 +414,8 @@
       color: #721c24 !important;
       cursor: not-allowed !important;
       font-weight: bold !important;
-      border: 1px dashed #f194a1 !important;
+      border: none !important;
+      border-radius: 0 !important;
       text-decoration: line-through !important;
     }
     
@@ -243,152 +424,181 @@
     .flatpickr-day.domingo:hover {
       background-color: #f5c6cb !important;
     }
-    
-    /* Media Queries para telas maiores */
-    @media (min-width: 768px) {
-      .form-item { 
-        flex: 1 1 calc(50% - 15px); 
-      }
-      
-      button {
-        width: auto;
-        display: inline-block;
-      }
-      
-      .controls button {
-        flex: 0 1 auto;
-      }
-      
-      h1 { font-size: 2rem; }
-      h2 { font-size: 1.7rem; }
-      
-      .valor-destaque { 
-        font-size: 1.4rem; 
-      }
+
+    .flatpickr-day {
+      border-radius: 0 !important;
     }
-    
+
+    /* Valor em destaque */
+    .valor-destaque {
+      background: #dff0d8;
+      color: #155724;
+      padding: 15px;
+      border-radius: 6px;
+      font-size: 1.2rem;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    /* Para impressão */
     @media print {
-      .no-print { 
-        display: none !important; 
+      .no-print {
+        display: none !important;
       }
       
-      .print-only { 
-        display: block !important; 
+      body {
+        background: white;
+        padding: 0;
       }
       
-      body { 
-        background: white; 
-        padding: 0; 
+      .container {
+        box-shadow: none;
+        background: white;
+        padding: 10px;
       }
       
-      .container { 
-        box-shadow: none; 
-        background: white; 
-        padding: 10px; 
-      }
-      
-      button { 
-        display: none !important; 
-      }
-      
-      .resultado table, #historicoContainer table {
-        font-size: 10pt;
+      .btn {
+        display: none !important;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1 class="print-only">ALUGUEL DE VEÍCULOS - HISTÓRICO COMPLETO</h1>
-    <h1 class="no-print">ALUGUEL DE VEÍCULOS</h1>
-
-    <div class="no-print">
-      <div class="form-group">
-        <div class="form-item">
+    <h1>ALUGUEL DE VEÍCULOS</h1>
+    
+    <!-- Formulário principal -->
+    <div class="card">
+      <div class="form-row">
+        <div class="form-col">
           <label>👷 Operador:</label>
           <select id="operador">
-            <option value="">-- Selecione --</option>
+            <option value="">Selecione um operador</option>
+            <option>Amailson Gawlinski</option>
             <option>Caio José</option>
             <option>Daniel Rodrigo</option>
+            <option>George Gonçalves</option>
             <option>Igor Nascimento</option>
             <option>Lissandro da Silva</option>
-            <option>Leonardo Vaz</option>
             <option>Patrick Darlan</option>
             <option>Ricardo Alves</option>
+            <option>Luana Parcianello</option>
             <option>Keniel Vasque</option>
           </select>
         </div>
-
-        <div class="form-item">
+        <div class="form-col">
           <label>🚗 Tipo de Veículo:</label>
           <select id="tipo">
-            <option value="">-- Selecione --</option>
+            <option value="">Selecione o tipo</option>
             <option value="moto">Moto (R$ 750)</option>
             <option value="carro">Carro (R$ 1500)</option>
           </select>
         </div>
+      </div>
 
-        <div class="form-item">
+      <div class="form-row">
+        <div class="form-col">
           <label>📅 Dias previstos:</label>
           <input type="text" id="faltas" placeholder="Clique e selecione os dias úteis" />
         </div>
-
-        <div class="form-item">
+        <div class="form-col">
           <label>✅ Dias reais trabalhados:</label>
-          <input type="number" id="diasReais" min="0" placeholder="Digite o número de dias trabalhados" />
+          <input type="number" id="diasReais" min="0" placeholder="Nº de dias trabalhados" />
         </div>
+      </div>
 
-        <div class="form-item">
+      <div class="form-row">
+        <div class="form-col">
           <label>📉 Faltas a descontar:</label>
-          <input type="number" id="faltasDesconto" min="0" />
+          <input type="number" id="faltasDesconto" min="0" placeholder="Nº de faltas" />
         </div>
-
-        <div class="form-item">
+        <div class="form-col">
           <label>🍊 Desconto CAJU (R$):</label>
-          <input type="number" id="descontoCaju" step="0.01" min="0" />
+          <input type="number" id="descontoCaju" step="0.01" min="0" placeholder="Valor do desconto" />
         </div>
+      </div>
 
-        <div class="form-item">
+      <div class="form-row">
+        <div class="form-col">
           <label>💰 Outros Descontos (R$):</label>
-          <input type="number" id="outrosDescontos" step="0.01" min="0" />
+          <input type="number" id="outrosDescontos" step="0.01" min="0" placeholder="Outros descontos" />
         </div>
-
-        <div class="form-item" style="flex: 1 1 100%;">
+        <div class="form-col">
           <label>📝 Justificativa:</label>
-          <textarea id="justificativa" rows="3" placeholder="Obrigatória se houver desconto."></textarea>
+          <textarea id="justificativa" placeholder="Obrigatória se houver desconto."></textarea>
         </div>
       </div>
 
-      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <button onclick="calcularValor()">➕ Calcular</button>
-        <button onclick="exportarPDF()">📄 Salvar PDF</button>
+      <div class="btn-container">
+        <button onclick="calcularValor()" class="btn btn-success btn-principal">CALCULAR</button>
+        <button id="btnExportar" onclick="exportarPDF()" class="btn btn-info btn-principal" style="display: none;">📄 SALVAR CÁLCULO</button>
+        <button id="btnExportarCompleto" onclick="exportarPDFCompleto()" class="btn btn-secondary btn-principal" style="display: none;">📤 SALVAR HISTÓRICO</button>
+        <button id="btnAtualizarDados" class="btn btn-warning btn-principal" onclick="carregarDados(); sincronizarItensLocais();" title="Atualiza dados do servidor e sincroniza alterações locais">🔄 ATUALIZAR/SINCRONIZAR</button>
       </div>
-
-      <div class="valor-destaque" id="valorOperador" style="display:none;"></div>
-      <div class="resultado" id="resultado" style="display:none;"></div>
-
-      <hr>
     </div>
 
-    <div id="historicoSection">
-      <h2>📚 Histórico</h2>
-      <div class="controls no-print">
-        <select id="filtroOperador" onchange="mostrarHistorico()">
-          <option value="">Todos os Operadores</option>
-        </select>
-        <button onclick="mostrarHistorico()">🔄 Atualizar</button>
-        <button onclick="exportarHistoricoPDF()">📤 Exportar Histórico</button>
-        <button class="btn-limpar" onclick="confirmarLimpezaHistorico()">🧹 Limpar Histórico</button>
-        <button onclick="sincronizarHistoricoCompleto()">🔄 Sincronizar com Planilha</button>
+    <div id="resultado" class="card"></div>
+    
+    <!-- Filtros -->
+    <div class="card">
+      <h3>🔍 Filtros</h3>
+      <div class="form-row">
+        <div class="form-col">
+          <label>Operador:</label>
+          <select id="filtroOperador">
+            <option value="Todos">TODOS os operadores</option>
+          </select>
+        </div>
+        <div class="form-col">
+          <label>Data:</label>
+          <input type="month" id="filtroData" value="">
+        </div>
       </div>
-
-      <div id="historicoContainer" style="display:none;"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="filtrarHistorico()">Aplicar Filtros</button>
+        <button class="btn btn-gray" onclick="limparFiltros()">Limpar Filtros</button>
+      </div>
+    </div>
+    
+    <!-- Tabela de histórico -->
+    <div class="card">
+      <div style="overflow-x: auto;">
+        <table id="tabelaHistorico">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Operador</th>
+              <th>Tipo</th>
+              <th>Dias Prev.</th>
+              <th>Dias Trab.</th>
+              <th>Faltas</th>
+              <th>Total (R$)</th>
+              <th>Data/Hora</th>
+              <th class="no-print">Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Resumo -->
+    <div id="resumo" class="card">
+      <h3>📈 Resumo dos Valores</h3>
+      <div id="resumoConteudo"></div>
     </div>
   </div>
 
   <script>
-    const Swal = window.Swal;
+    // Configurações do Supabase
+    const SUPABASE_URL = "https://nsfliimhsokyzhacnfdg.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zZmxpaW1oc29reXpoYWNuZmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNDg3MzQsImV4cCI6MjA2MjkyNDczNH0.QqosDhPG2xK16rAfitDiW837GMIL_dh5lmDwg8cOn_8";
+    const { jsPDF } = window.jspdf;
+    
+    // Variáveis globais
+    let historicoAluguel = [];
     let diasSelecionados = [];
+    let editandoId = null;
 
     // Feriados fixos (dia/mês)
     const feriadosFixos = [
@@ -474,19 +684,45 @@
       }
     });
 
-    // Função para gerar um ID numérico aleatório único
+    // Função para gerar ID único
     function gerarID() {
-      const min = 10000; // Número mínimo de 5 dígitos
-      const max = 99999; // Número máximo de 5 dígitos
+      const min = 10000;
+      const max = 99999;
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
-
+    
+    // Função para formatar valores monetários
     function formatarValor(valor) {
       return parseFloat(valor).toFixed(2)
         .replace('.', ',')
         .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
+    // Função para editar um registro no Supabase
+    async function editarRegistroSupabase(id, dadosAtualizados) {
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/aluguel_veiculos?id=eq.${id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+          },
+          body: JSON.stringify(dadosAtualizados)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Erro HTTP: ${response.status}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        console.error("Erro ao editar registro:", error);
+        throw error;
+      }
+    }
+    
+    // Função para calcular o valor do aluguel
     async function calcularValor() {
       const operador = document.getElementById("operador").value;
       const tipo = document.getElementById("tipo").value;
@@ -497,44 +733,37 @@
       const outrosDescontos = Math.max(parseFloat(document.getElementById("outrosDescontos").value) || 0, 0);
       const justificativa = document.getElementById("justificativa").value;
       
-      // Gerar ID numérico aleatório único para este cálculo
-      const idCalculo = gerarID();
-
-      if (!operador || !tipo || diasSelecionados.length === 0) {
-        await Swal.fire({
-          icon: 'warning',
-          title: 'Campos obrigatórios',
-          text: 'Preencha todos os campos obrigatórios.',
-          confirmButtonColor: '#3085d6'
-        });
-        return;
+      // Verificações de campos obrigatórios
+      if (!operador) { 
+        mostrarPopup('Atenção', 'Por favor, selecione um operador.', 'error');
+        return; 
       }
-
+      
+      if (!tipo) { 
+        mostrarPopup('Atenção', 'Por favor, selecione o tipo de veículo.', 'error');
+        return; 
+      }
+      
+      if (diasSelecionados.length === 0) { 
+        mostrarPopup('Atenção', 'Por favor, selecione os dias previstos.', 'error');
+        return; 
+      }
+      
       if (diasTrabalhados === 0) {
-        const { isConfirmed } = await Swal.fire({
-          icon: 'question',
-          title: 'Confirmação necessária',
-          text: 'Dias trabalhados está como 0. Isso significa que o operador não trabalhou nenhum dia. Deseja continuar?',
-          showCancelButton: true,
-          confirmButtonText: 'Sim, continuar',
-          cancelButtonText: 'Cancelar',
-          confirmButtonColor: '#3085d6',
-          cancelButtonColor: '#d33'
-        });
+        const confirmar = await mostrarPopupConfirmacao(
+          "Atenção",
+          "Dias trabalhados está como 0. Isso significa que o operador não trabalhou nenhum dia. Deseja continuar?",
+          { "Operador": operador }
+        );
         
-        if (!isConfirmed) {
+        if (!confirmar) {
           diasTrabalhadosInput.focus();
           return;
         }
       }
-
+      
       if ((faltasExtras > 0 || descontoCaju > 0 || outrosDescontos > 0) && justificativa.trim() === "") {
-        await Swal.fire({
-          icon: 'warning',
-          title: 'Justificativa necessária',
-          text: 'Por favor, justifique os descontos aplicados.',
-          confirmButtonColor: '#3085d6'
-        });
+        mostrarPopup('Atenção', 'Por favor, justifique os descontos aplicados.', 'error');
         return;
       }
 
@@ -542,416 +771,709 @@
       const valorPorDia = valorMensal / diasSelecionados.length;
       const valorFinal = Math.max((valorPorDia * diasTrabalhados) - (faltasExtras * valorPorDia) - descontoCaju - outrosDescontos, 0);
       const totalDescontos = (faltasExtras * valorPorDia) + descontoCaju + outrosDescontos;
+      
+      // Gerar ID único para este cálculo
+      const idCalculo = editandoId || gerarID();
+      const timestamp = new Date().toISOString();
+      
+      // Formatando o período para exibição
+      const primeiroDia = new Date(diasSelecionados[0]);
+      const ultimoDia = new Date(diasSelecionados[diasSelecionados.length - 1]);
+      const periodo = `${primeiroDia.toLocaleDateString('pt-BR')} a ${ultimoDia.toLocaleDateString('pt-BR')}`;
 
-      document.getElementById("valorOperador").style.display = "block";
-      document.getElementById("valorOperador").innerText = `💰 Valor a receber: R$ ${formatarValor(valorFinal)} (ID: ${idCalculo})`;
-
-      document.getElementById("resultado").style.display = "block";
-      document.getElementById("resultado").innerHTML = `
-        <div class="pdf-content resultado-compact">
-          <div class="pdf-header">
-            <div class="pdf-title">Comprovante de Aluguel de Veículo</div>
-            <div class="pdf-subtitle">${new Date().toLocaleDateString('pt-BR')} | ID: ${idCalculo}</div>
-          </div>
-          <table>
-            <tr><th colspan="2" style="text-align:center;background:var(--primary-color);color:white;">DADOS DO ALUGUEL</th></tr>
-            <tr><td style="width:50%;"><strong>Operador:</strong></td><td>${operador}</td></tr>
-            <tr><td><strong>Tipo de Veículo:</strong></td><td>${tipo === "moto" ? "Moto" : "Carro"} (R$ ${formatarValor(valorMensal)})</td></tr>
-            <tr><td><strong>Período:</strong></td><td>${diasSelecionados.length} dias úteis</td></tr>
-            
-            <tr><th colspan="2" style="text-align:center;background:var(--primary-color);color:white;">CÁLCULO</th></tr>
-            <tr><td><strong>Valor por dia:</strong></td><td>R$ ${formatarValor(valorPorDia)}</td></tr>
-            <tr><td><strong>Dias trabalhados:</strong></td><td>${diasTrabalhados}</td></tr>
-            <tr><td><strong>Valor bruto:</strong></td><td>R$ ${formatarValor(valorPorDia * diasTrabalhados)}</td></tr>
-            
-            <tr><th colspan="2" style="text-align:center;background:var(--primary-color);color:white;">DESCONTOS</th></tr>
-            <tr><td><strong>Faltas extras (${faltasExtras} dias):</strong></td><td>R$ ${formatarValor(faltasExtras * valorPorDia)}</td></tr>
-            <tr><td><strong>Desconto CAJU:</strong></td><td>R$ ${formatarValor(descontoCaju)}</td></tr>
-            <tr><td><strong>Outros descontos:</strong></td><td>R$ ${formatarValor(outrosDescontos)}</td></tr>
-            <tr><td><strong>Total descontos:</strong></td><td>R$ ${formatarValor(totalDescontos)}</td></tr>
-            
-            <tr class="total-row"><td><strong>VALOR LÍQUIDO:</strong></td><td><strong>R$ ${formatarValor(valorFinal)}</strong></td></tr>
-            
-            ${justificativa ? `<tr><th colspan="2" style="text-align:center;background:var(--light-gray);">JUSTIFICATIVA</th></tr>
-            <tr><td colspan="2">${justificativa}</td></tr>` : ''}
-            
-            <tr><td colspan="2" style="text-align:center;font-size:0.8rem;padding-top:15px;">
-              Sistema de Aluguel de Veículos - ${new Date().getFullYear()} | ID: ${idCalculo}
-            </td></tr>
-          </table>
-        </div>`;
-
-      salvarHistorico({
-        id: idCalculo,
-        operador, tipo, diasPrevistos: diasSelecionados.length, diasTrabalhados,
-        valorPorDia: valorPorDia.toFixed(2), faltasExtras, descontoCaju, outrosDescontos,
-        justificativa, valorFinal: valorFinal.toFixed(2)
-      });
-
-      await Swal.fire({
-        icon: 'success',
-        title: 'Cálculo concluído!',
-        text: `O valor do aluguel foi calculado com sucesso. ID: ${idCalculo}`,
-        confirmButtonColor: '#3085d6'
-      });
-    }
-
-    function salvarHistorico(dados) {
-      const historico = JSON.parse(localStorage.getItem("historicoAluguel") || "[]");
-      historico.push({ ...dados, data: new Date().toLocaleString("pt-BR") });
-      localStorage.setItem("historicoAluguel", JSON.stringify(historico));
-      atualizarFiltroOperadores();
-      mostrarHistorico();
-    }
-
-    function mostrarHistorico() {
-      const filtro = document.getElementById("filtroOperador").value;
-      const historico = JSON.parse(localStorage.getItem("historicoAluguel") || "[]");
-      const filtrado = filtro ? historico.filter(h => h.operador === filtro) : historico;
-
-      let html = `<div class="pdf-content">
-        <div class="pdf-header">
-          <div class="pdf-title">Histórico de Aluguel de Veículos</div>
-          <div class="pdf-subtitle">${new Date().toLocaleDateString('pt-BR')}</div>
+      // Exibir resultado
+      const resultadoDiv = document.getElementById("resultado");
+      resultadoDiv.style.display = "block";
+      resultadoDiv.innerHTML = `
+        <h4>${editandoId ? 'Cálculo Atualizado' : 'Resultado do Cálculo'}</h4>
+        <p><strong>ID do Cálculo:</strong> ${idCalculo}</p>
+        <p><strong>Operador:</strong> ${operador}</p>
+        <p><strong>Período:</strong> ${periodo}</p>
+        
+        <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">
+          <h5 style="margin-bottom: 10px; color: #2E86C1;">Detalhes do Cálculo</h5>
+          <p><strong>Tipo de Veículo:</strong> ${tipo === "moto" ? "Moto" : "Carro"} (R$ ${valorMensal.toFixed(2)})</p>
+          <p><strong>Dias Previstos:</strong> ${diasSelecionados.length} dias × R$ ${valorPorDia.toFixed(2)} = <strong>R$ ${valorMensal.toFixed(2)}</strong></p>
+          <p><strong>Dias Trabalhados:</strong> ${diasTrabalhados} dias × R$ ${valorPorDia.toFixed(2)} = <strong>R$ ${(valorPorDia * diasTrabalhados).toFixed(2)}</strong></p>
+          
+          ${totalDescontos > 0 ? `
+            <p><strong>Descontos:</strong></p>
+            <ul style="margin-left: 20px;">
+              ${faltasExtras > 0 ? `<li>Faltas extras (${faltasExtras} dias): R$ ${(faltasExtras * valorPorDia).toFixed(2)}</li>` : ''}
+              ${descontoCaju > 0 ? `<li>Desconto CAJU: R$ ${descontoCaju.toFixed(2)}</li>` : ''}
+              ${outrosDescontos > 0 ? `<li>Outros descontos: R$ ${outrosDescontos.toFixed(2)}</li>` : ''}
+            </ul>
+            <p><strong>Total Descontos:</strong> R$ ${totalDescontos.toFixed(2)}</p>
+          ` : ''}
+          
+          <p style="margin-top: 10px;">
+            <strong style="color: #28a745; font-size: 1.1em;">VALOR LÍQUIDO:</strong> R$ ${valorFinal.toFixed(2)}
+          </p>
         </div>
-        <table><thead><tr>
-          <th>ID</th>
-          <th>Data</th><th>Operador</th><th>Tipo</th><th>Dias Prev.</th><th>Dias Trab.</th>
-          <th>Valor/Dia</th><th>Descontos</th><th>Valor Final</th>
-          <th class="no-print">Ações</th>
-        </tr></thead><tbody>`;
+        
+        ${justificativa ? `
+        <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">
+          <h5 style="margin-bottom: 10px; color: #2E86C1;">📝 Justificativa</h5>
+          <p>${justificativa}</p>
+        </div>
+        ` : ''}
+      `;
 
-      for (let i = filtrado.length - 1; i >= 0; i--) {
-        const h = filtrado[i];
-        const totalDescontos = (h.faltasExtras * parseFloat(h.valorPorDia)) + h.descontoCaju + h.outrosDescontos;
-        const idxOriginal = historico.findIndex(x =>
-          x.data === h.data &&
-          x.operador === h.operador &&
-          x.tipo === h.tipo &&
-          x.valorFinal === h.valorFinal
+      // Dados para salvar no Supabase
+      const dadosParaSalvar = {
+        id: idCalculo,
+        timestamp: timestamp,
+        operador: operador,
+        tipo_veiculo: tipo,
+        valor_mensal: valorMensal.toFixed(2),
+        dias_previstos: diasSelecionados.length,
+        dias_trabalhados: diasTrabalhados,
+        valor_por_dia: valorPorDia.toFixed(2),
+        faltas_extras: faltasExtras,
+        desconto_caju: descontoCaju.toFixed(2),
+        outros_descontos: outrosDescontos.toFixed(2),
+        total_descontos: totalDescontos.toFixed(2),
+        valor_final: valorFinal.toFixed(2),
+        justificativa: justificativa,
+        periodo: periodo,
+        dias_selecionados: diasSelecionados.join(', ')
+      };
+
+      try {
+        let response;
+        if (editandoId) {
+          // Atualiza o registro existente
+          response = await editarRegistroSupabase(idCalculo, dadosParaSalvar);
+          
+          // Remove o registro antigo do histórico local
+          historicoAluguel = historicoAluguel.filter(item => item.id !== idCalculo);
+        } else {
+          // Cria um novo registro
+          response = await fetch(`${SUPABASE_URL}/rest/v1/aluguel_veiculos`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": SUPABASE_KEY,
+              "Authorization": `Bearer ${SUPABASE_KEY}`,
+              "Prefer": "return=representation"
+            },
+            body: JSON.stringify(dadosParaSalvar)
+          });
+        }
+
+        if (!response.ok) {
+          throw new Error(`Erro HTTP: ${response.status}`);
+        }
+
+        // Adiciona ao histórico local
+        historicoAluguel.unshift({
+          ...dadosParaSalvar,
+          data: new Date(timestamp).toLocaleString('pt-BR')
+        });
+
+        // Salva no localStorage como backup
+        localStorage.setItem('historicoAluguel', JSON.stringify(historicoAluguel));
+
+        atualizarHistorico();
+
+        document.getElementById('btnExportar').style.display = 'block';
+        document.getElementById('btnExportarCompleto').style.display = 'block';
+        document.getElementById('btnAtualizarDados').style.display = 'inline-block';
+
+        mostrarPopupAutomatico(
+          editandoId ? 'Atualizado!' : 'Sucesso!', 
+          editandoId ? 'Cálculo atualizado com sucesso!' : 'Cálculo salvo com sucesso no banco de dados.',
+          'success'
         );
+        
+        // Limpa o modo de edição
+        if (editandoId) {
+          editandoId = null;
+          limparCampos();
+        }
+      } catch (error) {
+        console.error("Erro ao salvar no Supabase:", error);
+        mostrarPopupAutomatico('Erro', 'Não foi possível salvar o cálculo. Os dados serão armazenados localmente.', 'error');
+        
+        // Adiciona ao histórico local mesmo em caso de erro
+        historicoAluguel.unshift({
+          ...dadosParaSalvar,
+          data: new Date().toLocaleString('pt-BR')
+        });
+        localStorage.setItem('historicoAluguel', JSON.stringify(historicoAluguel));
+        atualizarHistorico();
+      }
+    }
 
+    // Função para carregar dados do Supabase - ATUALIZADA
+    async function carregarDados() {
+      try {
+        // Tenta carregar do Supabase
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/aluguel_veiculos?select=*&order=timestamp.desc`, {
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Erro HTTP: ${response.status}`);
+        }
+        
+        const dadosSupabase = await response.json();
+        
+        // Verifica se há dados no Supabase
+        if (dadosSupabase && dadosSupabase.length > 0) {
+          // Verifica se há dados locais não sincronizados
+          const historicoSalvo = localStorage.getItem('historicoAluguel');
+          let dadosLocais = [];
+          
+          if (historicoSalvo) {
+            dadosLocais = JSON.parse(historicoSalvo);
+            
+            // Filtra apenas os itens locais que não existem no Supabase
+            const itensNaoSincronizados = dadosLocais.filter(itemLocal => 
+                !dadosSupabase.some(itemSupabase => itemSupabase.id === itemLocal.id)
+            );
+            
+            // Combina os dados (Supabase + itens locais não sincronizados)
+            historicoAluguel = [
+                ...dadosSupabase.map(item => ({
+                    ...item,
+                    data: new Date(item.timestamp).toLocaleString('pt-BR')
+                })),
+                ...itensNaoSincronizados
+            ];
+          } else {
+            historicoAluguel = dadosSupabase.map(item => ({
+                ...item,
+                data: new Date(item.timestamp).toLocaleString('pt-BR')
+            }));
+          }
+          
+          // Salva no localStorage como backup
+          localStorage.setItem('historicoAluguel', JSON.stringify(historicoAluguel));
+        } else {
+          // Se não houver dados no Supabase, tenta carregar do localStorage
+          const historicoSalvo = localStorage.getItem('historicoAluguel');
+          if (historicoSalvo) {
+            historicoAluguel = JSON.parse(historicoSalvo);
+          }
+        }
+        
+        // Mostra popup que fecha automaticamente
+        mostrarPopupAutomatico('Dados Atualizados', 'Os dados foram carregados com sucesso.', 'success');
+        
+      } catch (error) {
+        console.error("Erro ao carregar do Supabase, usando localStorage:", error);
+        // Se houver erro, usa o localStorage como fallback
+        const historicoSalvo = localStorage.getItem('historicoAluguel');
+        if (historicoSalvo) {
+          historicoAluguel = JSON.parse(historicoSalvo);
+        }
+        mostrarPopupAutomatico('Aviso', 'Dados carregados do cache local.', 'warning');
+      }
+      
+      // Atualiza a interface
+      atualizarHistorico();
+      atualizarFiltroOperadores();
+      
+      // Define o mês atual como padrão no filtro
+      const hoje = new Date();
+      const mesAtual = hoje.getFullYear() + '-' + String(hoje.getMonth() + 1).padStart(2, '0');
+      document.getElementById('filtroData').value = mesAtual;
+    }
+
+    // Função para sincronizar itens locais - NOVA
+    async function sincronizarItensLocais() {
+      try {
+          const historicoSalvo = localStorage.getItem('historicoAluguel');
+          if (!historicoSalvo) return;
+          
+          const dadosLocais = JSON.parse(historicoSalvo);
+          
+          // Verifica quais itens locais não existem no Supabase
+          const response = await fetch(`${SUPABASE_URL}/rest/v1/aluguel_veiculos?select=id`, {
+              headers: {
+                  "apikey": SUPABASE_KEY,
+                  "Authorization": `Bearer ${SUPABASE_KEY}`
+              }
+          });
+          
+          if (!response.ok) {
+              throw new Error(`Erro HTTP: ${response.status}`);
+          }
+          
+          const idsSupabase = (await response.json()).map(item => item.id);
+          const itensParaSincronizar = dadosLocais.filter(item => !idsSupabase.includes(item.id));
+          
+          // Tenta enviar cada item não sincronizado
+          for (const item of itensParaSincronizar) {
+              await fetch(`${SUPABASE_URL}/rest/v1/aluguel_veiculos`, {
+                  method: "POST",
+                  headers: {
+                      "Content-Type": "application/json",
+                      "apikey": SUPABASE_KEY,
+                      "Authorization": `Bearer ${SUPABASE_KEY}`,
+                      "Prefer": "return=representation"
+                  },
+                  body: JSON.stringify(item)
+              });
+          }
+          
+          // Recarrega os dados após sincronização
+          carregarDados();
+          
+      } catch (error) {
+          console.error("Erro ao sincronizar itens locais:", error);
+          mostrarPopupAutomatico('Atenção', 'Alguns itens locais não puderam ser sincronizados.', 'warning');
+      }
+    }
+
+    // Função para mostrar popup que fecha automaticamente
+    function mostrarPopupAutomatico(titulo, mensagem, tipo = 'info') {
+      const popupDiv = document.createElement('div');
+      popupDiv.className = 'popup-overlay';
+      
+      const icon = tipo === 'success' ? '✅' : tipo === 'error' ? '❌' : 'ℹ️';
+      const popupClass = tipo === 'success' ? 'popup-success' : 
+                        tipo === 'error' ? 'popup-error' : 
+                        tipo === 'warning' ? 'popup-warning' : '';
+      
+      popupDiv.innerHTML = `
+        <div class="popup-container ${popupClass}">
+          <div class="popup-icon">${icon}</div>
+          <div class="popup-title">${titulo}</div>
+          <div class="popup-message">${mensagem}</div>
+          <div class="popup-buttons">
+            <button class="popup-button popup-ok" id="popupAutoClose">OK</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(popupDiv);
+      
+      // Fecha automaticamente após 2 segundos
+      const timer = setTimeout(() => {
+        if (document.body.contains(popupDiv)) {
+          document.body.removeChild(popupDiv);
+        }
+      }, 2000);
+      
+      // Fecha ao clicar no botão
+      document.getElementById('popupAutoClose').addEventListener('click', () => {
+        clearTimeout(timer);
+        document.body.removeChild(popupDiv);
+      });
+    }
+
+    // Função para mostrar popup de confirmação
+    function mostrarPopupConfirmacao(titulo, mensagem, detalhes = null) {
+      return new Promise((resolve) => {
+        const popup = document.createElement('div');
+        popup.className = 'popup-overlay';
+        
+        let detalhesHTML = '';
+        if (detalhes) {
+          detalhesHTML = `
+            <div class="popup-details">
+              ${Object.entries(detalhes).map(([key, value]) => `
+                <div class="popup-details-item"><strong>${key}:</strong> ${value}</div>
+              `).join('')}
+            </div>
+          `;
+        }
+        
+        popup.innerHTML = `
+          <div class="popup-container popup-warning">
+            <div class="popup-icon">⚠️</div>
+            <div class="popup-title">${titulo}</div>
+            <div class="popup-message">${mensagem}</div>
+            ${detalhesHTML}
+            <div class="popup-buttons">
+              <button class="popup-button popup-confirm" id="popupConfirm">Sim</button>
+              <button class="popup-button popup-cancel" id="popupCancel">Não</button>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(popup);
+        
+        document.getElementById('popupConfirm').addEventListener('click', () => {
+          document.body.removeChild(popup);
+          resolve(true);
+        });
+        
+        document.getElementById('popupCancel').addEventListener('click', () => {
+          document.body.removeChild(popup);
+          resolve(false);
+        });
+      });
+    }
+
+    // Função para atualizar o histórico na tela
+    function atualizarHistorico() {
+      const tbody = document.querySelector("#tabelaHistorico tbody");
+      tbody.innerHTML = '';
+
+      const historicoFiltrado = filtrarListaHistorico();
+
+      if (historicoFiltrado.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center;">Nenhum registro encontrado</td></tr>`;
+        document.getElementById('resumo').style.display = 'none';
+        return;
+      }
+
+      historicoFiltrado.forEach(item => {
+        const tr = document.createElement('tr');
+        
+        tr.innerHTML = `
+          <td>${item.id}</td>
+          <td>${item.operador}</td>
+          <td>${item.tipo_veiculo === "moto" ? "Moto" : "Carro"}</td>
+          <td>${item.dias_previstos}</td>
+          <td>${item.dias_trabalhados}</td>
+          <td>${item.faltas_extras}</td>
+          <td>R$ ${parseFloat(item.valor_final).toFixed(2)}</td>
+          <td>${item.data}</td>
+          <td class="no-print">
+            <button class="btn-excluir" onclick="excluirItemHistorico(${item.id})">Excluir</button>
+          </td>
+        `;
+        
+        tbody.appendChild(tr);
+      });
+      
+      // Atualiza o resumo
+      atualizarResumoHistorico(historicoFiltrado);
+      document.getElementById('resumo').style.display = 'block';
+      
+      document.getElementById('btnExportarCompleto').style.display = historicoFiltrado.length > 0 ? 'block' : 'none';
+    }
+    
+    // Função para atualizar o resumo do histórico
+    function atualizarResumoHistorico(dados) {
+      const resumoDiv = document.getElementById('resumoConteudo');
+      
+      // Agrupa por operador
+      const porOperador = {};
+      dados.forEach(item => {
+        if (!porOperador[item.operador]) {
+          porOperador[item.operador] = {
+            totalCalculos: 0,
+            totalDias: 0,
+            totalValor: 0,
+            ids: []
+          };
+        }
+        
+        porOperador[item.operador].totalCalculos++;
+        porOperador[item.operador].totalDias += item.dias_trabalhados;
+        porOperador[item.operador].totalValor += parseFloat(item.valor_final);
+        porOperador[item.operador].ids.push(item.id);
+      });
+      
+      // Cria a tabela de resumo
+      let html = '<div style="overflow-x: auto;"><table>';
+      html += '<thead><tr><th>Operador</th><th>Total de Cálculos</th><th>Total de Dias</th><th>Total Pago (R$)</th><th>IDs</th></tr></thead>';
+      html += '<tbody>';
+      
+      for (const [operador, dados] of Object.entries(porOperador)) {
         html += `<tr>
-          <td>${h.id}</td>
-          <td>${h.data.split(',')[0]}</td><td>${h.operador}</td><td>${h.tipo === "moto" ? "Moto" : "Carro"}</td><td>${h.diasPrevistos}</td>
-          <td>${h.diasTrabalhados}</td><td>R$ ${parseFloat(h.valorPorDia).toFixed(2).replace('.', ',')}</td>
-          <td>R$ ${totalDescontos.toFixed(2).replace('.', ',')}</td>
-          <td>R$ ${parseFloat(h.valorFinal).toFixed(2).replace('.', ',')}</td>
-          <td class="no-print"><button class="btn-excluir" onclick="confirmarExclusaoRegistro(${idxOriginal})">Excluir</button></td>
+          <td>${operador}</td>
+          <td>${dados.totalCalculos}</td>
+          <td>${dados.totalDias}</td>
+          <td>R$ ${dados.totalValor.toFixed(2)}</td>
+          <td>${dados.ids.join(', ')}</td>
         </tr>`;
       }
-
-      html += "</tbody></table></div>";
-      document.getElementById("historicoContainer").innerHTML = html;
-      document.getElementById("historicoContainer").style.display = filtrado.length > 0 ? "block" : "none";
-    }
-
-    async function confirmarExclusaoRegistro(index) {
-      const { isConfirmed } = await Swal.fire({
-        title: 'Tem certeza?',
-        text: "Você não poderá reverter esta ação!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Sim, excluir!',
-        cancelButtonText: 'Cancelar'
-      });
       
-      if (isConfirmed) {
-        const historico = JSON.parse(localStorage.getItem("historicoAluguel") || "[]");
-        historico.splice(index, 1);
-        localStorage.setItem("historicoAluguel", JSON.stringify(historico));
-        
-        await Swal.fire({
-          icon: 'success',
-          title: 'Excluído!',
-          text: 'O registro foi removido com sucesso.',
-          confirmButtonColor: '#3085d6'
-        });
-        
-        mostrarHistorico();
-      }
+      html += '</tbody></table></div>';
+      resumoDiv.innerHTML = html;
     }
-
-    async function confirmarLimpezaHistorico() {
-      const { isConfirmed } = await Swal.fire({
-        title: 'Tem certeza absoluta?',
-        text: "Isso apagará TODOS os registros permanentemente!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Sim, limpar tudo!',
-        cancelButtonText: 'Cancelar'
-      });
-      
-      if (isConfirmed) {
-        localStorage.removeItem("historicoAluguel");
-        
-        await Swal.fire({
-          icon: 'success',
-          title: 'Histórico limpo!',
-          text: 'Todos os registros foram removidos com sucesso.',
-          confirmButtonColor: '#3085d6'
-        });
-        
-        mostrarHistorico();
-      }
-    }
-
+    
+    // Função para atualizar o filtro de operadores
     function atualizarFiltroOperadores() {
-      const historico = JSON.parse(localStorage.getItem("historicoAluguel") || "[]");
-      const operadores = [...new Set(historico.map(h => h.operador))];
-      const select = document.getElementById("filtroOperador");
-      select.innerHTML = `<option value="">Todos os Operadores</option>`;
-      operadores.forEach(op => {
-        const opt = document.createElement("option");
-        opt.value = op;
-        opt.textContent = op;
-        select.appendChild(opt);
+      const selectFiltro = document.getElementById('filtroOperador');
+      const operadoresUnicos = [...new Set(historicoAluguel.map(item => item.operador))].sort();
+      
+      // Mantém a seleção atual
+      const valorAtual = selectFiltro.value;
+      selectFiltro.innerHTML = '<option value="Todos">TODOS os operadores</option>';
+      
+      operadoresUnicos.forEach(op => {
+        const option = document.createElement('option');
+        option.value = op;
+        option.textContent = op;
+        selectFiltro.appendChild(option);
       });
-    }
-
-    function exportarPDF() {
-      const elemento = document.querySelector(".resultado");
-      if (!elemento) return;
       
-      const opt = {
-        margin: [0, 0, 0, 0],
-        filename: 'comprovante_aluguel_veiculo.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-          scale: 7,
-          logging: false,
-          useCORS: true
-        },
-        jsPDF: { 
-          unit: 'mm', 
-          format: 'a4', 
-          orientation: 'portrait',
-          putOnlyUsedFonts: true
-        }
-      };
-      
-      // Gera o PDF com as margens ajustadas
-      html2pdf().set(opt).from(elemento).save();
-    }
-
-    async function exportarHistoricoPDF() {
-      // Obter todos os dados do histórico
-      const historico = JSON.parse(localStorage.getItem("historicoAluguel") || "[]");
-      
-      // Verificar se há registros para exportar
-      if (historico.length === 0) {
-        await Swal.fire({
-          icon: 'warning',
-          title: 'Nenhum registro',
-          text: 'Não há registros no histórico para exportar.',
-          confirmButtonColor: '#3085d6'
-        });
-        return;
+      // Restaura a seleção se ainda existir
+      if (operadoresUnicos.includes(valorAtual)) {
+        selectFiltro.value = valorAtual;
       }
-      
-      // Ordenar do mais recente para o mais antigo
-      historico.sort((a, b) => new Date(b.data) - new Date(a.data));
-      
-      // Criar o conteúdo HTML para o PDF
-      let html = `
-        <div style="font-family: Arial, sans-serif; padding: 10px;">
-          <h1 style="text-align: center; color: var(--primary-color);">ALUGUEL DE VEÍCULOS - HISTÓRICO COMPLETO</h1>
-          <div style="text-align: center; margin-bottom: 15px; color: #555;">
-            Gerado em ${new Date().toLocaleDateString('pt-BR')} - Total de registros: ${historico.length}
-          </div>
-          <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
-            <thead>
-              <tr style="background-color: var(--light-gray);">
-                <th style="border: 1px solid var(--border-color); padding: 5px;">ID</th>
-                <th style="border: 1px solid var(--border-color); padding: 5px;">Data</th>
-                <th style="border: 1px solid var(--border-color); padding: 5px;">Operador</th>
-                <th style="border: 1px solid var(--border-color); padding: 5px;">Tipo</th>
-                <th style="border: 1px solid var(--border-color); padding: 5px;">Dias Prev.</th>
-                <th style="border: 1px solid var(--border-color); padding: 5px;">Dias Trab.</th>
-                <th style="border: 1px solid var(--border-color); padding: 5px;">Valor/Dia</th>
-                <th style="border: 1px solid var(--border-color); padding: 5px;">Descontos</th>
-                <th style="border: 1px solid var(--border-color); padding: 5px;">Valor Final</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
-      
-      // Adicionar cada registro ao HTML
-      historico.forEach(h => {
-        const totalDescontos = (h.faltasExtras * parseFloat(h.valorPorDia)) + h.descontoCaju + h.outrosDescontos;
-        html += `
-          <tr>
-            <td style="border: 1px solid var(--border-color); padding: 5px;">${h.id}</td>
-            <td style="border: 1px solid var(--border-color); padding: 5px;">${h.data.split(',')[0]}</td>
-            <td style="border: 1px solid var(--border-color); padding: 5px;">${h.operador}</td>
-            <td style="border: 1px solid var(--border-color); padding: 5px;">${h.tipo === "moto" ? "Moto" : "Carro"}</td>
-            <td style="border: 1px solid var(--border-color); padding: 5px; text-align: center;">${h.diasPrevistos}</td>
-            <td style="border: 1px solid var(--border-color); padding: 5px; text-align: center;">${h.diasTrabalhados}</td>
-            <td style="border: 1px solid var(--border-color); padding: 5px; text-align: right;">R$ ${parseFloat(h.valorPorDia).toFixed(2).replace('.', ',')}</td>
-            <td style="border: 1px solid var(--border-color); padding: 5px; text-align: right;">R$ ${totalDescontos.toFixed(2).replace('.', ',')}</td>
-            <td style="border: 1px solid var(--border-color); padding: 5px; text-align: right;">R$ ${parseFloat(h.valorFinal).toFixed(2).replace('.', ',')}</td>
-          </tr>
-        `;
-      });
-      
-      html += `
-            </tbody>
-          </table>
-          <div style="text-align: center; margin-top: 15px; font-size: 10px; color: #777;">
-            Sistema de Aluguel de Veículos - ${new Date().getFullYear()}
-          </div>
-        </div>
-      `;
-      
-      // Criar um elemento temporário para gerar o PDF
-      const element = document.createElement('div');
-      element.innerHTML = html;
-      document.body.appendChild(element);
-      
-      // Configurações para o PDF
-      const opt = {
-        margin: [10, 10, 10, 10],
-        filename: 'historico_completo_aluguel.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-          scale: 2,
-          logging: true,
-          useCORS: true,
-          scrollX: 0,
-          scrollY: 0
-        },
-        jsPDF: { 
-          unit: 'mm', 
-          format: 'a4', 
-          orientation: 'landscape',
-          putOnlyUsedFonts: true
-        }
-      };
-      
-      // Gerar o PDF
-      html2pdf().set(opt).from(element).save().then(() => {
-        // Remover o elemento temporário após a geração do PDF
-        document.body.removeChild(element);
+    }
+
+    // Função para filtrar o histórico - ATUALIZADA
+    function filtrarListaHistorico() {
+        const filtroOperador = document.getElementById('filtroOperador').value;
+        const filtroData = document.getElementById('filtroData').value;
         
-        Swal.fire({
-          icon: 'success',
-          title: 'PDF gerado!',
-          text: 'O histórico foi exportado com sucesso.',
-          confirmButtonColor: '#3085d6'
-        });
-      });
-    }
-
-    function salvarNoGoogleSheets(dados) {
-      const url = "https://script.google.com/macros/s/AKfycbyfhztX3ZILYcyS7DkS_rVfEWruituv86SY71gk3cgjx563BEC6YzXkOhOfcb4hcqo2QQ/exec";
-      
-      const payload = {
-        operador: dados.operador,
-        tipo: dados.tipo,
-        diasPrevistos: dados.diasPrevistos,
-        diasTrabalhados: dados.diasTrabalhados,
-        valorPorDia: dados.valorPorDia,
-        faltasExtras: dados.faltasExtras || 0,
-        descontoCaju: dados.descontoCaju || 0,
-        outrosDescontos: dados.outrosDescontos || 0,
-        justificativa: dados.justificativa || '',
-        valorFinal: dados.valorFinal,
-        dataRegistro: dados.dataRegistro || new Date().toISOString()
-      };
-
-      fetch(url, {
-        method: "POST",
-        mode: "no-cors",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload)
-      })
-      .then(() => console.log("Dados enviados para o Google Sheets com sucesso!"))
-      .catch(error => console.error("Erro ao enviar para o Google Sheets:", error));
-    }
-
-    async function sincronizarHistoricoCompleto() {
-      const historico = JSON.parse(localStorage.getItem("historicoAluguel") || "[]");
-      
-      // Verificar se há registros para sincronizar
-      if (historico.length === 0) {
-        await Swal.fire({
-          icon: 'warning',
-          title: 'Nenhum registro',
-          text: 'Não há registros no histórico para sincronizar.',
-          confirmButtonColor: '#3085d6'
-        });
-        return;
-      }
-      
-      const { isConfirmed } = await Swal.fire({
-        title: 'Confirmar sincronização',
-        html: `Deseja sincronizar <b>${historico.length}</b> registros com a planilha?<br><small>Esta operação pode levar alguns minutos.</small>`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Sim, sincronizar',
-        cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33'
-      });
-      
-      if (!isConfirmed) return;
-      
-      const loadingSwal = Swal.fire({
-        title: 'Sincronizando...',
-        html: `Enviando <b>0/${historico.length}</b> registros`,
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
-      });
-      
-      // Enviar cada registro individualmente
-      let enviados = 0;
-      const promises = historico.map((registro, index) => {
-        return new Promise(resolve => {
-          setTimeout(async () => {
-            try {
-              await salvarNoGoogleSheets(registro);
-              enviados++;
-              
-              if (loadingSwal.isVisible()) {
-                Swal.update({
-                  html: `Enviando <b>${enviados}/${historico.length}</b> registros`
-                });
-              }
-              
-              resolve(true);
-            } catch (error) {
-              resolve(false);
+        return historicoAluguel.filter(item => {
+            // Filtro por operador
+            const operadorMatch = filtroOperador === "Todos" || item.operador === filtroOperador;
+            
+            // Filtro por mês/ano
+            let dataMatch = true;
+            if (filtroData) {
+                const dataItem = new Date(item.timestamp);
+                const mesItem = dataItem.getFullYear() + '-' + String(dataItem.getMonth() + 1).padStart(2, '0');
+                dataMatch = mesItem === filtroData;
             }
-          }, index * 500); // 500ms de intervalo entre requisições
+
+            return operadorMatch && dataMatch;
         });
-      });
-      
-      Promise.all(promises).then(results => {
-        const sucessos = results.filter(Boolean).length;
-        const falhas = historico.length - sucessos;
-        
-        Swal.fire({
-          title: 'Sincronização concluída!',
-          html: `Resultado:<br><br>
-                <b>${sucessos}</b> registros sincronizados com sucesso<br>
-                <b>${falhas}</b> registros não sincronizados`,
-          icon: sucessos === historico.length ? 'success' : falhas === historico.length ? 'error' : 'warning',
-          confirmButtonColor: '#3085d6'
-        });
-      });
     }
 
-    // Atualiza filtro ao carregar
-    atualizarFiltroOperadores();
-    mostrarHistorico();
+    // Função para aplicar filtros
+    function filtrarHistorico() {
+        atualizarHistorico();
+    }
+    
+    // Função para limpar filtros
+    function limparFiltros() {
+      document.getElementById('filtroOperador').value = 'Todos';
+      document.getElementById('filtroData').value = '';
+      filtrarHistorico();
+    }
+
+    // Função para limpar campos do formulário
+    function limparCampos() {
+      document.getElementById('operador').value = '';
+      document.getElementById('tipo').value = '';
+      document.getElementById('faltas').value = '';
+      document.getElementById('diasReais').value = '';
+      document.getElementById('faltasDesconto').value = '';
+      document.getElementById('descontoCaju').value = '';
+      document.getElementById('outrosDescontos').value = '';
+      document.getElementById('justificativa').value = '';
+      diasSelecionados = [];
+
+      document.getElementById('resultado').style.display = 'none';
+      document.getElementById('resultado').innerHTML = '';
+
+      document.getElementById('btnExportar').style.display = 'none';
+    }
+
+    // Função para exportar PDF do cálculo atual
+    function exportarPDF() {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+      
+      // Obtém os dados do resultado
+      const resultadoDiv = document.getElementById('resultado');
+      const titulo = resultadoDiv.querySelector('h4').textContent;
+      const nomeOperador = document.getElementById('operador').value || 'Operador';
+      const dataAtual = new Date().toLocaleDateString('pt-BR');
+      
+      // Configurações do documento
+      pdf.setProperties({
+          title: `Aluguel de Veículo - ${nomeOperador}`,
+          subject: 'Cálculo de Aluguel de Veículo',
+          author: 'Sistema de Cálculos',
+          keywords: 'aluguel, veículo, cálculo',
+          creator: 'Sistema de Cálculos'
+      });
+      
+      // Cabeçalho
+      pdf.setFontSize(16);
+      pdf.setTextColor(46, 134, 193);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(`Aluguel de Veículo - ${nomeOperador}`, 105, 15, { align: 'center' });
+      
+      pdf.setFontSize(12);
+      pdf.setTextColor(100, 100, 100);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(`Gerado em: ${dataAtual}`, 105, 22, { align: 'center' });
+      pdf.text(titulo, 105, 29, { align: 'center' });
+      
+      // Conteúdo
+      pdf.setFontSize(11);
+      pdf.setTextColor(0, 0, 0);
+      
+      let yPos = 40;
+      const lineHeight = 7;
+      const marginLeft = 15;
+      
+      // Extrai todos os parágrafos do resultado
+      const paragrafos = resultadoDiv.querySelectorAll('p, h5');
+      
+      paragrafos.forEach(p => {
+          // Divide o texto em linhas que cabem no PDF
+          const lines = pdf.splitTextToSize(p.textContent, 180);
+          
+          lines.forEach(line => {
+              pdf.text(line, marginLeft, yPos);
+              yPos += lineHeight;
+          });
+          
+          // Espaço extra após cada parágrafo
+          yPos += 2;
+      });
+      
+      // Adiciona linha horizontal
+      pdf.setDrawColor(200, 200, 200);
+      pdf.line(marginLeft, yPos + 5, 195, yPos + 5);
+      yPos += 10;
+      
+      // Adiciona rodapé
+      pdf.setFontSize(10);
+      pdf.setTextColor(150, 150, 150);
+      pdf.text('Documento gerado automaticamente pelo sistema de cálculos', 105, yPos, { align: 'center' });
+      
+      // Salva o PDF
+      pdf.save(`aluguel_veiculo_${nomeOperador.replace(' ', '_')}_${new Date().toISOString().slice(0, 10)}.pdf`);
+    }
+
+    // Função para exportar PDF do histórico completo
+    function exportarPDFCompleto() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm'
+      });
+      
+      // Usa todo o histórico, não apenas o filtrado
+      const historicoCompleto = [...historicoAluguel];
+
+      doc.setFontSize(16);
+      doc.text("Histórico Completo de Cálculos - Aluguel de Veículos", 105, 15, null, null, 'center');
+
+      doc.setFontSize(10);
+      
+      // Tabela de registros
+      const headers = [["ID", "Operador", "Tipo", "Dias Prev.", "Dias Trab.", "Faltas", "Total (R$)", "Data/Hora"]];
+      
+      const dataTabela = historicoCompleto.map(item => {
+        return [
+          item.id,
+          item.operador,
+          item.tipo_veiculo === "moto" ? "Moto" : "Carro",
+          item.dias_previstos,
+          item.dias_trabalhados,
+          item.faltas_extras,
+          parseFloat(item.valor_final).toFixed(2),
+          item.data
+        ];
+      });
+      
+      doc.autoTable({
+        head: headers,
+        body: dataTabela,
+        startY: 25,
+        theme: "grid",
+        headStyles: { 
+          fillColor: [46, 134, 193],
+          textColor: 255,
+          fontStyle: 'bold'
+        },
+        alternateRowStyles: {
+          fillColor: [240, 240, 240]
+        },
+        margin: { top: 25 },
+        styles: {
+          fontSize: 10,
+          cellPadding: 3,
+          overflow: 'linebreak'
+        },
+        columnStyles: {
+          6: { halign: 'right' }
+        }
+      });
+
+      doc.save(`historico_completo_aluguel_veiculos_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.pdf`);
+    }
+
+    // Função para editar item
+    function editarItem(id) {
+      const item = historicoAluguel.find(item => item.id === id);
+      if (!item) return;
+      
+      // Preenche o formulário com os dados do item
+      document.getElementById('operador').value = item.operador;
+      document.getElementById('tipo').value = item.tipo_veiculo;
+      
+      // Configura os dias selecionados
+      diasSelecionados = item.dias_selecionados.split(', ');
+      document.getElementById('faltas')._flatpickr.setDate(diasSelecionados);
+      
+      document.getElementById('diasReais').value = item.dias_trabalhados;
+      document.getElementById('faltasDesconto').value = item.faltas_extras;
+      document.getElementById('descontoCaju').value = item.desconto_caju;
+      document.getElementById('outrosDescontos').value = item.outros_descontos;
+      document.getElementById('justificativa').value = item.justificativa;
+      
+      // Define que estamos editando
+      editandoId = id;
+      
+      // Rola para o topo do formulário
+      window.scrollTo(0, 0);
+      
+      // Altera o botão calcular para indicar edição
+      document.querySelector('.btn-success').textContent = 'ATUALIZAR CÁLCULO';
+    }
+
+    // Função para excluir item do histórico
+    async function excluirItemHistorico(id) {
+      const confirmar = await mostrarPopupConfirmacao(
+        "Confirmar exclusão",
+        "Tem certeza que deseja excluir este registro permanentemente?",
+        { "ID": id, "Operador": historicoAluguel.find(item => item.id === id)?.operador }
+      );
+      
+      if (!confirmar) {
+        return;
+      }
+      
+      try {
+        // Remove do Supabase
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/aluguel_veiculos?id=eq.${id}`, {
+          method: "DELETE",
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Erro HTTP: ${response.status}`);
+        }
+        
+        // Remove do array local
+        historicoAluguel = historicoAluguel.filter(item => item.id !== id);
+        
+        // Salva no localStorage
+        localStorage.setItem('historicoAluguel', JSON.stringify(historicoAluguel));
+        
+        // Atualiza a interface
+        atualizarHistorico();
+        
+        mostrarPopupAutomatico('Excluído!', 'O registro foi removido com sucesso.', 'success');
+      } catch (error) {
+        console.error("Erro ao excluir:", error);
+        mostrarPopupAutomatico('Erro', 'Não foi possível excluir o registro.', 'error');
+      }
+    }
+
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', function() {
+      // Configura eventos de filtro
+      document.getElementById('filtroOperador').addEventListener('change', filtrarHistorico);
+      document.getElementById('filtroData').addEventListener('change', filtrarHistorico);
+      
+      // Carrega dados do Supabase (com fallback para localStorage)
+      carregarDados();
+    });
   </script>
 </body>
 </html>
