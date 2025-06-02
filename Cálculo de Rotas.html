@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>🚗 Calculadora de Rotas Avançada</title>
+  <title>🚗 ROTAS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Bibliotecas CSS -->
@@ -20,30 +20,29 @@
 
   <style>
     :root {
-      --cor-primaria: #2E86C1;
-      --cor-secundaria: #4CAF50;
-      --cor-perigo: #f44336;
-      --cor-aviso: #FFEB3B;
-      --cor-texto: #333;
-      --cor-fundo: #f8f8f8;
-      --cor-fundo-card: #fff;
-      --cor-borda: #ddd;
+      --primary-color: #37b61e; /* Verde principal */
+      --secondary-color: #2E86C1; /* Azul para ações secundárias */
+      --danger-color: #E74C3C; /* Vermelho para ações perigosas */
+      --warning-color: #FFC107; /* Amarelo para avisos */
+      --text-color: #333; /* Cor do texto principal */
+      --light-gray: #f5f5f5; /* Cinza claro para fundos */
+      --border-color: #ddd; /* Cor das bordas */
+      --background-color: #ffffff; /* Cor de fundo principal */
+      --card-background: #f7f7f7; /* Cor de fundo dos cards */
     }
 
-    .dark-mode {
-      --cor-texto: #f0f0f0;
-      --cor-fundo: #121212;
-      --cor-fundo-card: #1e1e1e;
-      --cor-borda: #444;
-    }
-
-    body, html {
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background-color: var(--cor-fundo);
-      color: var(--cor-texto);
-      transition: all 0.3s ease;
+    }
+    
+    body, html {
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.5;
     }
 
     #app-container {
@@ -53,11 +52,10 @@
 
     #sidebar {
       width: 300px;
-      background-color: var(--cor-fundo-card);
-      border-right: 1px solid var(--cor-borda);
+      background-color: var(--card-background);
+      border-right: 1px solid var(--border-color);
       padding: 15px;
       overflow-y: auto;
-      transition: all 0.3s ease;
     }
 
     #main-content {
@@ -72,89 +70,110 @@
       z-index: 1;
     }
 
-    .controls {
-      padding: 15px;
-      background-color: var(--cor-fundo-card);
-      border-bottom: 1px solid var(--cor-borda);
+    /* Cabeçalho e Títulos */
+    h1, h2, h3 {
+      color: var(--primary-color);
+      margin-bottom: 15px;
     }
 
-    .controls-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .control-group {
+    h2 {
+      font-size: 1.5rem;
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      gap: 10px;
     }
 
-    label {
-      font-weight: 600;
-      margin-bottom: 5px;
-      font-size: 14px;
-    }
-
-    input, select, textarea {
-      padding: 10px;
-      border: 1px solid var(--cor-borda);
-      border-radius: 6px;
-      font-size: 14px;
-      background-color: var(--cor-fundo-card);
-      color: var(--cor-texto);
+    /* Botões - Estilo Padronizado */
+    .main-buttons {
+      display: flex;
+      gap: 10px;
+      padding: 15px;
+      background-color: var(--card-background);
+      border-bottom: 1px solid var(--border-color);
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     button {
       border: none;
-      border-radius: 6px;
-      padding: 10px 15px;
-      font-weight: 600;
+      border-radius: 5px;
+      padding: 12px 20px;
+      font-weight: bold;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s;
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      font-size: 1rem;
+      white-space: nowrap;
     }
 
     .btn-primary {
-      background-color: var(--cor-primaria);
+      background-color: var(--primary-color);
       color: white;
     }
 
     .btn-success {
-      background-color: var(--cor-secundaria);
+      background-color: var(--secondary-color);
       color: white;
     }
 
     .btn-danger {
-      background-color: var(--cor-perigo);
+      background-color: var(--danger-color);
       color: white;
     }
 
     .btn-warning {
-      background-color: var(--cor-aviso);
+      background-color: var(--warning-color);
       color: #333;
     }
 
     button:hover {
       opacity: 0.9;
-      transform: scale(1.02);
+      transform: translateY(-1px);
     }
 
-    /* Botões pequenos para ações específicas */
+    /* Botões pequenos */
     .btn-small {
-      padding: 6px 8px !important;
-      font-size: 12px !important;
-      min-width: 30px;
-      height: 30px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      padding: 6px 10px !important;
+      font-size: 0.8rem !important;
     }
 
+    /* Formulários e Controles */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    input, select, textarea {
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      font-size: 1rem;
+      width: 100%;
+      background-color: white;
+    }
+
+    label {
+      font-weight: bold;
+      margin-bottom: 2px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Lista de Destinos */
     #destinos {
-      margin-top: 10px;
+      margin-top: 15px;
       list-style: none;
       padding: 0;
     }
@@ -162,36 +181,23 @@
     .destino {
       display: flex;
       align-items: center;
-      margin-bottom: 8px;
-      border: 1px solid var(--cor-borda);
+      margin-bottom: 10px;
+      border: 1px solid var(--border-color);
       padding: 10px;
-      background: var(--cor-fundo-card);
-      gap: 8px;
-      border-radius: 6px;
-      transition: all 0.2s ease;
+      background: white;
+      gap: 10px;
+      border-radius: 5px;
     }
 
     .destino input {
       flex: 1;
       padding: 8px;
-      border-radius: 6px;
-      border: 1px solid var(--cor-borda);
-    }
-
-    .destino button {
-      margin-left: 4px;
-    }
-
-    .destino .btn-warning {
-      background-color: #FFC107;
-    }
-
-    .destino .btn-danger {
-      background-color: #DC3545;
+      border-radius: 5px;
+      border: 1px solid var(--border-color);
     }
 
     .waypoint-marker {
-      background: var(--cor-primaria);
+      background: var(--primary-color);
       color: white;
       width: 24px;
       height: 24px;
@@ -204,30 +210,8 @@
       flex-shrink: 0;
     }
 
-    .resultados-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 15px;
-      padding: 15px;
-      background: var(--cor-fundo-card);
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    .output {
-      font-weight: bold;
-      font-size: 16px;
-    }
-
-    .calc-info {
-      font-size: 14px;
-      color: var(--cor-texto);
-      opacity: 0.8;
-    }
-
     .tag-identificacao {
-      background-color: var(--cor-aviso);
+      background-color: var(--warning-color);
       color: #000;
       padding: 4px 8px;
       font-size: 12px;
@@ -237,9 +221,39 @@
       flex-shrink: 0;
     }
 
+    /* Resultados e Informações */
+    .resultados-container {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      border: 1px solid var(--border-color);
+    }
+
+    .output {
+      font-weight: bold;
+      font-size: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .output i {
+      margin-right: 5px;
+    }
+
+    .calc-info {
+      font-size: 0.9rem;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    /* Abas */
     .tab-container {
       display: flex;
-      border-bottom: 1px solid var(--cor-borda);
+      border-bottom: 1px solid var(--border-color);
       margin-bottom: 15px;
     }
 
@@ -247,11 +261,16 @@
       padding: 10px 15px;
       cursor: pointer;
       border-bottom: 2px solid transparent;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
 
     .tab.active {
-      border-bottom: 2px solid var(--cor-primaria);
+      border-bottom: 2px solid var(--primary-color);
       font-weight: bold;
+      color: var(--primary-color);
     }
 
     .tab-content {
@@ -262,33 +281,34 @@
       display: block;
     }
 
+    /* Etapas da Rota */
     .route-steps {
       margin-top: 15px;
       max-height: 300px;
       overflow-y: auto;
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      border: 1px solid var(--border-color);
     }
 
     .step-item {
       padding: 8px 0;
-      border-bottom: 1px dashed var(--cor-borda);
+      border-bottom: 1px dashed var(--border-color);
       display: flex;
       justify-content: space-between;
     }
 
     .step-distance {
-      color: var(--cor-primaria);
+      color: var(--primary-color);
       font-weight: bold;
     }
 
     .step-duration {
-      color: var(--cor-secundaria);
+      color: var(--secondary-color);
     }
 
-    .chart-container {
-      margin-top: 20px;
-      height: 200px;
-    }
-
+    /* Seletor de Veículos */
     .vehicle-selector {
       display: flex;
       gap: 10px;
@@ -299,50 +319,55 @@
       flex: 1;
       text-align: center;
       padding: 10px;
-      border: 1px solid var(--cor-borda);
+      border: 1px solid var(--border-color);
       border-radius: 8px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s;
+      background: white;
     }
 
     .vehicle-option.selected {
-      border-color: var(--cor-primaria);
-      background-color: rgba(46, 134, 193, 0.1);
+      border-color: var(--primary-color);
+      background-color: rgba(55, 182, 30, 0.1);
     }
 
     .vehicle-icon {
       font-size: 24px;
       margin-bottom: 5px;
+      color: var(--primary-color);
     }
 
-    .toll-cost-input {
-      margin-top: 15px;
-    }
-
-    .time-picker {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
+    /* Histórico */
     .history-item {
       padding: 10px;
       margin-bottom: 10px;
-      border: 1px solid var(--cor-borda);
+      border: 1px solid var(--border-color);
       border-radius: 6px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s;
+      background: white;
     }
 
     .history-item:hover {
-      background-color: rgba(46, 134, 193, 0.1);
+      background-color: rgba(55, 182, 30, 0.1);
     }
 
     .history-date {
-      font-size: 12px;
+      font-size: 0.8rem;
       color: #777;
     }
 
+    /* Gráfico */
+    .chart-container {
+      margin-top: 20px;
+      height: 200px;
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      border: 1px solid var(--border-color);
+    }
+
+    /* Responsividade */
     @media (max-width: 768px) {
       #app-container {
         flex-direction: column;
@@ -351,7 +376,19 @@
       #sidebar {
         width: 100%;
         border-right: none;
-        border-bottom: 1px solid var(--cor-borda);
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .main-buttons {
+        flex-direction: column;
+      }
+      
+      .main-buttons button {
+        width: 100%;
+      }
+
+      .controls-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -362,9 +399,9 @@
       <h2><i class="fas fa-route"></i> Calculadora de Rotas</h2>
       
       <div class="tab-container">
-        <div class="tab active" onclick="switchTab('planning')">Planejamento</div>
-        <div class="tab" onclick="switchTab('history')">Histórico</div>
-        <div class="tab" onclick="switchTab('settings')">Configurações</div>
+        <div class="tab active" onclick="switchTab('planning')"><i class="fas fa-map-marked-alt"></i> Planejamento</div>
+        <div class="tab" onclick="switchTab('history')"><i class="fas fa-history"></i> Histórico</div>
+        <div class="tab" onclick="switchTab('settings')"><i class="fas fa-cog"></i> Configurações</div>
       </div>
 
       <div id="planning-tab" class="tab-content active">
@@ -389,7 +426,7 @@
             <label><i class="fas fa-users"></i> Segundo Operador:</label>
             <select id="segundoOperador" onchange="adicionarPorSegundoOperador()">
               <option value="">Selecione...</option>
-            <option value="Caio José|Rua Davi Francisco Prazeres, 139 - Rio Caveiras, Biguaçu - SC, 88160-000">Caio José</option>
+              <option value="Caio José|Rua Davi Francisco Prazeres, 139 - Rio Caveiras, Biguaçu - SC, 88160-000">Caio José</option>
               <option value="Leonardo Vaz|Rua Silvonei Estacino Patrício, 109 - AririuPalhoça - SC, 88135-029
 ">Leonardo Vaz</option>
               <option value="Daniel Rodrigo|Rua Carlos Alberto Lauermann Nunes, 265 - Olaria, Canoas - RS, 92035-012">Daniel Rodrigo</option>
@@ -416,10 +453,6 @@
             <div class="vehicle-icon"><i class="fas fa-car"></i></div>
             <div>Carro</div>
           </div>
-          <div class="vehicle-option" onclick="selectVehicle('truck')">
-            <div class="vehicle-icon"><i class="fas fa-truck"></i></div>
-            <div>Caminhão</div>
-          </div>
           <div class="vehicle-option" onclick="selectVehicle('motorcycle')">
             <div class="vehicle-icon"><i class="fas fa-motorcycle"></i></div>
             <div>Moto</div>
@@ -429,27 +462,14 @@
         <div class="controls-grid">
           <div class="control-group">
             <label><i class="fas fa-gas-pump"></i> Preço Gasolina (R$):</label>
-            <input type="number" id="valor" value="6.46" step="0.01" min="0">
+            <input type="number" id="valor" value="6.46" step="0.01" min="0" readonly>
           </div>
 
           <div class="control-group">
             <label><i class="fas fa-tag"></i> Custo Pedágio (R$):</label>
             <input type="number" id="toll-cost" value="0" step="0.01" min="0">
           </div>
-
-          <div class="control-group">
-            <label><i class="fas fa-clock"></i> Horário Saída:</label>
-            <div class="time-picker">
-              <input type="time" id="departure-time" value="08:00">
-              <button class="btn-primary btn-small" onclick="updateArrivalTime()"><i class="fas fa-sync-alt"></i></button>
-            </div>
-          </div>
         </div>
-
-        <button class="btn-primary" onclick="adicionarDestino()"><i class="fas fa-plus"></i> Adicionar Parada</button>
-        <button class="btn-success" onclick="calcularRota()"><i class="fas fa-calculator"></i> Calcular Rota</button>
-        <button class="btn-warning" onclick="otimizarRota()"><i class="fas fa-random"></i> Otimizar Rota</button>
-        <button class="btn-danger" onclick="resetarTudo()"><i class="fas fa-trash"></i> Limpar Tudo</button>
 
         <ul id="destinos"></ul>
 
@@ -459,7 +479,6 @@
             <div class="calc-info" id="calculo-info"></div>
             <div id="arrival-time"></div>
           </div>
-          <button class="btn-success" onclick="salvarEmArquivo()"><i class="fas fa-save"></i> Salvar</button>
         </div>
 
         <div class="chart-container">
@@ -477,33 +496,45 @@
         </div>
         <div id="historicoRotas"></div>
       </div>
-
+      
       <div id="settings-tab" class="tab-content">
         <h3><i class="fas fa-cog"></i> Configurações</h3>
-        <div class="control-group">
-          <label><i class="fas fa-paint-brush"></i> Tema:</label>
-          <select id="theme-selector" onchange="toggleDarkMode()">
-            <option value="light">Claro</option>
-            <option value="dark">Escuro</option>
-          </select>
-        </div>
+        
         <div class="control-group">
           <label><i class="fas fa-tachometer-alt"></i> Consumo (km/l):</label>
           <input type="number" id="fuel-efficiency" value="10" min="1" step="0.1">
         </div>
-        <button class="btn-primary" onclick="saveSettings()"><i class="fas fa-save"></i> Salvar Configurações</button>
+
+        <div class="control-group">
+          <label><i class="fas fa-gas-pump"></i> Valor da Gasolina (R$/litro):</label>
+          <input type="number" id="gas-price" value="6.46" min="0.01" step="0.01">
+        </div>
+
+        <button class="btn-primary" onclick="saveSettings()">
+          <i class="fas fa-save"></i> Salvar Configurações
+        </button>
       </div>
     </div>
 
     <div id="main-content">
       <div id="map"></div>
+      
+      <!-- Botões principais abaixo do mapa -->
+      <div class="main-buttons">
+        <button class="btn-primary" onclick="adicionarDestino()"><i class="fas fa-plus"></i> Adicionar Parada</button>
+        <button class="btn-success" onclick="calcularRota()"><i class="fas fa-calculator"></i> Calcular Rota</button>
+        <button class="btn-warning" onclick="otimizarRota()"><i class="fas fa-random"></i> Otimizar Rota</button>
+        <button class="btn-danger" onclick="resetarTudo()"><i class="fas fa-trash"></i> Limpar Tudo</button>
+        <button class="btn-success" onclick="salvarEmArquivo()"><i class="fas fa-save"></i> Salvar</button>
+      </div>
+
       <div class="route-steps" id="route-steps"></div>
     </div>
   </div>
 
   <script>
     // Inicialização do mapa
-    const map = L.map('map').setView([-28.2350, -52.9253], 7);
+    const map = L.map('map').setView([-28.500, -53.9000], 7);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap'
     }).addTo(map);
@@ -533,14 +564,14 @@
             label: 'Custos (R$)',
             data: [0, 0, 0],
             backgroundColor: [
-              'rgba(75, 192, 192, 0.6)',
-              'rgba(255, 206, 86, 0.6)',
-              'rgba(54, 162, 235, 0.6)'
+              'rgba(55, 182, 30, 0.6)', // Verde
+              'rgba(255, 206, 86, 0.6)', // Amarelo
+              'rgba(46, 134, 193, 0.6)'  // Azul
             ],
             borderColor: [
-              'rgba(75, 192, 192, 1)',
+              'rgba(55, 182, 30, 1)',
               'rgba(255, 206, 86, 1)',
-              'rgba(54, 162, 235, 1)'
+              'rgba(46, 134, 193, 1)'
             ],
             borderWidth: 1
           }]
@@ -562,24 +593,23 @@
     }
 
     function loadSettings() {
-      const savedTheme = localStorage.getItem('theme') || 'light';
-      document.getElementById('theme-selector').value = savedTheme;
-      if (savedTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-      }
-
       const savedEfficiency = localStorage.getItem('fuelEfficiency') || 10;
       document.getElementById('fuel-efficiency').value = savedEfficiency;
       fuelEfficiency = parseFloat(savedEfficiency);
+
+      const savedGasPrice = localStorage.getItem('gasPrice') || 6.46;
+      document.getElementById('gas-price').value = savedGasPrice;
+      document.getElementById('valor').value = savedGasPrice;
     }
 
     function saveSettings() {
-      const theme = document.getElementById('theme-selector').value;
-      localStorage.setItem('theme', theme);
-      
       const efficiency = document.getElementById('fuel-efficiency').value;
       localStorage.setItem('fuelEfficiency', efficiency);
       fuelEfficiency = parseFloat(efficiency);
+
+      const gasPrice = document.getElementById('gas-price').value;
+      localStorage.setItem('gasPrice', gasPrice);
+      document.getElementById('valor').value = gasPrice;
 
       Toastify({
         text: "Configurações salvas com sucesso!",
@@ -587,17 +617,8 @@
         close: true,
         gravity: "top",
         position: "right",
-        backgroundColor: "#4CAF50",
+        backgroundColor: "#37b61e",
       }).showToast();
-    }
-
-    function toggleDarkMode() {
-      const theme = document.getElementById('theme-selector').value;
-      if (theme === 'dark') {
-        document.body.classList.add('dark-mode');
-      } else {
-        document.body.classList.remove('dark-mode');
-      }
     }
 
     function selectVehicle(vehicle) {
@@ -609,9 +630,6 @@
       switch(vehicle) {
         case 'car':
           fuelEfficiency = 10;
-          break;
-        case 'truck':
-          fuelEfficiency = 5;
           break;
         case 'motorcycle':
           fuelEfficiency = 15;
@@ -790,7 +808,7 @@
         close: true,
         gravity: "top",
         position: "right",
-        backgroundColor: "#2196F3",
+        backgroundColor: "#37b61e",
       }).showToast();
       
       // Simula um atraso para a "otimização"
@@ -814,7 +832,7 @@
           close: true,
           gravity: "top",
           position: "right",
-          backgroundColor: "#4CAF50",
+          backgroundColor: "#37b61e",
         }).showToast();
       }, 2000);
     }
@@ -879,7 +897,7 @@
         
         // Desenha a rota no mapa
         routeLayer = L.polyline(routeCoords.map(c => L.latLng(c[0], c[1])), {
-          color: '#2E86C1',
+          color: '#37b61e',
           weight: 5,
           opacity: 0.7
         }).addTo(map);
@@ -896,13 +914,13 @@
         
         // Atualiza a interface
         document.getElementById('resultado').innerHTML = `
-          <i class="fas fa-road"></i> Distância: <strong>${distanciaKm} km</strong> | 
-          <i class="fas fa-money-bill-wave"></i> Custo: <strong>R$ ${custoTotal}</strong> | 
-          <i class="fas fa-clock"></i> Tempo: <strong>${formatarTempo(tempoMinutos)}</strong>
+          <span><i class="fas fa-road"></i> <strong>${distanciaKm} km</strong></span>
+          <span><i class="fas fa-money-bill-wave"></i> <strong>R$ ${custoTotal}</strong></span>
+          <span><i class="fas fa-clock"></i> <strong>${formatarTempo(tempoMinutos)}</strong></span>
         `;
         
         document.getElementById('calculo-info').innerHTML = `
-          <div><i class="fas fa-gas-pump"></i> Combustível: (${distanciaKm} km / ${fuelEfficiency} km/l) * R$ ${valorCombustivel.toFixed(2)} = R$ ${custoCombustivel}</div>
+          <div><i class="fas fa-gas-pump"></i> Combustível: (${distanciaKm} km / ${fuelEfficiency} km/l) × R$ ${valorCombustivel.toFixed(2)} = R$ ${custoCombustivel}</div>
           <div><i class="fas fa-tag"></i> Pedágio: R$ ${custoPedagio.toFixed(2)}</div>
         `;
         
@@ -925,11 +943,11 @@
 
     function getMarkerColor(element) {
       const tag = element.querySelector('.tag-identificacao')?.innerText;
-      if (tag?.includes('Origem')) return '#4CAF50'; // Verde
+      if (tag?.includes('Origem')) return '#37b61e'; // Verde
       if (tag?.includes('Sede')) return '#9C27B0';   // Roxo
       if (tag?.includes('Segundo Operador')) return '#FF9800'; // Laranja
-      if (tag?.includes('Retorno')) return '#4CAF50'; // Verde
-      return '#2196F3'; // Azul padrão
+      if (tag?.includes('Retorno')) return '#37b61e'; // Verde
+      return '#2E86C1'; // Azul padrão
     }
 
     function mostrarEtapasRota(legs) {
@@ -1041,7 +1059,7 @@
         historyItem.innerHTML = `
           <div><strong>${item.operador}</strong> ${item.segundoOperador ? ' + ' + item.segundoOperador : ''}</div>
           <div class="history-date">${item.data}</div>
-          <div><i class="fas fa-${item.veiculo === 'truck' ? 'truck' : item.veiculo === 'motorcycle' ? 'motorcycle' : 'car'}"></i> ${item.distancia} km | R$ ${item.custo} | ${item.tempo} min</div>
+          <div><i class="fas fa-${item.veiculo === 'motorcycle' ? 'motorcycle' : 'car'}"></i> ${item.distancia} km | R$ ${item.custo} | ${item.tempo} min</div>
         `;
         lista.appendChild(historyItem);
       });
@@ -1093,7 +1111,7 @@
         close: true,
         gravity: "top",
         position: "right",
-        backgroundColor: "#2196F3",
+        backgroundColor: "#37b61e",
       }).showToast();
     }
 
@@ -1131,34 +1149,40 @@
       
       // Título
       doc.setFontSize(20);
+      doc.setTextColor(55, 182, 30);
       doc.text("Relatório de Rotas - AFT", 105, 15, null, null, 'center');
       doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
       doc.text(`Emitido em: ${dataAtual} às ${horarioAtual}`, 105, 22, null, null, 'center');
       
       // Informações básicas
       let y = 35;
       doc.setFontSize(14);
+      doc.setTextColor(55, 182, 30);
       doc.text("Informações da Rota", 14, y);
       y += 10;
       
       doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
       doc.text(`Operador: ${operadorNome}`, 20, y);
       y += 7;
       doc.text(`Segundo Operador: ${segundoOperadorNome}`, 20, y);
       y += 7;
       doc.text(`Sede: ${sedeNome}`, 20, y);
       y += 7;
-      doc.text(`Veículo: ${currentVehicle === 'car' ? 'Carro' : currentVehicle === 'truck' ? 'Caminhão' : 'Moto'}`, 20, y);
+      doc.text(`Veículo: ${currentVehicle === 'car' ? 'Carro' : 'Moto'}`, 20, y);
       y += 7;
       doc.text(`Consumo: ${fuelEfficiency} km/l`, 20, y);
       y += 10;
       
       // Itinerário
       doc.setFontSize(14);
+      doc.setTextColor(55, 182, 30);
       doc.text("Itinerário", 14, y);
       y += 10;
       
       doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
       destinos.forEach(destino => {
         if (y > 280) {
           doc.addPage();
@@ -1171,10 +1195,12 @@
       // Resumo
       y += 10;
       doc.setFontSize(14);
+      doc.setTextColor(55, 182, 30);
       doc.text("Resumo da Rota", 14, y);
       y += 10;
       
       doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
       doc.text(resumoRota, 20, y);
       y += 7;
       if (chegada) {
@@ -1194,10 +1220,12 @@
       // Adiciona o gráfico (simplificado)
       y += 15;
       doc.setFontSize(14);
+      doc.setTextColor(55, 182, 30);
       doc.text("Distribuição de Custos", 14, y);
       y += 10;
       
       doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
       doc.text("Combustível: " + costChart.data.datasets[0].data[0], 20, y);
       y += 7;
       doc.text("Pedágio: " + costChart.data.datasets[0].data[1], 20, y);
@@ -1206,6 +1234,7 @@
       
       // Rodapé
       doc.setFontSize(8);
+      doc.setTextColor(100, 100, 100);
       doc.text("Sistema de Gestão de Rotas - AFT Logística", 105, 285, null, null, 'center');
       
       // Salva o PDF
@@ -1217,7 +1246,7 @@
         close: true,
         gravity: "top",
         position: "right",
-        backgroundColor: "#4CAF50",
+        backgroundColor: "#37b61e",
       }).showToast();
     }
   </script>
