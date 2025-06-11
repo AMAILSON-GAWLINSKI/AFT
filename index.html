@@ -174,14 +174,14 @@
       }
 
       // Nível 5: Acesso total
-      else if (
-        (user === 'amailson' && pass === '1234') ||
-        (user === 'Daniel' && pass === 'Daniel@1978') ||
-        (user === 'Financeiro' && pass === 'Fin@1978') ||
-        (user === 'Ricardo' && pass === 'Ricardo@1978')
-      ) {
-        level = 5;
-      }
+else if (
+  (user === 'amailson' && pass === '1234') ||
+  (user === 'Daniel' && pass === 'Daniel@1978') ||
+  (user === 'Financeiro' && pass === 'Fin@1978') || // ← Usuário Financeiro funcional
+  (user === 'Ricardo' && pass === 'Ricardo@1978')
+) {
+  level = 5;
+}
 
       // Erro de login
       else {
