@@ -455,6 +455,7 @@
           <label>❌ Erro:</label>
           <select id="erro" required>
             <option value="SEM ERROS">SEM ERROS</option>
+            <option value="Não sincronizou no final do dia">Não sincronizou no final do dia</option>            
             <option value="Não marcou corretamente o horario que realizou o serviço">Não marcou corretamente o horario que realizou o serviço</option>            
             <option value="Cancelou rota sem justificativa">Cancelou rota sem justificativa</option>
             <option value="Não avisou o atraso com 30 min. De antecedência">Não avisou o atraso com 30 min. De antecedência</option>
@@ -594,6 +595,7 @@
 
     // Tabela de deduções (valores em reais)
     const deducoes = {
+      "Não sincronizou no final do dia": 25,
       "Não marcou corretamente o horario que realizou o serviço": 25,
       "Cancelou rota sem justificativa": 150,
       "Não avisou o atraso com 30 min. De antecedência": 25,
