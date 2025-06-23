@@ -1013,6 +1013,9 @@
       const hoje = new Date();
       const mesAtual = hoje.getFullYear() + '-' + String(hoje.getMonth() + 1).padStart(2, '0');
       document.getElementById('filtroData').value = mesAtual;
+      
+      // Aplica o filtro automaticamente
+      filtrarErros();
     }
 
     // Função para sincronizar itens locais - ATUALIZADO para usar a nova tabela
@@ -1287,7 +1290,12 @@
     // Limpa os filtros
     function limparFiltros() {
       document.getElementById("filtroOperador").value = "Todos";
-      document.getElementById("filtroData").value = "";
+      
+      // Define o mês atual como padrão ao limpar filtros
+      const hoje = new Date();
+      const mesAtual = hoje.getFullYear() + '-' + String(hoje.getMonth() + 1).padStart(2, '0');
+      document.getElementById("filtroData").value = mesAtual;
+      
       filtrarErros();
     }
 
@@ -1302,17 +1310,17 @@
       const filtroOperador = document.getElementById('filtroOperador').value;
       const filtroData = document.getElementById('filtroData').value;
       
+      // Se não houver filtro de data definido, usa o mês atual
+      const mesFiltro = filtroData || new Date().toISOString().substring(0, 7);
+      
       return registros.filter(item => {
         // Filtro por operador
         const operadorMatch = filtroOperador === "Todos" || item.operador === filtroOperador;
         
         // Filtro por mês/ano
-        let dataMatch = true;
-        if (filtroData) {
-          const dataItem = new Date(item.data);
-          const mesItem = dataItem.getFullYear() + '-' + String(dataItem.getMonth() + 1).padStart(2, '0');
-          dataMatch = mesItem === filtroData;
-        }
+        const dataItem = new Date(item.data);
+        const mesItem = dataItem.getFullYear() + '-' + String(dataItem.getMonth() + 1).padStart(2, '0');
+        const dataMatch = mesItem === mesFiltro;
 
         return operadorMatch && dataMatch;
       });
@@ -1387,7 +1395,7 @@
       // Se houver filtro por data, acrescenta o resumo dos erros cometidos
       const filtroData = document.getElementById("filtroData").value;
       
-      if (filtroData) {
+      if (filtroData || true) { // Sempre mostra o resumo de erros, mesmo sem filtro específico
         const resumoErros = {};
         
         listaFiltrada.forEach(r => {
