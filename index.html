@@ -126,10 +126,6 @@
     const maxAttempts = 2;
     
     function sendEmailNotification(username) {
-      // Esta função simula o envio de um e-mail
-      // Na prática, você precisaria implementar um backend para enviar e-mails reais
-      
-      // Simulação no console
       console.log(`E-mail de notificação enviado para: suporte.gawlinski@gmail.com`);
       console.log(`Assunto: Tentativa de acesso falha ao sistema`);
       console.log(`Conteúdo: O usuário ${username} tentou acessar o sistema e errou a senha ${maxAttempts} vezes.`);
@@ -145,7 +141,6 @@
       if (user === 'Operador' && pass === 'Claudia') {
         level = 2;
       }
-
       // Nível 3: Visualiza erro de operador + pode adicionar itens ao cálculo
       else if (
         (user === 'Luana' && pass === 'Luana@1978') ||
@@ -153,9 +148,7 @@
       ) {
         level = 3;
       }
-
       // Nível 5: Acesso total
-      // ATENÇÃO: Débora foi removida do sistema em 13/08/2025 conforme solicitação
       else if (
         (user === 'amailson' && pass === '1234') ||
         (user === 'Daniel' && pass === 'Daniel@1978') ||
@@ -164,7 +157,6 @@
       ) {
         level = 5;
       }
-
       // Erro de login
       else {
         failedAttempts++;
@@ -172,26 +164,26 @@
         
         if (failedAttempts >= maxAttempts) {
           sendEmailNotification(user);
-          failedAttempts = 0; // Reset após enviar o e-mail
+          failedAttempts = 0;
           document.getElementById('errorMsg').innerText += ' Foi notificado o suporte sobre tentativas falhas.';
         }
         return;
       }
 
-      // Resetar tentativas falhas após login bem-sucedido
+      // Login bem-sucedido
       failedAttempts = 0;
-      
-      // Armazenar permissão e redirecionar
       localStorage.setItem('userPermissionLevel', level);
+      
+      // Verificação adicional antes do redirecionamento
+      console.log(`Login bem-sucedido! Redirecionando para sistema.html...`);
       window.location.href = 'sistema.html';
     }
 
     // Mostrar/ocultar senha
-    document.getElementById('togglePassword').addEventListener('click', function () {
+    document.getElementById('togglePassword').addEventListener('click', function() {
       const passwordInput = document.getElementById('password');
       const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
       passwordInput.setAttribute('type', type);
-
       this.innerHTML = type === 'text'
         ? '<i class="fa-solid fa-eye"></i>'
         : '<i class="fa-solid fa-eye-slash"></i>';
