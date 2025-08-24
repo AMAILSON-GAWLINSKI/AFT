@@ -615,7 +615,7 @@
   <script>
     // Configurações do Supabase
     const SUPABASE_URL = "https://nsfliimhsokyzhacnfdg.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhbmFzZSIsInJlZiI6Im5zZmxpaW1oc29reXpoYWNuZmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNDg3MzQsImV4cCI6MjA2MjkyNDczNH0.QqosDhPG2xK16rAfitDiW837GMIL_dh5lmDwg8cOn_8";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zZmxpaW1oc29reXpoYWNuZmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNDg3MzQsImV4cCI6MjA2MjkyNDczNH0.QqosDhPG2xK16rAfitDiW837GMIL_dh5lmDwg8cOn_8";
     const { jsPDF } = window.jspdf;
     
     // Variáveis globais
@@ -725,6 +725,116 @@
         .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
+    // Função para mostrar popup de confirmação
+    function mostrarPopupConfirmacao(titulo, mensagem, detalhes = null) {
+      return new Promise((resolve) => {
+        const popup = document.createElement('div');
+        popup.className = 'popup-overlay';
+        
+        let detalhesHTML = '';
+        if (detalhes) {
+          detalhesHTML = `
+            <div class="popup-details">
+              ${Object.entries(detalhes).map(([key, value]) => `
+                <div class="popup-details-item"><strong>${key}:</strong> ${value}</div>
+              `).join('')}
+            </div>
+          `;
+        }
+        
+        popup.innerHTML = `
+          <div class="popup-container popup-warning">
+            <div class="popup-icon">⚠️</div>
+            <div class="popup-title">${titulo}</div>
+            <div class="popup-message">${mensagem}</div>
+            ${detalhesHTML}
+            <div class="popup-buttons">
+              <button class="popup-button popup-confirm" id="popupConfirm">Sim</button>
+              <button class="popup-button popup-cancel" id="popupCancel">Não</button>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(popup);
+        
+        document.getElementById('popupConfirm').addEventListener('click', () => {
+          document.body.removeChild(popup);
+          resolve(true);
+        });
+        
+        document.getElementById('popupCancel').addEventListener('click', () => {
+          document.body.removeChild(popup);
+          resolve(false);
+        });
+      });
+    }
+
+    // Função para mostrar popup de informação
+    function mostrarPopupInformacao(titulo, mensagem, tipo = 'info') {
+      return new Promise((resolve) => {
+        const popup = document.createElement('div');
+        popup.className = 'popup-overlay';
+        
+        const icon = tipo === 'success' ? '✅' : tipo === 'error' ? '❌' : 'ℹ️';
+        const popupClass = tipo === 'success' ? 'popup-success' : tipo === 'error' ? 'popup-error' : '';
+        
+        popup.innerHTML = `
+          <div class="popup-container ${popupClass}">
+            <div class="popup-icon">${icon}</div>
+            <div class="popup-title">${titulo}</div>
+            <div class="popup-message">${mensagem}</div>
+            <div class="popup-buttons">
+              <button class="popup-button popup-ok" id="popupOK">OK</button>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(popup);
+        
+        document.getElementById('popupOK').addEventListener('click', () => {
+          document.body.removeChild(popup);
+          resolve(true);
+        });
+      });
+    }
+
+    // Função para mostrar popup que fecha automaticamente
+    function mostrarPopupAutomatico(titulo, mensagem, tipo = 'info') {
+      const popupDiv = document.createElement('div');
+      popupDiv.className = 'popup-overlay';
+      
+      const icon = tipo === 'success' ? '✅' : tipo === 'error' ? '❌' : 'ℹ️';
+      const popupClass = tipo === 'success' ? 'popup-success' : 
+                        tipo === 'error' ? 'popup-error' : 
+                        tipo === 'warning' ? 'popup-warning' : '';
+      
+      popupDiv.innerHTML = `
+        <div class="popup-container ${popupClass}">
+          <div class="popup-icon">${icon}</div>
+          <div class="popup-title">${titulo}</div>
+          <div class="popup-message">${mensagem}</div>
+          <div class="popup-buttons">
+            <button class="popup-button popup-ok" id="popupAutoClose">OK</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(popupDiv);
+      
+      // Fecha automaticamente após 2 segundos
+      const timer = setTimeout(() => {
+        if (document.body.contains(popupDiv)) {
+          document.body.removeChild(popupDiv);
+        }
+      }, 2000);
+      
+      // Fecha ao clicar no botão
+      document.getElementById('popupAutoClose').addEventListener('click', () => {
+        clearTimeout(timer);
+        document.body.removeChild(popupDiv);
+      });
+    }
+
     // Função para editar um registro no Supabase
     async function editarRegistroSupabase(id, dadosAtualizados) {
       try {
@@ -762,17 +872,17 @@
       
       // Verificações de campos obrigatórios
       if (!operador) { 
-        mostrarPopup('Atenção', 'Por favor, selecione um operador.', 'error');
+        mostrarPopupAutomatico('Atenção', 'Por favor, selecione um operador.', 'error');
         return; 
       }
       
       if (!tipo) { 
-        mostrarPopup('Atenção', 'Por favor, selecione o tipo de veículo.', 'error');
+        mostrarPopupAutomatico('Atenção', 'Por favor, selecione o tipo de veículo.', 'error');
         return; 
       }
       
       if (diasSelecionados.length === 0) { 
-        mostrarPopup('Atenção', 'Por favor, selecione os dias previstos.', 'error');
+        mostrarPopupAutomatico('Atenção', 'Por favor, selecione os dias previstos.', 'error');
         return; 
       }
       
@@ -790,7 +900,7 @@
       }
       
       if ((faltasExtras > 0 || descontoCaju > 0 || outrosDescontos > 0) && justificativa.trim() === "") {
-        mostrarPopup('Atenção', 'Por favor, justifique os descontos aplicados.', 'error');
+        mostrarPopupAutomatico('Atenção', 'Por favor, justifique os descontos aplicados.', 'error');
         return;
       }
 
@@ -1062,87 +1172,6 @@
       }
     }
 
-    // Função para mostrar popup que fecha automaticamente
-    function mostrarPopupAutomatico(titulo, mensagem, tipo = 'info') {
-      const popupDiv = document.createElement('div');
-      popupDiv.className = 'popup-overlay';
-      
-      const icon = tipo === 'success' ? '✅' : tipo === 'error' ? '❌' : 'ℹ️';
-      const popupClass = tipo === 'success' ? 'popup-success' : 
-                        tipo === 'error' ? 'popup-error' : 
-                        tipo === 'warning' ? 'popup-warning' : '';
-      
-      popupDiv.innerHTML = `
-        <div class="popup-container ${popupClass}">
-          <div class="popup-icon">${icon}</div>
-          <div class="popup-title">${titulo}</div>
-          <div class="popup-message">${mensagem}</div>
-          <div class="popup-buttons">
-            <button class="popup-button popup-ok" id="popupAutoClose">OK</button>
-          </div>
-        </div>
-      `;
-      
-      document.body.appendChild(popupDiv);
-      
-      // Fecha automaticamente após 2 segundos
-      const timer = setTimeout(() => {
-        if (document.body.contains(popupDiv)) {
-          document.body.removeChild(popupDiv);
-        }
-      }, 2000);
-      
-      // Fecha ao clicar no botão
-      document.getElementById('popupAutoClose').addEventListener('click', () => {
-        clearTimeout(timer);
-        document.body.removeChild(popupDiv);
-      });
-    }
-
-    // Função para mostrar popup de confirmação
-    function mostrarPopupConfirmacao(titulo, mensagem, detalhes = null) {
-      return new Promise((resolve) => {
-        const popup = document.createElement('div');
-        popup.className = 'popup-overlay';
-        
-        let detalhesHTML = '';
-        if (detalhes) {
-          detalhesHTML = `
-            <div class="popup-details">
-              ${Object.entries(detalhes).map(([key, value]) => `
-                <div class="popup-details-item"><strong>${key}:</strong> ${value}</div>
-              `).join('')}
-            </div>
-          `;
-        }
-        
-        popup.innerHTML = `
-          <div class="popup-container popup-warning">
-            <div class="popup-icon">⚠️</div>
-            <div class="popup-title">${titulo}</div>
-            <div class="popup-message">${mensagem}</div>
-            ${detalhesHTML}
-            <div class="popup-buttons">
-              <button class="popup-button popup-confirm" id="popupConfirm">Sim</button>
-              <button class="popup-button popup-cancel" id="popupCancel">Não</button>
-            </div>
-          </div>
-        `;
-        
-        document.body.appendChild(popup);
-        
-        document.getElementById('popupConfirm').addEventListener('click', () => {
-          document.body.removeChild(popup);
-          resolve(true);
-        });
-        
-        document.getElementById('popupCancel').addEventListener('click', () => {
-          document.body.removeChild(popup);
-          resolve(false);
-        });
-      });
-    }
-
     // Função para atualizar o histórico na tela
     function atualizarHistorico() {
       const tbody = document.querySelector("#tabelaHistorico tbody");
@@ -1342,7 +1371,7 @@
       const paragrafos = resultadoDiv.querySelectorAll('p, h5');
       
       paragrafos.forEach(p => {
-          // Divide o texto em linhas que cabem no PDF
+          // Divide o texto em linhas que caben no PDF
           const lines = pdf.splitTextToSize(p.textContent, 180);
           
           lines.forEach(line => {
