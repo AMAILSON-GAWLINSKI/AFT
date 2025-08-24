@@ -829,7 +829,7 @@
           ` : ''}
           
           <p style="margin-top: 10px;">
-            <strong style="color: #28a745; font-size: 1.1em;">VALOR LÍQUIDO:</strong> R$ ${valorFinal.toFixed(2)}
+            <strong style="color: #28a745; font-size: 1.1em;">VALOR LÍQUido:</strong> R$ ${valorFinal.toFixed(2)}
           </p>
         </div>
         
@@ -1062,7 +1062,7 @@
       const popupDiv = document.createElement('div');
       popupDiv.className = 'popup-overlay';
       
-      const icon = tipo === 'success' ? '✅' : tipo === 'error' ? '❌' : 'ℹ️';
+      const icon = tipo === 'success' => '✅' : tipo === 'error' ? '❌' : 'ℹ️';
       const popupClass = tipo === 'success' ? 'popup-success' : 
                         tipo === 'error' ? 'popup-error' : 
                         tipo === 'warning' ? 'popup-warning' : '';
