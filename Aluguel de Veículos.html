@@ -105,6 +105,7 @@
       padding: 15px;
       border-radius: 10px;
       margin-top: 15px;
+      box-shadow: 0 2px极
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
@@ -642,68 +643,72 @@
     };
 
     // Configuração do flatpickr com os dias bloqueados
-    flatpickr("#faltas", {
-      mode: "multiple", 
-      dateFormat: "Y-m-d", 
-      locale: "pt",
-      onChange: selected => diasSelecionados = selected,
-      disable: [
-        function(date) {
-          // Verifica se é domingo (0 = Domingo, 1 = Segunda, ..., 6 = Sábado)
+    document.addEventListener('DOMContentLoaded', function() {
+      flatpickr("#faltas", {
+        mode: "multiple", 
+        dateFormat: "Y-m-d", 
+        locale: "pt",
+        onChange: function(selectedDates, dateStr, instance) {
+          diasSelecionados = selectedDates.map(date => date.toISOString().split('T')[0]);
+        },
+        disable: [
+          function(date) {
+            // Verifica se é domingo (0 = Domingo, 1 = Segunda, ..., 6 = Sábado)
+            if (date.getDay() === 0) {
+              return true;
+            }
+            
+            // Verifica feriados fixos
+            const dia = date.getDate();
+            const mes = date.getMonth() + 1; // getMonth() retorna 0-11
+            
+            const isFeriadoFixo = feriadosFixos.some(f => f.dia === dia && f.mes === mes);
+            if (isFeriadoFixo) {
+              return true;
+            }
+            
+            // Verifica feriados móveis
+            const dataFormatada = date.getFullYear() + '-' + 
+                                String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                                String(date.getDate()).padStart(2, '0');
+            
+            if (feriadosMoveis[dataFormatada]) {
+              return true;
+            }
+            
+            return false;
+          }
+        ],
+        onDayCreate: function(dObj, dStr, fp, dayElem) {
+          const date = dayElem.dateObj;
+          
+          // Marca domingos
           if (date.getDay() === 0) {
-            return true;
+            dayElem.classList.add('domingo');
+            dayElem.title = "Domingo";
           }
           
-          // Verifica feriados fixos
+          // Marca feriados fixos
           const dia = date.getDate();
-          const mes = date.getMonth() + 1; // getMonth() retorna 0-11
+          const mes = date.getMonth() + 1;
           
           const isFeriadoFixo = feriadosFixos.some(f => f.dia === dia && f.mes === mes);
           if (isFeriadoFixo) {
-            return true;
+            dayElem.classList.add('feriado');
+            dayElem.title = "Feriado Nacional";
           }
           
-          // Verifica feriados móveis
+          // Marca feriados móveis
           const dataFormatada = date.getFullYear() + '-' + 
                               String(date.getMonth() + 1).padStart(2, '0') + '-' + 
                               String(date.getDate()).padStart(2, '0');
           
           if (feriadosMoveis[dataFormatada]) {
-            return true;
+            dayElem.classList.add('feriado-movel');
+            dayElem.title = feriadosMoveis[dataFormatada];
           }
-          
-          return false;
         }
-      ],
-      onDayCreate: function(dObj, dStr, fp, dayElem) {
-        const date = dayElem.dateObj;
-        
-        // Marca domingos
-        if (date.getDay() === 0) {
-          dayElem.classList.add('domingo');
-          dayElem.title = "Domingo";
-        }
-        
-        // Marca feriados fixos
-        const dia = date.getDate();
-        const mes = date.getMonth() + 1;
-        
-        const isFeriadoFixo = feriadosFixos.some(f => f.dia === dia && f.mes === mes);
-        if (isFeriadoFixo) {
-          dayElem.classList.add('feriado');
-          dayElem.title = "Feriado Nacional";
-        }
-        
-        // Marca feriados móveis
-        const dataFormatada = date.getFullYear() + '-' + 
-                            String(date.getMonth() + 1).padStart(2, '0') + '-' + 
-                            String(date.getDate()).padStart(2, '0');
-        
-        if (feriadosMoveis[dataFormatada]) {
-          dayElem.classList.add('feriado-movel');
-          dayElem.title = feriadosMoveis[dataFormatada];
-        }
-      }
+      });
     });
 
     // Função para gerar ID único
@@ -829,7 +834,7 @@
           ` : ''}
           
           <p style="margin-top: 10px;">
-            <strong style="color: #28a745; font-size: 1.1em;">VALOR LÍQUido:</strong> R$ ${valorFinal.toFixed(2)}
+            <strong style="color: #28a745; font-size: 1.1em;">VALOR LÍQUIDO:</strong> R$ ${valorFinal.toFixed(2)}
           </p>
         </div>
         
@@ -1062,7 +1067,7 @@
       const popupDiv = document.createElement('div');
       popupDiv.className = 'popup-overlay';
       
-      const icon = tipo === 'success' => '✅' : tipo === 'error' ? '❌' : 'ℹ️';
+      const icon = tipo === 'success' ? '✅' : tipo === 'error' ? '❌' : 'ℹ️';
       const popupClass = tipo === 'success' ? 'popup-success' : 
                         tipo === 'error' ? 'popup-error' : 
                         tipo === 'warning' ? 'popup-warning' : '';
@@ -1433,7 +1438,12 @@
       
       // Configura os dias selecionados
       diasSelecionados = item.dias_selecionados.split(', ');
-      document.getElementById('faltas')._flatpickr.setDate(diasSelecionados);
+      
+      // Reinicializa o flatpickr com as datas selecionadas
+      const flatpickrInstance = document.getElementById('faltas')._flatpickr;
+      if (flatpickrInstance) {
+        flatpickrInstance.setDate(diasSelecionados);
+      }
       
       document.getElementById('diasReais').value = item.dias_trabalhados;
       document.getElementById('faltasDesconto').value = item.faltas_extras;
