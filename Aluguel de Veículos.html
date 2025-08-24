@@ -461,6 +461,22 @@
         display: none !important;
       }
     }
+    
+    /* Estilo para o campo de exportação PDF */
+    .export-pdf-container {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px dashed #ccc;
+      text-align: center;
+    }
+    
+    .export-pdf-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #2E86C1;
+    }
   </style>
 </head>
 <body>
@@ -538,6 +554,12 @@
     </div>
 
     <div id="resultado" class="card"></div>
+    
+    <!-- Campo para exportar em PDF - NOVO -->
+    <div id="exportarPDFContainer" class="export-pdf-container" style="display: none;">
+      <div class="export-pdf-title">📄 Exportar Cálculo em PDF</div>
+      <button onclick="exportarPDF()" class="btn btn-primary">Exportar PDF</button>
+    </div>
     
     <!-- Filtros -->
     <div class="card">
@@ -819,6 +841,9 @@
         ` : ''}
       `;
 
+      // Mostrar o campo de exportação em PDF
+      document.getElementById('exportarPDFContainer').style.display = 'block';
+      
       // Dados para salvar no Supabase
       const dadosParaSalvar = {
         id: idCalculo,
@@ -1263,6 +1288,7 @@
       document.getElementById('resultado').innerHTML = '';
 
       document.getElementById('btnExportar').style.display = 'none';
+      document.getElementById('exportarPDFContainer').style.display = 'none';
     }
 
     // Função para exportar PDF do cálculo atual
@@ -1477,5 +1503,3 @@
   </script>
 </body>
 </html>
-
-
