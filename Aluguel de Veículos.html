@@ -614,7 +614,7 @@
   <script>
     // Configurações do Supabase
     const SUPABASE_URL = "https://nsfliimhsokyzhacnfdg.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zZmxpaW1oc29reXpoYWNuZmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNDg3MzQsImV4cCI6MjA2MjkyNDczNH0.QqosDhPG2xK16rAfitDiW837GMIL_dh5lmDwg8cOn_8";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhbmFzZSIsInJlZiI6Im5zZmxpaW1oc29reXpoYWNuZmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNDg3MzQsImV4cCI6MjA2MjkyNDczNH0.QqosDhPG2xK16rAfitDiW837GMIL_dh5lmDwg8cOn_8";
     const { jsPDF } = window.jspdf;
     
     // Variáveis globais
@@ -900,6 +900,7 @@
         localStorage.setItem('historicoAluguel', JSON.stringify(historicoAluguel));
 
         atualizarHistorico();
+        atualizarFiltroOperadores();
 
         document.getElementById('btnExportar').style.display = 'block';
         document.getElementById('btnExportarCompleto').style.display = 'block';
@@ -927,6 +928,7 @@
         });
         localStorage.setItem('historicoAluguel', JSON.stringify(historicoAluguel));
         atualizarHistorico();
+        atualizarFiltroOperadores();
       }
     }
 
@@ -1483,6 +1485,7 @@
         
         // Atualiza a interface
         atualizarHistorico();
+        atualizarFiltroOperadores();
         
         mostrarPopupAutomatico('Excluído!', 'O registro foi removido com sucesso.', 'success');
       } catch (error) {
