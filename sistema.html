@@ -33,23 +33,63 @@
       max-width: 460px;
       width: 100%;
       transition: transform 0.3s ease;
+      position: relative;
     }
 
     .card:hover {
       transform: scale(1.02);
     }
 
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
     .logo-central {
-      display: block;
-      margin: 0 auto 25px auto;
-      max-width: 150px;
+      max-width: 180px;
       height: auto;
+      transition: all 0.3s ease;
+    }
+
+    .logo-central:hover {
+      transform: scale(1.05);
     }
 
     h1 {
       margin-bottom: 25px;
       font-size: 28px;
       color: #333;
+    }
+
+    .search-container {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 15px 45px 15px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #888;
+      cursor: pointer;
     }
 
     .btn {
@@ -65,11 +105,21 @@
       border-radius: 12px;
       text-decoration: none;
       transition: all 0.3s ease;
+      text-align: left;
+      position: relative;
     }
 
     .btn:hover {
       background-color: #0056b3;
       transform: scale(1.03);
+    }
+
+    .btn-icon {
+      margin-right: 10px;
+    }
+
+    .hidden {
+      display: none;
     }
 
     @media (max-width: 768px) {
@@ -87,7 +137,12 @@
       }
 
       .logo-central {
-        max-width: 120px;
+        max-width: 150px;
+      }
+      
+      .search-input {
+        padding: 12px 40px 12px 12px;
+        font-size: 14px;
       }
     }
 
@@ -112,22 +167,42 @@
       }
 
       .logo-central {
-        max-width: 100px;
+        max-width: 130px;
+      }
+      
+      .search-input {
+        padding: 10px 35px 10px 10px;
+        font-size: 13px;
       }
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <img src="https://aftquimica.com.br/wp-content/uploads/2025/07/aftq-logo-capa-temp-01.png" alt="Logo AFT Química" class="logo-central">
+    <div class="logo-container">
+      <img src="https://aftquimica.com.br/wp-content/uploads/2025/07/aftq-logo-capa-temp-01.png" alt="Logo AFT Química" class="logo-central">
+    </div>
 
     <h1>🔀 Escolha seu Sistema</h1>
+    
+    <div class="search-container">
+      <input type="text" id="searchInput" class="search-input" placeholder="Buscar sistema...">
+      <span class="search-icon">🔍</span>
+    </div>
 
     <!-- Botões com níveis de permissão -->
-    <a href="vale-alimentacao.html" class="btn" data-permission="5">🍽️ Vale-Alimentação</a>
-    <a href="Erros por Operador.html" class="btn" data-permission="2,3,5">❌ Erros por Operador</a>
-    <a href="Aluguel de Veículos.html" class="btn" data-permission="5">🚗 Aluguel de Veículos</a>
-    <a href="Cálculo de Rotas.html" class="btn" data-permission="5">📍 Cálculo de Rotas - TESTE</a>
+    <a href="vale-alimentacao.html" class="btn" data-permission="5" data-name="Vale-Alimentação">
+      <span class="btn-icon">🍽️</span> Vale-Alimentação
+    </a>
+    <a href="Erros por Operador.html" class="btn" data-permission="2,3,5" data-name="Erros por Operador">
+      <span class="btn-icon">❌</span> Erros por Operador
+    </a>
+    <a href="Aluguel de Veículos.html" class="btn" data-permission="5" data-name="Aluguel de Veículos">
+      <span class="btn-icon">🚗</span> Aluguel de Veículos
+    </a>
+    <a href="Cálculo de Rotas.html" class="btn" data-permission="5" data-name="Cálculo de Rotas">
+      <span class="btn-icon">📍</span> Cálculo de Rotas - TESTE
+    </a>
   </div>
 
   <script>
@@ -141,12 +216,43 @@
 
     // Oculta botões cujo nível de acesso for maior que o do usuário
     document.querySelectorAll(".btn").forEach(btn => {
-      const requiredLevel = parseInt(btn.getAttribute("data-permission"));
-      if (userPermissionLevel < requiredLevel) {
+      const requiredLevels = btn.getAttribute("data-permission").split(',').map(Number);
+      if (!requiredLevels.some(level => userPermissionLevel >= level)) {
         btn.style.display = "none";
       }
+    });
+
+    // Implementação da busca
+    const searchInput = document.getElementById('searchInput');
+    const allButtons = document.querySelectorAll('.btn');
+    
+    searchInput.addEventListener('input', function() {
+      const searchText = this.value.toLowerCase().trim();
+      
+      allButtons.forEach(btn => {
+        // Verificar se o botão está visível considerando as permissões primeiro
+        const requiredLevels = btn.getAttribute("data-permission").split(',').map(Number);
+        const hasPermission = requiredLevels.some(level => userPermissionLevel >= level);
+        
+        if (!hasPermission) {
+          btn.classList.add('hidden');
+          return;
+        }
+        
+        // Se tem permissão, verificar a busca
+        const buttonName = btn.getAttribute('data-name').toLowerCase();
+        if (searchText === '' || buttonName.includes(searchText)) {
+          btn.classList.remove('hidden');
+        } else {
+          btn.classList.add('hidden');
+        }
+      });
+    });
+
+    // Focar no campo de busca quando clicar no ícone
+    document.querySelector('.search-icon').addEventListener('click', function() {
+      searchInput.focus();
     });
   </script>
 </body>
 </html>
-
