@@ -486,9 +486,9 @@
           <label>👷 Operador:</label>
           <select id="beneficiario">
             <option value="">Selecione um operador</option>
-            <option value="Laercio Moreira">Laercio Moreira</option>
+            <option value="Higor Sarmento">Higor Sarmento</option>
             <option value="Rafael Machado">Rafael Machado</option>
-            <option value="Leonardo Vaz">Leonardo Vaz</option>
+            <option value="Lidurino junior">Lidurino junior</option>
             <option value="Joelson Carlos">Joelson Carlos</option>
             <option value="Ricardo Alves">Ricardo Alves</option>
             <option value="Igor Nascimento">Igor Nascimento</option>
@@ -547,7 +547,7 @@
       <div class="btn-container">
         <button onclick="adicionarMes()" class="btn btn-primary btn-principal">ADICIONAR MÊS</button>
         <button onclick="calcularVA()" class="btn btn-success btn-principal">CALCULAR</button>
-        <button id="btnExportar" onclick="exportarPDF()" class="btn btn-info btn-principal" style="display: none;">📄 SALVAR CÁLCULO</button>
+        <button onclick="exportarPDFCalculoAtual()" class="btn btn-info btn-principal">📄 EXPORTAR PDF</button>
         <button id="btnExportarCompleto" onclick="exportarPDFCompleto()" class="btn btn-secondary btn-principal" style="display: none;">📤 SALVAR HISTÓRICO</button>
         <button id="btnAtualizarDados" class="btn btn-warning btn-principal" onclick="carregarDados()">🔄 ATUALIZAR</button>
       </div>
@@ -615,6 +615,19 @@
     let diasMarcados = {};
     let mesesSelecionados = [];
     let editandoId = null;
+    let ultimoCalculo = null;
+
+    // Função para formatar data no formato "1 de outubro de 2025"
+    function formatarDataExtenso(dataString) {
+      const [ano, mes, dia] = dataString.split('-').map(Number);
+      const data = new Date(ano, mes - 1, dia);
+      
+      const diaNum = data.getDate();
+      const mesNome = data.toLocaleString('pt-BR', { month: 'long' });
+      const anoNum = data.getFullYear();
+      
+      return `${diaNum} de ${mesNome} de ${anoNum}`;
+    }
 
     // Função para gerar ID único
     function gerarID() {
@@ -1038,18 +1051,23 @@
       totalLiquido -= descontoMenos4h;
       totalLiquido = Math.max(0, totalLiquido);
 
-      const primeiroMes = mesesComDias[0];
-      const [ano, mesNum] = primeiroMes.split('-').map(Number);
-      const dataObj = new Date(ano, mesNum - 1);
-      const nomeMes = dataObj.toLocaleString('pt-BR', { month: 'long' });
-
-      let mesesString = '';
-      if (mesesComDias.length > 1) {
-        mesesString = mesesComDias.map(mes => {
-          const [y, m] = mes.split('-');
-          const d = new Date(y, m - 1, 1);
-          return d.toLocaleString('pt-BR', { month: 'long' }) + ' ' + y;
-        }).join(', ');
+      // Determinar primeiro e último dia selecionado
+      let primeiroDia = null;
+      let ultimoDia = null;
+      let periodoFormatado = '';
+      
+      if (todosDiasSelecionados.length > 0) {
+        // Ordenar as datas
+        const datasOrdenadas = todosDiasSelecionados.sort();
+        
+        primeiroDia = datasOrdenadas[0];
+        ultimoDia = datasOrdenadas[datasOrdenadas.length - 1];
+        
+        // Formatar o período
+        const primeiroDiaFormatado = formatarDataExtenso(primeiroDia);
+        const ultimoDiaFormatado = formatarDataExtenso(ultimoDia);
+        
+        periodoFormatado = `de ${primeiroDiaFormatado} até ${ultimoDiaFormatado}`;
       }
 
       const idCalculo = editandoId || gerarID();
@@ -1061,9 +1079,7 @@
         <h4>${editandoId ? 'Cálculo Atualizado' : 'Resultado do Cálculo'}</h4>
         <p><strong>ID do Cálculo:</strong> ${idCalculo}</p>
         <p><strong>Operador:</strong> ${nome}</p>
-        ${mesesComDias.length > 1 ? 
-          `<p><strong>Período:</strong> ${mesesString}</p>` : 
-          `<p><strong>Mês/Ano:</strong> ${nomeMes.toUpperCase()} ${ano}</p>`}
+        ${periodoFormatado ? `<p><strong>Período:</strong> ${periodoFormatado}</p>` : ''}
         
         <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">
           <h5 style="margin-bottom: 10px; color: #2E86C1;">📝 Detalhes do Cálculo</h5>
@@ -1091,6 +1107,27 @@
         Valor do benefício diário: R$ ${valorDia.toFixed(2)}
         </p>
       `;
+
+      // Salva os dados do último cálculo para exportação
+      ultimoCalculo = {
+        id: idCalculo,
+        nome: nome,
+        valorDiario: valorDia,
+        tipoDesconto: tipoDesconto,
+        valorDesconto: valorDesconto,
+        qtdDescontos4h: qtdDescontos4h,
+        mesesComDias: mesesComDias,
+        totalDiasTrabalhados: totalDiasTrabalhados,
+        todosDiasSelecionados: todosDiasSelecionados,
+        totalBruto: totalBruto,
+        descontoAplicado: descontoAplicado,
+        descontoMenos4h: descontoMenos4h,
+        totalLiquido: totalLiquido,
+        primeiroDia: primeiroDia,
+        ultimoDia: ultimoDia,
+        periodoFormatado: periodoFormatado,
+        timestamp: timestamp
+      };
 
       const dadosParaSalvar = {
           id: idCalculo,
@@ -1139,9 +1176,7 @@
         historicoVA.unshift({
           ...dadosParaSalvar,
           nome, 
-          mes: mesesComDias.length > 1 ? 'Vários meses' : nomeMes.toUpperCase(), 
-          ano: mesesComDias.length > 1 ? '' : ano,
-          periodo: mesesComDias.length > 1 ? mesesString : '',
+          periodo: periodoFormatado,
           diasTrabalhados: totalDiasTrabalhados, 
           descontos4h: qtdDescontos4h,
           total: totalLiquido,
@@ -1153,7 +1188,6 @@
 
         atualizarHistorico();
 
-        document.getElementById('btnExportar').style.display = 'block';
         document.getElementById('btnExportarCompleto').style.display = 'block';
         document.getElementById('btnAtualizarDados').style.display = 'inline-block';
 
@@ -1176,9 +1210,7 @@
         historicoVA.unshift({
             id: idCalculo,
             nome, 
-            mes: mesesComDias.length > 1 ? 'Vários meses' : nomeMes.toUpperCase(), 
-            ano: mesesComDias.length > 1 ? '' : ano,
-            periodo: mesesComDias.length > 1 ? mesesString : '',
+            periodo: periodoFormatado,
             diasTrabalhados: totalDiasTrabalhados, 
             descontos4h: qtdDescontos4h,
             total: totalLiquido,
@@ -1208,16 +1240,27 @@
         // Verifica se há dados no Supabase
         if (dadosSupabase && dadosSupabase.length > 0) {
           historicoVA = dadosSupabase.map(item => {
-            const data = new Date(item.timestamp);
-            const mes = data.toLocaleString('pt-BR', { month: 'long' });
-            const ano = data.getFullYear();
+            // Tenta recriar o período formatado a partir dos dias selecionados
+            let periodoFormatado = '';
+            if (item.dias_selecionados) {
+              const diasArray = item.dias_selecionados.split(', ');
+              if (diasArray.length > 0) {
+                const datasOrdenadas = diasArray.sort();
+                const primeiroDia = datasOrdenadas[0];
+                const ultimoDia = datasOrdenadas[datasOrdenadas.length - 1];
+                
+                if (primeiroDia && ultimoDia) {
+                  const primeiroDiaFormatado = formatarDataExtenso(primeiroDia);
+                  const ultimoDiaFormatado = formatarDataExtenso(ultimoDia);
+                  periodoFormatado = `de ${primeiroDiaFormatado} até ${ultimoDiaFormatado}`;
+                }
+              }
+            }
             
             return {
               ...item,
               nome: item.operador,
-              mes: item.meses.includes(',') ? 'Vários meses' : mes.toUpperCase(),
-              ano: item.meses.includes(',') ? '' : ano,
-              periodo: item.meses,
+              periodo: periodoFormatado || item.meses,
               diasTrabalhados: item.dias_trabalhados,
               descontos4h: item.qtd_descontos_4h,
               total: parseFloat(item.total_liquido)
@@ -1265,7 +1308,7 @@
         tr.innerHTML = `
           <td>${item.id}</td>
           <td>${item.nome}</td>
-          <td>${item.periodo || item.mes + '/' + item.ano}</td>
+          <td>${item.periodo || item.meses}</td>
           <td>${item.diasTrabalhados}</td>
           <td>${item.descontos4h}</td>
           <td>R$ ${item.total.toFixed(2)}</td>
@@ -1387,76 +1430,111 @@
       document.getElementById('resultado').style.display = 'none';
       document.getElementById('resultado').innerHTML = '';
 
-      document.getElementById('btnExportar').style.display = 'none';
+      ultimoCalculo = null;
     }
 
-    function exportarPDF() {
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF();
-        
-        // Obtém os dados do resultado
-        const resultadoDiv = document.getElementById('resultado');
-        const titulo = resultadoDiv.querySelector('h4').textContent;
-        const nomeOperador = document.getElementById('beneficiario').value || 'Operador';
-        const dataAtual = new Date().toLocaleDateString('pt-BR');
-        
-        // Configurações do documento
-        pdf.setProperties({
-            title: `Vale Alimentação - ${nomeOperador}`,
-            subject: 'Cálculo de Vale Alimentação',
-            author: 'Sistema de Cálculos',
-            keywords: 'vale, alimentação, cálculo',
-            creator: 'Sistema de Cálculos'
-        });
-        
-        // Cabeçalho
-        pdf.setFontSize(16);
-        pdf.setTextColor(46, 134, 193);
-        pdf.setFont("helvetica", "bold");
-        pdf.text(`Vale Alimentação - ${nomeOperador}`, 105, 15, { align: 'center' });
-        
-        pdf.setFontSize(12);
-        pdf.setTextColor(100, 100, 100);
-        pdf.setFont("helvetica", "normal");
-        pdf.text(`Gerado em: ${dataAtual}`, 105, 22, { align: 'center' });
-        pdf.text(titulo, 105, 29, { align: 'center' });
-        
-        // Conteúdo
-        pdf.setFontSize(11);
-        pdf.setTextColor(0, 0, 0);
-        
-        let yPos = 40;
-        const lineHeight = 7;
-        const marginLeft = 15;
-        
-        // Extrai todos os parágrafos do resultado
-        const paragrafos = resultadoDiv.querySelectorAll('p');
-        
-        paragrafos.forEach(p => {
-            // Divide o texto em linhas que cabem no PDF
-            const lines = pdf.splitTextToSize(p.textContent, 180);
-            
-            lines.forEach(line => {
-                pdf.text(line, marginLeft, yPos);
-                yPos += lineHeight;
-            });
-            
-            // Espaço extra após cada parágrafo
-            yPos += 2;
-        });
-        
-        // Adiciona linha horizontal
-        pdf.setDrawColor(200, 200, 200);
-        pdf.line(marginLeft, yPos + 5, 195, yPos + 5);
-        yPos += 10;
-        
-        // Adiciona rodapé
-        pdf.setFontSize(10);
-        pdf.setTextColor(150, 150, 150);
-        pdf.text('Documento gerado automaticamente pelo sistema de cálculos', 105, yPos, { align: 'center' });
-        
-        // Salva o PDF
-        pdf.save(`vale_alimentacao_${nomeOperador.replace(' ', '_')}_${new Date().toISOString().slice(0, 10)}.pdf`);
+    // Nova função para exportar o cálculo atual em PDF
+    function exportarPDFCalculoAtual() {
+      if (!ultimoCalculo) {
+        mostrarPopup('Atenção', 'Não há cálculo para exportar. Primeiro faça um cálculo.', 'warning');
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+      
+      // Configurações do documento
+      pdf.setProperties({
+        title: `Vale Alimentação - ${ultimoCalculo.nome}`,
+        subject: 'Cálculo de Vale Alimentação',
+        author: 'Sistema de Cálculos',
+        keywords: 'vale, alimentação, cálculo',
+        creator: 'Sistema de Cálculos'
+      });
+      
+      // Cabeçalho
+      pdf.setFontSize(16);
+      pdf.setTextColor(46, 134, 193);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(`VALE ALIMENTAÇÃO - ${ultimoCalculo.nome.toUpperCase()}`, 105, 15, { align: 'center' });
+      
+      pdf.setFontSize(12);
+      pdf.setTextColor(100, 100, 100);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(`ID: ${ultimoCalculo.id}`, 105, 22, { align: 'center' });
+      pdf.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 105, 29, { align: 'center' });
+      
+      // Informações do cálculo
+      pdf.setFontSize(11);
+      pdf.setTextColor(0, 0, 0);
+      
+      let yPos = 40;
+      const lineHeight = 7;
+      const marginLeft = 15;
+      
+      // Dados básicos
+      pdf.text(`Operador: ${ultimoCalculo.nome}`, marginLeft, yPos);
+      yPos += lineHeight;
+      
+      if (ultimoCalculo.periodoFormatado) {
+        pdf.text(`Período: ${ultimoCalculo.periodoFormatado}`, marginLeft, yPos);
+        yPos += lineHeight;
+      }
+      
+      pdf.text(`Valor Diário: R$ ${ultimoCalculo.valorDiario.toFixed(2)}`, marginLeft, yPos);
+      yPos += lineHeight;
+      
+      pdf.text(`Dias Trabalhados: ${ultimoCalculo.totalDiasTrabalhados}`, marginLeft, yPos);
+      yPos += lineHeight;
+      
+      if (ultimoCalculo.qtdDescontos4h > 0) {
+        pdf.text(`Dias com -4h: ${ultimoCalculo.qtdDescontos4h}`, marginLeft, yPos);
+        yPos += lineHeight;
+      }
+      
+      yPos += 5;
+      
+      // Detalhes do cálculo
+      pdf.setFont("helvetica", "bold");
+      pdf.text("DETALHES DO CÁLCULO", marginLeft, yPos);
+      yPos += lineHeight;
+      pdf.setFont("helvetica", "normal");
+      
+      // Linha do valor bruto
+      pdf.text(`Total Bruto: ${ultimoCalculo.totalDiasTrabalhados} dias × R$ ${ultimoCalculo.valorDiario.toFixed(2)} = R$ ${ultimoCalculo.totalBruto.toFixed(2)}`, marginLeft, yPos);
+      yPos += lineHeight;
+      
+      // Descontos
+      if (ultimoCalculo.descontoAplicado > 0) {
+        pdf.text(`Desconto (${ultimoCalculo.tipoDesconto === 'percentual' ? ultimoCalculo.valorDesconto + '%' : 'Fixo'}): R$ ${ultimoCalculo.descontoAplicado.toFixed(2)}`, marginLeft, yPos);
+        yPos += lineHeight;
+      }
+      
+      if (ultimoCalculo.descontoMenos4h > 0) {
+        pdf.text(`Desconto por -4h: ${ultimoCalculo.qtdDescontos4h} × R$ ${ultimoCalculo.valorDiario.toFixed(2)} = R$ ${ultimoCalculo.descontoMenos4h.toFixed(2)}`, marginLeft, yPos);
+        yPos += lineHeight;
+      }
+      
+      yPos += 5;
+      
+      // Total
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(40, 167, 69);
+      pdf.text(`TOTAL LÍQUIDO: R$ ${ultimoCalculo.totalLiquido.toFixed(2)}`, marginLeft, yPos);
+      yPos += lineHeight + 5;
+          
+      // Adiciona linha horizontal
+      pdf.setDrawColor(200, 200, 200);
+      pdf.line(marginLeft, yPos + 5, 195, yPos + 5);
+      yPos += 10;
+      
+      // Adiciona rodapé
+      pdf.setFontSize(10);
+      pdf.setTextColor(150, 150, 150);
+      pdf.text(`Assinatura de ${ultimoCalculo.nome}`, 105, yPos, { align: 'center' });
+      
+      // Salva o PDF
+      pdf.save(`vale_alimentacao_${ultimoCalculo.nome.replace(' ', '_')}_${ultimoCalculo.id}.pdf`);
     }
 
     function exportarPDFCompleto() {
@@ -1481,7 +1559,7 @@
           return [
             item.id,
             item.nome,
-            item.periodo || item.mes + '/' + item.ano,
+            item.periodo || item.meses,
             item.diasTrabalhados,
             item.descontos4h,
             item.total.toFixed(2),
@@ -1701,5 +1779,3 @@
   </script>
 </body>
 </html>
-
-
