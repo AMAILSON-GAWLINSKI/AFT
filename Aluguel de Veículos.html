@@ -105,7 +105,6 @@
       padding: 15px;
       border-radius: 10px;
       margin-top: 15px;
-      box-shadow: 0 2px极
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
@@ -323,6 +322,106 @@
       color: var(--danger);
     }
     
+    /* Estilos para o gerenciador de operadores */
+    .operador-field-container {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .operador-select {
+      flex: 1;
+    }
+    
+    .btn-gerenciar {
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .btn-gerenciar:hover {
+      background-color: #5a6268;
+    }
+    
+    /* Estilos para o modal de gerenciamento de operadores */
+    .gerenciador-container {
+      max-height: 400px;
+      overflow-y: auto;
+      margin: 20px 0;
+    }
+    
+    .lista-operadores {
+      margin-top: 15px;
+    }
+    
+    .item-operador {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .item-operador:last-child {
+      border-bottom: none;
+    }
+    
+    .nome-operador {
+      font-weight: bold;
+    }
+    
+    .btn-excluir-operador {
+      background-color: #E74C3C;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    
+    .btn-excluir-operador:hover {
+      background-color: #c0392b;
+    }
+    
+    .adicionar-operador-container {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .input-novo-operador {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    
+    .btn-adicionar-operador {
+      background-color: var(--success);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 8px 15px;
+      cursor: pointer;
+    }
+    
+    .btn-adicionar-operador:hover {
+      background-color: #229954;
+    }
+    
+    .operador-com-registros {
+      color: #888;
+    }
+    
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -352,6 +451,20 @@
       
       .popup-title {
         font-size: 1.1rem;
+      }
+      
+      .operador-field-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .btn-gerenciar {
+        width: 100%;
+        margin-top: 5px;
+      }
+      
+      .adicionar-operador-container {
+        flex-direction: column;
       }
     }
 
@@ -489,17 +602,13 @@
       <div class="form-row">
         <div class="form-col">
           <label>👷 Operador:</label>
-          <select id="operador">
-            <option value="">Selecione um operador</option>
-            <option>Igor Nascimento</option>
-            <option>Higor Sarmento</option>
-            <option>Rafael Machado</option>            
-            <option>Lidurino junior</option>
-            <option>Ricardo Alves</option>
-            <option>Luana Parcianello</option>
-            <option>Keniel Vasque</option>
-            <option>Joelson Carlos</option>
-          </select>
+          <div class="operador-field-container">
+            <select id="operador" class="operador-select">
+              <option value="">Selecione um operador</option>
+              <!-- Os operadores serão carregados dinamicamente -->
+            </select>
+            <button class="btn-gerenciar" onclick="abrirGerenciadorOperadores()" title="Gerenciar operadores">⚙️</button>
+          </div>
         </div>
         <div class="form-col">
           <label>🚗 Tipo de Veículo:</label>
@@ -554,7 +663,7 @@
 
     <div id="resultado" class="card"></div>
     
-    <!-- Campo para exportar em PDF - NOVO -->
+    <!-- Campo para exportar em PDF -->
     <div id="exportarPDFContainer" class="export-pdf-container" style="display: none;">
       <div class="export-pdf-title">📄 Exportar Cálculo em PDF</div>
       <button onclick="exportarPDF()" class="btn btn-primary">Exportar PDF</button>
@@ -620,6 +729,18 @@
     let historicoAluguel = [];
     let diasSelecionados = [];
     let editandoId = null;
+    
+    // Lista padrão de operadores
+    const operadoresPadrao = [
+      "Igor Nascimento",
+      "Higor Sarmento", 
+      "Rafael Machado",
+      "Lidurino junior",
+      "Ricardo Alves",
+      "Luana Parcianello",
+      "Keniel Vasque",
+      "Joelson Carlos"
+    ];
 
     // Feriados fixos (dia/mês)
     const feriadosFixos = [
@@ -707,7 +828,217 @@
           }
         }
       });
+      
+      // Carrega os operadores do localStorage
+      carregarOperadores();
+      
+      // Configura eventos de filtro
+      document.getElementById('filtroOperador').addEventListener('change', filtrarHistorico);
+      document.getElementById('filtroData').addEventListener('change', filtrarHistorico);
+      
+      // Carrega dados do Supabase (com fallback para localStorage)
+      carregarDados();
     });
+
+    // ==============================================
+    // FUNÇÕES DE GERENCIAMENTO DE OPERADORES
+    // ==============================================
+
+    // Função para carregar operadores do localStorage
+    function carregarOperadores() {
+      let operadores = localStorage.getItem('operadoresAluguel');
+      
+      if (!operadores) {
+        // Se não houver operadores salvos, usa a lista padrão
+        operadores = JSON.stringify(operadoresPadrao);
+        localStorage.setItem('operadoresAluguel', operadores);
+      }
+      
+      const listaOperadores = JSON.parse(operadores);
+      atualizarSelectOperadores(listaOperadores);
+      return listaOperadores;
+    }
+
+    // Função para salvar operadores no localStorage
+    function salvarOperadores(listaOperadores) {
+      localStorage.setItem('operadoresAluguel', JSON.stringify(listaOperadores));
+      atualizarSelectOperadores(listaOperadores);
+    }
+
+    // Função para atualizar todos os selects de operadores
+    function atualizarSelectOperadores(listaOperadores) {
+      // Atualiza o select principal
+      const selectOperador = document.getElementById('operador');
+      const valorAtual = selectOperador.value;
+      
+      selectOperador.innerHTML = '<option value="">Selecione um operador</option>';
+      
+      listaOperadores.forEach(operador => {
+        const option = document.createElement('option');
+        option.value = operador;
+        option.textContent = operador;
+        selectOperador.appendChild(option);
+      });
+      
+      // Restaura a seleção anterior, se ainda existir
+      if (listaOperadores.includes(valorAtual)) {
+        selectOperador.value = valorAtual;
+      }
+      
+      // Atualiza o filtro de operadores no histórico
+      atualizarFiltroOperadores();
+    }
+
+    // Função para verificar se um operador tem registros associados
+    function operadorTemRegistros(nomeOperador) {
+      return historicoAluguel.some(item => item.operador === nomeOperador);
+    }
+
+    // Função para abrir o gerenciador de operadores
+    function abrirGerenciadorOperadores() {
+      const listaOperadores = carregarOperadores();
+      
+      // Cria o HTML da lista de operadores
+      let listaHTML = '';
+      listaOperadores.forEach(operador => {
+        const temRegistros = operadorTemRegistros(operador);
+        listaHTML += `
+          <div class="item-operador">
+            <span class="nome-operador ${temRegistros ? 'operador-com-registros' : ''}">
+              ${operador}
+              ${temRegistros ? ' (com registros)' : ''}
+            </span>
+            <button class="btn-excluir-operador" onclick="excluirOperador('${operador}')" 
+                    ${temRegistros ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+              Excluir
+            </button>
+          </div>
+        `;
+      });
+      
+      // Cria o popup do gerenciador
+      const popup = document.createElement('div');
+      popup.className = 'popup-overlay';
+      popup.innerHTML = `
+        <div class="popup-container">
+          <div class="popup-icon">👷</div>
+          <div class="popup-title">Gerenciar Operadores</div>
+          <div class="popup-message">Adicione ou remova operadores da lista.</div>
+          
+          <div class="gerenciador-container">
+            <div class="lista-operadores">
+              ${listaHTML}
+            </div>
+            
+            <div class="adicionar-operador-container">
+              <input type="text" id="novoOperador" class="input-novo-operador" 
+                     placeholder="Digite o nome do novo operador">
+              <button class="btn-adicionar-operador" onclick="adicionarOperador()">Adicionar</button>
+            </div>
+          </div>
+          
+          <div class="popup-buttons">
+            <button class="popup-button popup-ok" onclick="fecharGerenciadorOperadores()">Fechar</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(popup);
+      
+      // Foca no campo de entrada
+      setTimeout(() => {
+        document.getElementById('novoOperador').focus();
+      }, 100);
+      
+      // Permite adicionar com Enter
+      document.getElementById('novoOperador').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          adicionarOperador();
+        }
+      });
+    }
+
+    // Função para fechar o gerenciador de operadores
+    function fecharGerenciadorOperadores() {
+      const popup = document.querySelector('.popup-overlay');
+      if (popup) {
+        document.body.removeChild(popup);
+      }
+    }
+
+    // Função para adicionar um novo operador
+    function adicionarOperador() {
+      const input = document.getElementById('novoOperador');
+      const nomeOperador = input.value.trim();
+      
+      if (!nomeOperador) {
+        mostrarPopupAutomatico('Atenção', 'Por favor, digite o nome do operador.', 'warning');
+        return;
+      }
+      
+      const listaOperadores = carregarOperadores();
+      
+      // Verifica se o operador já existe
+      if (listaOperadores.includes(nomeOperador)) {
+        mostrarPopupAutomatico('Atenção', 'Este operador já está na lista.', 'warning');
+        input.focus();
+        return;
+      }
+      
+      // Adiciona o operador à lista
+      listaOperadores.push(nomeOperador);
+      salvarOperadores(listaOperadores);
+      
+      // Limpa o campo de entrada e foca novamente
+      input.value = '';
+      input.focus();
+      
+      // Atualiza a lista no popup
+      abrirGerenciadorOperadores();
+      
+      mostrarPopupAutomatico('Sucesso', 'Operador adicionado com sucesso!', 'success');
+    }
+
+    // Função para excluir um operador
+    async function excluirOperador(nomeOperador) {
+      // Verifica se o operador tem registros associados
+      if (operadorTemRegistros(nomeOperador)) {
+        mostrarPopupAutomatico('Atenção', 
+          `Não é possível excluir "${nomeOperador}" porque existem registros associados a este operador.`, 
+          'error');
+        return;
+      }
+      
+      const confirmar = await mostrarPopupConfirmacao(
+        "Confirmar exclusão",
+        `Tem certeza que deseja excluir o operador "${nomeOperador}"?`,
+        { "Operador": nomeOperador }
+      );
+      
+      if (!confirmar) {
+        return;
+      }
+      
+      const listaOperadores = carregarOperadores();
+      const novaLista = listaOperadores.filter(op => op !== nomeOperador);
+      
+      // Verifica se a lista não ficou vazia
+      if (novaLista.length === 0) {
+        mostrarPopupAutomatico('Atenção', 'A lista de operadores não pode ficar vazia.', 'warning');
+        return;
+      }
+      
+      salvarOperadores(novaLista);
+      
+      // Atualiza a lista no popup
+      abrirGerenciadorOperadores();
+      
+      mostrarPopupAutomatico('Sucesso', 'Operador excluído com sucesso!', 'success');
+    }
+
+    // ==============================================
+    // FUNÇÕES EXISTENTES (com pequenas adaptações)
+    // ==============================================
 
     // Função para gerar ID único
     function gerarID() {
@@ -1530,19 +1861,6 @@
         mostrarPopupAutomatico('Erro', 'Não foi possível excluir o registro.', 'error');
       }
     }
-
-    // Inicialização
-    document.addEventListener('DOMContentLoaded', function() {
-      // Configura eventos de filtro
-      document.getElementById('filtroOperador').addEventListener('change', filtrarHistorico);
-      document.getElementById('filtroData').addEventListener('change', filtrarHistorico);
-      
-      // Carrega dados do Supabase (com fallback para localStorage)
-      carregarDados();
-    });
   </script>
 </body>
 </html>
-
-
-
