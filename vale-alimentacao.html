@@ -675,7 +675,7 @@
         <button onclick="calcularVA()" class="btn btn-success btn-principal">CALCULAR</button>
         <button onclick="exportarPDFCalculoAtual()" class="btn btn-info btn-principal">📄 EXPORTAR PDF</button>
         <button id="btnExportarCompleto" onclick="exportarPDFCompleto()" class="btn btn-secondary btn-principal" style="display: none;">📤 SALVAR HISTÓRICO</button>
-        <button id="btnAtualizarDados" class="btn btn-warning btn-principal" onclick="carregarDados()">🔄 ATUALIZAR</button>
+        <button onclick="limparCampos()" class="btn btn-danger btn-principal">LIMPAR CAMPOS</button>
       </div>
     </div>
 
@@ -927,9 +927,6 @@
       ];
       
       const feriadosMoveis = {
-        "2025-03-04": "Carnaval",
-        "2025-04-18": "Sexta-feira Santa",
-        "2025-06-19": "Corpus Christi",
         "2025-03-04": "Carnaval",
         "2025-04-18": "Sexta-feira Santa",
         "2025-06-19": "Corpus Christi",
@@ -1327,14 +1324,44 @@
           total_liquido: totalLiquido.toFixed(2)
       };
 
+      // PRINCIPAL CORREÇÃO: Primeiro salva localmente, independente do Supabase
+      const registroLocal = {
+        id: idCalculo,
+        nome: nome,
+        periodo: periodoFormatado,
+        diasTrabalhados: totalDiasTrabalhados,
+        descontos4h: qtdDescontos4h,
+        total: totalLiquido,
+        timestamp: timestamp,
+        valor_diario: valorDia.toFixed(2),
+        tipo_desconto: tipoDesconto,
+        valor_desconto: valorDesconto.toFixed(2),
+        meses: mesesComDias.join(', '),
+        dias_selecionados: todosDiasSelecionados.join(', ')
+      };
+
+      // Remove registro antigo se estiver editando
+      if (editandoId) {
+        historicoVA = historicoVA.filter(item => item.id !== editandoId);
+        editandoId = null;
+      }
+      
+      // Adiciona novo registro
+      historicoVA.unshift(registroLocal);
+      
+      // Salva no localStorage
+      localStorage.setItem('historicoVA', JSON.stringify(historicoVA));
+      
+      // Atualiza a interface imediatamente
+      atualizarHistorico();
+      // NÃO LIMPAR CAMPOS AQUI - mantém o resultado visível
+
+      // Tenta salvar no Supabase (opcional)
       try {
         let response;
         if (editandoId) {
           // Atualiza o registro existente
           response = await editarRegistroSupabase(idCalculo, dadosParaSalvar);
-          
-          // Remove o registro antigo do histórico local
-          historicoVA = historicoVA.filter(item => item.id !== idCalculo);
         } else {
           // Cria um novo registro
           response = await fetch(`${SUPABASE_URL}/rest/v1/vale_alimentacao`, {
@@ -1353,53 +1380,18 @@
           throw new Error(`Erro HTTP: ${response.status}`);
         }
 
-        // Adiciona ao histórico local
-        historicoVA.unshift({
-          ...dadosParaSalvar,
-          nome, 
-          periodo: periodoFormatado,
-          diasTrabalhados: totalDiasTrabalhados, 
-          descontos4h: qtdDescontos4h,
-          total: totalLiquido,
-          timestamp: timestamp
-        });
-
-        // Salva no localStorage como backup
-        localStorage.setItem('historicoVA', JSON.stringify(historicoVA));
-
-        atualizarHistorico();
-
-        document.getElementById('btnExportarCompleto').style.display = 'block';
-        document.getElementById('btnAtualizarDados').style.display = 'inline-block';
-
         mostrarPopup(
-          editandoId ? 'Atualizado!' : 'Sucesso!', 
-          editandoId ? 'Cálculo atualizado com sucesso!' : 'Cálculo salvo com sucesso no banco de dados.',
+          'Sucesso!', 
+          'Cálculo salvo com sucesso no histórico local e no banco de dados.',
           'success'
         );
-        
-        // Limpa o modo de edição
-        if (editandoId) {
-          editandoId = null;
-          limparCampos();
-        }
       } catch (error) {
         console.error("Erro ao salvar no Supabase:", error);
-        mostrarPopup('Erro', 'Não foi possível salvar o cálculo. Os dados serão armazenados localmente.', 'error');
-        
-        // Adiciona ao histórico local mesmo em caso de erro
-        historicoVA.unshift({
-            id: idCalculo,
-            nome, 
-            periodo: periodoFormatado,
-            diasTrabalhados: totalDiasTrabalhados, 
-            descontos4h: qtdDescontos4h,
-            total: totalLiquido,
-            timestamp: new Date().toISOString()
-        });
-        localStorage.setItem('historicoVA', JSON.stringify(historicoVA));
-        atualizarHistorico();
+        mostrarPopup('Aviso', 'Cálculo salvo apenas localmente. Erro ao conectar com o banco de dados.', 'warning');
       }
+
+      document.getElementById('btnExportarCompleto').style.display = 'block';
+      document.getElementById('btnAtualizarDados').style.display = 'inline-block';
     }
 
     async function carregarDados() {
@@ -1420,8 +1412,8 @@
         
         // Verifica se há dados no Supabase
         if (dadosSupabase && dadosSupabase.length > 0) {
-          historicoVA = dadosSupabase.map(item => {
-            // Tenta recriar o período formatado a partir dos dias selecionados
+          // Converte dados do Supabase para o formato local
+          const dadosConvertidos = dadosSupabase.map(item => {
             let periodoFormatado = '';
             if (item.dias_selecionados) {
               const diasArray = item.dias_selecionados.split(', ');
@@ -1440,35 +1432,57 @@
             
             return {
               ...item,
+              id: item.id,
               nome: item.operador,
               periodo: periodoFormatado || item.meses,
               diasTrabalhados: item.dias_trabalhados,
               descontos4h: item.qtd_descontos_4h,
-              total: parseFloat(item.total_liquido)
+              total: parseFloat(item.total_liquido),
+              timestamp: item.timestamp
             };
           });
           
+          // Atualiza o histórico local com dados do Supabase
+          historicoVA = dadosConvertidos;
+          
           // Salva no localStorage como backup
           localStorage.setItem('historicoVA', JSON.stringify(historicoVA));
-        } else {
-          // Se não houver dados no Supabase, tenta carregar do localStorage
-          const historicoSalvo = localStorage.getItem('historicoVA');
-          if (historicoSalvo) {
-            historicoVA = JSON.parse(historicoSalvo);
-          }
         }
       } catch (error) {
         console.error("Erro ao carregar do Supabase, usando localStorage:", error);
-        // Se houver erro, usa o localStorage como fallback
-        const historicoSalvo = localStorage.getItem('historicoVA');
-        if (historicoSalvo) {
-          historicoVA = JSON.parse(historicoSalvo);
+      }
+      
+      // SEMPRE carrega do localStorage como fallback
+      const historicoSalvo = localStorage.getItem('historicoVA');
+      if (historicoSalvo) {
+        try {
+          const dadosLocais = JSON.parse(historicoSalvo);
+          
+          // Se já tem dados do Supabase, mescla, senão usa os locais
+          if (historicoVA.length === 0) {
+            historicoVA = dadosLocais;
+          } else {
+            // Evita duplicatas por ID
+            const idsExistentes = new Set(historicoVA.map(item => item.id));
+            dadosLocais.forEach(item => {
+              if (!idsExistentes.has(item.id)) {
+                historicoVA.push(item);
+              }
+            });
+          }
+        } catch (e) {
+          console.error("Erro ao processar dados locais:", e);
         }
       }
+      
+      // Ordena por timestamp
+      historicoVA.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
       
       // Atualiza a interface
       atualizarHistorico();
       atualizarFiltroOperadores();
+      
+      mostrarPopup('Sucesso', 'Dados carregados com sucesso!', 'success');
     }
 
     function atualizarHistorico() {
@@ -1579,7 +1593,15 @@
             const operadorMatch = filtroOperador === "Todos" || item.nome === filtroOperador;
             
             // Filtro por data
-            const dataMatch = !filtroData || item.meses.split(', ')[0].startsWith(filtroData);
+            let dataMatch = true;
+            if (filtroData) {
+              if (item.meses) {
+                const mesesArray = item.meses.split(', ');
+                dataMatch = mesesArray.some(mes => mes.startsWith(filtroData));
+              } else {
+                dataMatch = false;
+              }
+            }
 
             return operadorMatch && dataMatch;
         });
@@ -1612,6 +1634,7 @@
       document.getElementById('resultado').innerHTML = '';
 
       ultimoCalculo = null;
+      editandoId = null;
     }
 
     // Nova função para exportar o cálculo atual em PDF
@@ -1912,7 +1935,7 @@
       }
       
       try {
-        // Remove do Supabase
+        // Remove do Supabase (se existir)
         const response = await fetch(`${SUPABASE_URL}/rest/v1/vale_alimentacao?id=eq.${id}`, {
           method: "DELETE",
           headers: {
@@ -1921,24 +1944,21 @@
           }
         });
         
-        if (!response.ok) {
-          throw new Error(`Erro HTTP: ${response.status}`);
-        }
-        
-        // Remove do array local
-        historicoVA = historicoVA.filter(item => item.id !== id);
-        
-        // Salva no localStorage
-        localStorage.setItem('historicoVA', JSON.stringify(historicoVA));
-        
-        // Atualiza a interface
-        atualizarHistorico();
-        
-        mostrarPopup('Excluído!', 'O registro foi removido com sucesso.', 'success');
+        // Não importa se deu erro no Supabase, remove localmente
       } catch (error) {
-        console.error("Erro ao excluir:", error);
-        mostrarPopup('Erro', 'Não foi possível excluir o registro.', 'error');
+        console.error("Erro ao excluir do Supabase:", error);
       }
+      
+      // Remove do array local
+      historicoVA = historicoVA.filter(item => item.id !== id);
+      
+      // Salva no localStorage
+      localStorage.setItem('historicoVA', JSON.stringify(historicoVA));
+      
+      // Atualiza a interface
+      atualizarHistorico();
+      
+      mostrarPopup('Excluído!', 'O registro foi removido com sucesso.', 'success');
     }
 
     // Funções para gerenciar operadores
