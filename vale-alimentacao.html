@@ -88,6 +88,45 @@
       font-size: 14px;
     }
 
+    /* Container para seleção de operador com botões */
+    .operador-container {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .operador-container select {
+      flex: 1;
+    }
+    
+    .btn-operador {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 5px 10px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .btn-add-operador {
+      color: var(--success);
+    }
+    
+    .btn-remove-operador {
+      color: var(--danger);
+    }
+    
+    .btn-edit-operador {
+      color: var(--primary);
+    }
+    
+    .btn-operador:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
     /* Estilos do calendário melhorados */
     #calendario {
       display: grid;
@@ -122,7 +161,7 @@
       transition: background-color 0.2s ease, color 0.2s ease;
     }
     
-    #calendario button:hover:not(:disabled) {
+    #calendario button:hover {
       background-color: #e2e6ea;
     }
 
@@ -133,19 +172,31 @@
       border-color: #1c7430;
     }
 
-    #calendario button.feriado,
+    /* Feriados - apenas estilo visual, não bloqueado */
+    #calendario button.feriado {
+      background-color: #f5c6cb;
+      color: #721c24;
+      font-weight: bold;
+      border: 1px dashed #f194a1;
+    }
+    
+    #calendario button.feriado.ativo {
+      background-color: #28a745;
+      color: #ffffff;
+      border: 2px solid #721c24;
+    }
+    
     #calendario button.feriado-movel {
       background-color: #f5c6cb;
       color: #721c24;
-      cursor: not-allowed;
       font-weight: bold;
       border: 1px dashed #f194a1;
-      text-decoration: line-through;
     }
     
-    #calendario button.feriado:hover,
-    #calendario button.feriado-movel:hover {
-      background-color: #f5c6cb;
+    #calendario button.feriado-movel.ativo {
+      background-color: #28a745;
+      color: #ffffff;
+      border: 2px solid #721c24;
     }
 
     /* Estilos de cards e tabelas */
@@ -376,6 +427,71 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Modal para gerenciar operadores */
+    .operador-modal {
+      background-color: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      max-width: 90%;
+      width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    .operador-list {
+      margin: 20px 0;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+      border-radius: 5px;
+    }
+    
+    .operador-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .operador-item:last-child {
+      border-bottom: none;
+    }
+    
+    .operador-item span {
+      flex: 1;
+    }
+    
+    .operador-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .btn-remove-small {
+      background-color: #E74C3C;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      padding: 3px 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    
+    .btn-remove-small:hover {
+      opacity: 0.8;
+    }
+    
+    .operador-input-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .operador-input-group input {
+      flex: 1;
+    }
+
     /* Responsividade */
     @media (max-width: 768px) {
       .form-col {
@@ -398,13 +514,22 @@
         font-size: 0.7rem;
       }
       
-      .popup-container {
+      .popup-container, .operador-modal {
         width: 90%;
         padding: 15px;
       }
       
       .popup-title {
         font-size: 1.1rem;
+      }
+      
+      .operador-container {
+        flex-wrap: wrap;
+      }
+      
+      .operador-actions {
+        flex-direction: column;
+        gap: 5px;
       }
     }
 
@@ -441,6 +566,10 @@
       
       .btn {
         width: 100%;
+      }
+      
+      .operador-input-group {
+        flex-direction: column;
       }
     }
     
@@ -484,17 +613,14 @@
       <div class="form-row">
         <div class="form-col">
           <label>👷 Operador:</label>
-          <select id="beneficiario">
-            <option value="">Selecione um operador</option>
-            <option value="Higor Sarmento">Higor Sarmento</option>
-            <option value="Rafael Machado">Rafael Machado</option>
-            <option value="Lidurino junior">Lidurino junior</option>
-            <option value="Joelson Carlos">Joelson Carlos</option>
-            <option value="Ricardo Alves">Ricardo Alves</option>
-            <option value="Igor Nascimento">Igor Nascimento</option>
-            <option value="Keniel vasque">Keniel vasque</option>
-            <option value="Luana Parcianello">Luana Parcianello</option>
-          </select>
+          <div class="operador-container">
+            <select id="beneficiario">
+              <option value="">Selecione um operador</option>
+              <!-- Opções serão carregadas dinamicamente -->
+            </select>
+            <button class="btn-operador btn-add-operador" onclick="abrirModalOperadores()" title="Gerenciar operadores">➕</button>
+            <button class="btn-operador btn-remove-operador" onclick="removerOperadorSelecionado()" title="Remover operador selecionado">🗑️</button>
+          </div>
         </div>
         <div class="form-col">
           <label>Valor do Benefício:</label>
@@ -616,6 +742,61 @@
     let mesesSelecionados = [];
     let editandoId = null;
     let ultimoCalculo = null;
+    let operadores = []; // Array para armazenar operadores
+
+    // Inicializar lista de operadores (pode ser carregada do localStorage)
+    function inicializarOperadores() {
+      // Tenta carregar do localStorage
+      const operadoresSalvos = localStorage.getItem('operadoresVA');
+      
+      if (operadoresSalvos) {
+        operadores = JSON.parse(operadoresSalvos);
+      } else {
+        // Lista inicial padrão
+        operadores = [
+          "Higor Sarmento",
+          "Rafael Machado",
+          "Lidurino junior",
+          "Joelson Carlos",
+          "Ricardo Alves",
+          "Igor Nascimento",
+          "Keniel vasque",
+          "Luana Parcianello"
+        ];
+        salvarOperadores();
+      }
+      
+      atualizarSelectOperadores();
+    }
+
+    function salvarOperadores() {
+      localStorage.setItem('operadoresVA', JSON.stringify(operadores));
+    }
+
+    function atualizarSelectOperadores() {
+      const select = document.getElementById('beneficiario');
+      const filtroSelect = document.getElementById('filtroOperador');
+      const valorAtual = select.value;
+      const filtroValorAtual = filtroSelect.value;
+      
+      // Limpa e recria as opções do select principal
+      select.innerHTML = '<option value="">Selecione um operador</option>';
+      
+      operadores.forEach(operador => {
+        const option = document.createElement('option');
+        option.value = operador;
+        option.textContent = operador;
+        select.appendChild(option);
+      });
+      
+      // Restaura a seleção se ainda existir
+      if (operadores.includes(valorAtual)) {
+        select.value = valorAtual;
+      }
+      
+      // Atualiza o filtro de operadores
+      atualizarFiltroOperadores();
+    }
 
     // Função para formatar data no formato "1 de outubro de 2025"
     function formatarDataExtenso(dataString) {
@@ -746,6 +927,9 @@
       ];
       
       const feriadosMoveis = {
+        "2025-03-04": "Carnaval",
+        "2025-04-18": "Sexta-feira Santa",
+        "2025-06-19": "Corpus Christi",
         "2025-03-04": "Carnaval",
         "2025-04-18": "Sexta-feira Santa",
         "2025-06-19": "Corpus Christi",
@@ -945,26 +1129,25 @@
         const isFeriadoMovel = feriadosMoveis[dataFormatada];
         const isDomingo = diaDaSemana === 0;
 
+        // Aplica estilos de feriado, mas permite seleção
         if (isFeriadoFixo) {
           botaoDia.classList.add('feriado');
           botaoDia.title = "Feriado Nacional";
-          botaoDia.disabled = true;
         } else if (isFeriadoMovel) {
           botaoDia.classList.add('feriado-movel');
           botaoDia.title = feriadosMoveis[dataFormatada];
-          botaoDia.disabled = true;
         } else if (isDomingo) {
           botaoDia.classList.add('feriado');
           botaoDia.title = "Domingo";
-          botaoDia.disabled = true;
-        } else {
-          if (diasTrabalhadosMesAtual.includes(dia)) {
-            botaoDia.classList.add('ativo');
-          } else {
-            botaoDia.classList.add('dia-nao-trabalhado');
-          }
-          botaoDia.addEventListener('click', () => toggleDiaTrabalhado(mesSelecionado, dia, botaoDia));
         }
+        
+        // Verifica se o dia está marcado como trabalhado
+        if (diasTrabalhadosMesAtual.includes(dia)) {
+          botaoDia.classList.add('ativo');
+        }
+        
+        // Adiciona evento de clique para todos os dias
+        botaoDia.addEventListener('click', () => toggleDiaTrabalhado(mesSelecionado, dia, botaoDia));
 
         calendario.appendChild(botaoDia);
       }
@@ -979,11 +1162,9 @@
       if (index > -1) {
         diasMarcados[mesRef].splice(index, 1);
         botao.classList.remove('ativo');
-        botao.classList.add('dia-nao-trabalhado');
       } else {
         diasMarcados[mesRef].push(dia);
         diasMarcados[mesRef].sort((a, b) => a - b);
-        botao.classList.remove('dia-nao-trabalhado');
         botao.classList.add('ativo');
       }
     }
@@ -1760,6 +1941,163 @@
       }
     }
 
+    // Funções para gerenciar operadores
+    function abrirModalOperadores() {
+      const modal = document.createElement('div');
+      modal.className = 'popup-overlay';
+      
+      // Cria a lista de operadores em formato HTML
+      let operadoresListHTML = '';
+      operadores.forEach((operador, index) => {
+        operadoresListHTML += `
+          <div class="operador-item">
+            <span>${operador}</span>
+            <div class="operador-actions">
+              <button class="btn-remove-small" onclick="removerOperadorModal(${index})">Remover</button>
+            </div>
+          </div>
+        `;
+      });
+      
+      modal.innerHTML = `
+        <div class="operador-modal">
+          <div class="popup-title">👷 Gerenciar Operadores</div>
+          <div class="popup-message">
+            <p>Adicione, edite ou remova operadores da lista.</p>
+          </div>
+          
+          <div class="operador-list">
+            ${operadoresListHTML || '<div style="text-align: center; padding: 20px; color: #6c757d;">Nenhum operador cadastrado</div>'}
+          </div>
+          
+          <div class="operador-input-group">
+            <input type="text" id="novoOperadorInput" placeholder="Nome do novo operador" style="flex: 1;">
+            <button class="btn btn-success" onclick="adicionarOperadorModal()">Adicionar</button>
+          </div>
+          
+          <div class="popup-buttons" style="margin-top: 20px;">
+            <button class="popup-button popup-ok" id="fecharModalOperadores">Fechar</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      document.getElementById('fecharModalOperadores').addEventListener('click', () => {
+        document.body.removeChild(modal);
+      });
+      
+      // Adiciona evento para pressionar Enter no input
+      document.getElementById('novoOperadorInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          adicionarOperadorModal();
+        }
+      });
+      
+      // Foca no input
+      document.getElementById('novoOperadorInput').focus();
+    }
+    
+    function adicionarOperadorModal() {
+      const input = document.getElementById('novoOperadorInput');
+      const nomeOperador = input.value.trim();
+      
+      if (!nomeOperador) {
+        mostrarPopup('Atenção', 'Por favor, insira um nome para o operador.', 'warning');
+        return;
+      }
+      
+      // Verifica se o operador já existe
+      if (operadores.includes(nomeOperador)) {
+        mostrarPopup('Atenção', 'Este operador já está na lista!', 'warning');
+        input.value = '';
+        return;
+      }
+      
+      // Adiciona o operador à lista
+      operadores.push(nomeOperador);
+      operadores.sort(); // Ordena alfabeticamente
+      
+      // Salva no localStorage
+      salvarOperadores();
+      
+      // Atualiza o select
+      atualizarSelectOperadores();
+      
+      // Limpa o input
+      input.value = '';
+      
+      // Atualiza a modal
+      const modal = document.querySelector('.popup-overlay');
+      document.body.removeChild(modal);
+      abrirModalOperadores();
+      
+      mostrarPopup('Sucesso!', `Operador "${nomeOperador}" adicionado com sucesso.`, 'success');
+    }
+    
+    function removerOperadorModal(index) {
+      const operador = operadores[index];
+      
+      mostrarPopupConfirmacao(
+        "Remover Operador",
+        `Tem certeza que deseja remover o operador "${operador}"?`,
+        { "Operador": operador }
+      ).then(confirmado => {
+        if (confirmado) {
+          // Remove o operador
+          operadores.splice(index, 1);
+          
+          // Salva no localStorage
+          salvarOperadores();
+          
+          // Atualiza o select
+          atualizarSelectOperadores();
+          
+          // Atualiza a modal
+          const modal = document.querySelector('.popup-overlay');
+          document.body.removeChild(modal);
+          abrirModalOperadores();
+          
+          mostrarPopup('Removido!', `Operador "${operador}" removido com sucesso.`, 'success');
+        }
+      });
+    }
+    
+    function removerOperadorSelecionado() {
+      const select = document.getElementById('beneficiario');
+      const operadorSelecionado = select.value;
+      
+      if (!operadorSelecionado) {
+        mostrarPopup('Atenção', 'Nenhum operador selecionado para remover.', 'warning');
+        return;
+      }
+      
+      mostrarPopupConfirmacao(
+        "Remover Operador",
+        `Tem certeza que deseja remover o operador "${operadorSelecionado}"?`,
+        { "Operador": operadorSelecionado }
+      ).then(confirmado => {
+        if (confirmado) {
+          // Remove o operador da lista
+          const index = operadores.indexOf(operadorSelecionado);
+          if (index > -1) {
+            operadores.splice(index, 1);
+            
+            // Salva no localStorage
+            salvarOperadores();
+            
+            // Atualiza o select
+            atualizarSelectOperadores();
+            
+            // Limpa a seleção
+            select.value = '';
+            
+            mostrarPopup('Removido!', `Operador "${operadorSelecionado}" removido com sucesso.`, 'success');
+          }
+        }
+      });
+    }
+
     // Inicialização
     document.addEventListener('DOMContentLoaded', function() {
       // Carrega dados iniciais
@@ -1768,6 +2106,9 @@
       document.getElementById('mesSelecionado').value = mesAtualISO;
       document.getElementById('filtroData').value = mesAtualISO;
       gerarCalendario();
+      
+      // Inicializa a lista de operadores
+      inicializarOperadores();
       
       // Carrega dados do Supabase (com fallback para localStorage)
       carregarDados();
