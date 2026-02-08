@@ -99,6 +99,37 @@
       min-height: 80px;
     }
 
+    /* Container do operador com botão de gerenciamento */
+    .operador-container {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .operador-select {
+      flex: 1;
+    }
+    
+    .btn-gerenciar {
+      background-color: var(--warning);
+      color: #212529;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-weight: bold;
+      white-space: nowrap;
+      min-width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .btn-gerenciar:hover {
+      background-color: #e0a800;
+    }
+
     /* Estilos de cards e tabelas */
     .card {
       background: white;
@@ -233,8 +264,9 @@
       border-radius: 10px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.2);
       max-width: 90%;
-      width: 400px;
-      text-align: center;
+      width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
       animation: fadeIn 0.3s;
     }
     
@@ -242,6 +274,7 @@
       font-size: 1.2rem;
       font-weight: bold;
       margin-bottom: 15px;
+      text-align: center;
     }
     
     .popup-message {
@@ -306,6 +339,7 @@
     .popup-icon {
       font-size: 2rem;
       margin-bottom: 10px;
+      text-align: center;
     }
     
     .popup-success .popup-title {
@@ -318,6 +352,67 @@
     
     .popup-error .popup-title {
       color: var(--danger);
+    }
+    
+    /* Estilo para a lista de operadores no popup */
+    .operadores-lista {
+      max-height: 300px;
+      overflow-y: auto;
+      margin: 15px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 10px;
+    }
+    
+    .operador-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .operador-item:last-child {
+      border-bottom: none;
+    }
+    
+    .operador-nome {
+      flex: 1;
+      font-size: 0.95rem;
+    }
+    
+    .operador-excluir-btn {
+      background-color: var(--danger);
+      color: white;
+      border: none;
+      border-radius: 3px;
+      padding: 3px 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    
+    .operador-excluir-btn:hover {
+      background-color: #c0392b;
+    }
+    
+    .novo-operador-form {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .novo-operador-input {
+      flex: 1;
+    }
+    
+    .btn-adicionar-operador {
+      background-color: var(--success);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-weight: bold;
     }
     
     @keyframes fadeIn {
@@ -349,6 +444,19 @@
       
       .popup-title {
         font-size: 1.1rem;
+      }
+      
+      .operador-container {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .btn-gerenciar {
+        width: 100%;
+      }
+      
+      .novo-operador-form {
+        flex-direction: column;
       }
     }
 
@@ -439,17 +547,13 @@
       <div class="form-row">
         <div class="form-col">
           <label>👷 Operador:</label>
-          <select id="operador" required>
-            <option value="">Selecione um operador</option>
-            <option value="Laercio Moreira">Laercio Moreira</option>
-            <option value="Rafael Machado">Rafael Machado</option>
-            <option value="Leonardo Vaz">Leonardo Vaz</option>
-            <option value="Joelson Carlos">Joelson Carlos</option>
-            <option value="Ricardo Alves">Ricardo Alves</option>
-            <option value="Igor Nascimento">Igor Nascimento</option>
-            <option value="Keniel vasque">Keniel vasque</option>
-            <option value="Luana Parcianello">Luana Parcianello</option>
-          </select>
+          <div class="operador-container">
+            <select id="operador" class="operador-select" required>
+              <option value="">Selecione um operador</option>
+              <!-- Os operadores serão carregados dinamicamente -->
+            </select>
+            <button type="button" class="btn-gerenciar" onclick="mostrarPopupGerenciarOperadores()" title="Gerenciar operadores">⚙️</button>
+          </div>
         </div>
         <div class="form-col">
           <label>❌ Erro:</label>
@@ -592,6 +696,7 @@
     // Variáveis globais
     let registros = [];
     let editandoId = null;
+    let operadores = []; // Array para armazenar a lista de operadores
 
     // Tabela de deduções (valores em reais)
     const deducoes = {
@@ -621,6 +726,225 @@
     };
     // Valor base para cálculo
     const baseValor = 500;
+
+    // Função para carregar operadores do localStorage
+    function carregarOperadores() {
+      const operadoresSalvos = localStorage.getItem('operadoresErros');
+      if (operadoresSalvos) {
+        operadores = JSON.parse(operadoresSalvos);
+      } else {
+        // Lista padrão de operadores
+        operadores = [
+          "Laercio Moreira",
+          "Rafael Machado", 
+          "Leonardo Vaz",
+          "Joelson Carlos",
+          "Ricardo Alves",
+          "Igor Nascimento",
+          "Keniel vasque",
+          "Luana Parcianello"
+        ];
+        salvarOperadores();
+      }
+      atualizarSelectOperadores();
+    }
+
+    // Função para salvar operadores no localStorage
+    function salvarOperadores() {
+      localStorage.setItem('operadoresErros', JSON.stringify(operadores));
+    }
+
+    // Função para atualizar os selects de operador
+    function atualizarSelectOperadores() {
+      const selectOperador = document.getElementById('operador');
+      const selectFiltroOperador = document.getElementById('filtroOperador');
+      
+      // Salva os valores atuais
+      const valorAtual = selectOperador.value;
+      const valorFiltroAtual = selectFiltroOperador.value;
+      
+      // Limpa os selects
+      selectOperador.innerHTML = '<option value="">Selecione um operador</option>';
+      selectFiltroOperador.innerHTML = '<option value="Todos">TODOS os operadores</option>';
+      
+      // Adiciona os operadores
+      operadores.forEach(operador => {
+        const option1 = document.createElement('option');
+        option1.value = operador;
+        option1.textContent = operador;
+        selectOperador.appendChild(option1);
+        
+        const option2 = document.createElement('option');
+        option2.value = operador;
+        option2.textContent = operador;
+        selectFiltroOperador.appendChild(option2);
+      });
+      
+      // Restaura os valores selecionados
+      if (operadores.includes(valorAtual)) {
+        selectOperador.value = valorAtual;
+      }
+      
+      if (operadores.includes(valorFiltroAtual)) {
+        selectFiltroOperador.value = valorFiltroAtual;
+      }
+    }
+
+    // Função para mostrar popup de gerenciamento de operadores
+    async function mostrarPopupGerenciarOperadores() {
+      return new Promise((resolve) => {
+        const popup = document.createElement('div');
+        popup.className = 'popup-overlay';
+        
+        // Cria a lista de operadores em HTML
+        let listaOperadoresHTML = '';
+        if (operadores.length === 0) {
+          listaOperadoresHTML = '<div style="text-align: center; padding: 20px; color: #666;">Nenhum operador cadastrado</div>';
+        } else {
+          listaOperadoresHTML = `
+            <div class="operadores-lista">
+              ${operadores.map(operador => `
+                <div class="operador-item">
+                  <span class="operador-nome">${operador}</span>
+                  <button class="operador-excluir-btn" onclick="excluirOperadorNoPopup('${operador}', this)">Excluir</button>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }
+        
+        popup.innerHTML = `
+          <div class="popup-container">
+            <div class="popup-title">👷 Gerenciar Operadores</div>
+            <div class="popup-message">
+              <p>Adicione, remova ou edite a lista de operadores.</p>
+              ${listaOperadoresHTML}
+              <div class="novo-operador-form">
+                <input type="text" id="novoOperador" class="novo-operador-input" placeholder="Nome do novo operador">
+                <button class="btn-adicionar-operador" onclick="adicionarOperadorNoPopup()">Adicionar</button>
+              </div>
+            </div>
+            <div class="popup-buttons">
+              <button class="popup-button popup-ok" id="popupFecharGerenciamento">Fechar</button>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(popup);
+        
+        // Foca no campo de entrada
+        setTimeout(() => {
+          document.getElementById('novoOperador').focus();
+        }, 100);
+        
+        // Configura o evento para adicionar operador pressionando Enter
+        document.getElementById('novoOperador').addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            adicionarOperadorNoPopup();
+          }
+        });
+        
+        document.getElementById('popupFecharGerenciamento').addEventListener('click', () => {
+          document.body.removeChild(popup);
+          resolve(true);
+        });
+      });
+    }
+
+    // Função para adicionar operador no popup
+    async function adicionarOperadorNoPopup() {
+      const novoOperadorInput = document.getElementById('novoOperador');
+      const novoOperador = novoOperadorInput.value.trim();
+      
+      if (!novoOperador) {
+        mostrarPopupAutomatico('Campo vazio', 'Digite o nome do operador.', 'error');
+        return;
+      }
+      
+      if (operadores.includes(novoOperador)) {
+        mostrarPopupAutomatico('Operador já existe', 'Este operador já está na lista.', 'warning');
+        return;
+      }
+      
+      // Adiciona o operador
+      operadores.push(novoOperador);
+      salvarOperadores();
+      atualizarSelectOperadores();
+      
+      // Limpa o campo de entrada
+      novoOperadorInput.value = '';
+      
+      // Atualiza a lista no popup
+      const operadoresLista = document.querySelector('.operadores-lista');
+      if (operadoresLista) {
+        if (operadoresLista.innerHTML.includes('Nenhum operador cadastrado')) {
+          operadoresLista.innerHTML = '';
+        }
+        
+        const novoItem = document.createElement('div');
+        novoItem.className = 'operador-item';
+        novoItem.innerHTML = `
+          <span class="operador-nome">${novoOperador}</span>
+          <button class="operador-excluir-btn" onclick="excluirOperadorNoPopup('${novoOperador}', this)">Excluir</button>
+        `;
+        operadoresLista.appendChild(novoItem);
+      }
+      
+      mostrarPopupAutomatico('Operador adicionado', `${novoOperador} foi adicionado à lista.`, 'success');
+      
+      // Foca novamente no campo
+      novoOperadorInput.focus();
+    }
+
+    // Função para excluir operador no popup
+    async function excluirOperadorNoPopup(nomeOperador, botao) {
+      // Verifica se o operador tem registros associados
+      const temRegistros = registros.some(registro => registro.operador === nomeOperador);
+      
+      if (temRegistros) {
+        const confirmar = await mostrarPopupConfirmacao(
+          'Atenção',
+          `O operador "${nomeOperador}" possui registros associados. Deseja excluí-lo mesmo assim? Os registros não serão afetados, mas o operador não aparecerá mais nas listas.`,
+          {
+            'Operador': nomeOperador,
+            'Registros associados': registros.filter(r => r.operador === nomeOperador).length
+          }
+        );
+        
+        if (!confirmar) {
+          return;
+        }
+      } else {
+        const confirmar = await mostrarPopupConfirmacao(
+          'Confirmar exclusão',
+          `Deseja excluir o operador "${nomeOperador}"?`,
+          { 'Operador': nomeOperador }
+        );
+        
+        if (!confirmar) {
+          return;
+        }
+      }
+      
+      // Remove o operador da lista
+      operadores = operadores.filter(op => op !== nomeOperador);
+      salvarOperadores();
+      atualizarSelectOperadores();
+      
+      // Remove o item da lista no popup
+      const item = botao.closest('.operador-item');
+      if (item) {
+        item.remove();
+      }
+      
+      // Se não houver mais operadores, mostra mensagem
+      const operadoresLista = document.querySelector('.operadores-lista');
+      if (operadores.length === 0 && operadoresLista) {
+        operadoresLista.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">Nenhum operador cadastrado</div>';
+      }
+      
+      mostrarPopupAutomatico('Operador removido', `${nomeOperador} foi removido da lista.`, 'success');
+    }
 
     // Função para mostrar popup de confirmação
     function mostrarPopupConfirmacao(titulo, mensagem, detalhes = null) {
@@ -1132,6 +1456,7 @@
             <td>${r.valor_total_descontado.toFixed(2)}</td>
             <td>${r.valor_final_pago.toFixed(2)}</td>
             <td class="no-print">
+              <button class="btn-editar" onclick="editarRegistro(${index})">Editar</button>
               <button class="btn-excluir" onclick="excluirRegistro(${r.id})">Excluir</button>
             </td>
           </tr>`;
@@ -1650,6 +1975,9 @@
 
     // Inicialização
     document.addEventListener('DOMContentLoaded', function() {
+      // Carrega a lista de operadores
+      carregarOperadores();
+      
       // Configura eventos de filtro
       document.getElementById('filtroOperador').addEventListener('change', filtrarErros);
       document.getElementById('filtroData').addEventListener('change', filtrarErros);
@@ -1672,5 +2000,3 @@
   </script>
 </body>
 </html>
-
-
