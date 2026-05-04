@@ -110,7 +110,9 @@
 <body>
   <div class="login-card">
     <h2>🔐 Login do Sistema</h2>
-    <input type="text" id="username" placeholder="Usuário" autocomplete="username" />
+    <div class="input-group">
+      <input type="text" id="username" placeholder="Usuário" autocomplete="username" />
+    </div>
     <div class="input-group">
       <input type="password" id="password" placeholder="Senha" autocomplete="current-password" />
       <span class="toggle-password" id="togglePassword">
@@ -142,18 +144,16 @@
         level = 2;
       }
       // Nível 3: Visualiza erro de operador + pode adicionar itens ao cálculo
-      else if (
-        (user === 'Claudia' && pass === 'Claudia@1978')
-      ) {
+      else if (user === 'Claudia' && pass === 'Claudia@1978') {
         level = 3;
       }
-      // Nível 5: Acesso total
+      // Nível 5: Acesso total (CORREÇÃO: adicionado operador lógico e vírgulas)
       else if (
         (user === 'amailson' && pass === '1234') ||
         (user === 'Daniel' && pass === 'Daniel@1978') ||
         (user === 'Financeiro' && pass === 'Fin@1978') ||
-        (user === 'Ricardo' && pass === 'Ricardo@1978')
-        (user === 'Luana' && pass === 'Luana@1978') ||
+        (user === 'Ricardo' && pass === 'Ricardo@1978') ||
+        (user === 'Luana' && pass === 'Luana@1978')
       ) {
         level = 5;
       }
@@ -163,7 +163,7 @@
         document.getElementById('errorMsg').innerText = '❌ Usuário ou senha incorretos.';
         
         if (failedAttempts >= maxAttempts) {
-          sendEmailNotification(user);
+          sendEmailNotification(user || "desconhecido");
           failedAttempts = 0;
           document.getElementById('errorMsg').innerText += ' Foi notificado o suporte sobre tentativas falhas.';
         }
@@ -173,8 +173,8 @@
       // Login bem-sucedido
       failedAttempts = 0;
       localStorage.setItem('userPermissionLevel', level);
+      localStorage.setItem('loggedInUser', user);
       
-      // Verificação adicional antes do redirecionamento
       console.log(`Login bem-sucedido! Redirecionando para sistema.html...`);
       window.location.href = 'sistema.html';
     }
@@ -190,13 +190,20 @@
     });
 
     // Tecla Enter ativa login
-    document.getElementById('password').addEventListener('keydown', function(event) {
-      if (event.key === 'Enter') login();
-    });
-
-    document.getElementById('username').addEventListener('keydown', function(event) {
-      if (event.key === 'Enter') login();
-    });
+    const passwordField = document.getElementById('password');
+    const usernameField = document.getElementById('username');
+    
+    if (passwordField) {
+      passwordField.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') login();
+      });
+    }
+    
+    if (usernameField) {
+      usernameField.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') login();
+      });
+    }
   </script>
 </body>
 </html>
