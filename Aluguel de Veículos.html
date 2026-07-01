@@ -760,14 +760,30 @@
       "2025-06-19": "Corpus Christi"
     };
 
-    // Configuração do flatpickr com os dias bloqueados
+    // ==============================================
+    // CONFIGURAÇÃO DO FLATPICKR - CORREÇÃO DE PERÍODO
+    // ==============================================
     document.addEventListener('DOMContentLoaded', function() {
       flatpickr("#faltas", {
         mode: "multiple", 
-        dateFormat: "Y-m-d", 
+        dateFormat: "d/m/Y",
         locale: "pt",
         onChange: function(selectedDates, dateStr, instance) {
-          diasSelecionados = selectedDates.map(date => date.toISOString().split('T')[0]);
+          // CORREÇÃO: Usar as datas selecionadas diretamente, sem conversão UTC
+          diasSelecionados = selectedDates.map(date => {
+            // Mantém a data no timezone local
+            return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+          });
+          
+          // Atualiza o campo com as datas formatadas
+          if (selectedDates.length > 0) {
+            const datasFormatadas = selectedDates.map(date => 
+              date.toLocaleDateString('pt-BR')
+            );
+            instance.input.value = datasFormatadas.join(', ');
+          } else {
+            instance.input.value = '';
+          }
         },
         disable: [
           function(date) {
@@ -778,7 +794,7 @@
             
             // Verifica feriados fixos
             const dia = date.getDate();
-            const mes = date.getMonth() + 1; // getMonth() retorna 0-11
+            const mes = date.getMonth() + 1;
             
             const isFeriadoFixo = feriadosFixos.some(f => f.dia === dia && f.mes === mes);
             if (isFeriadoFixo) {
@@ -1187,7 +1203,9 @@
       }
     }
     
-    // Função para calcular o valor do aluguel
+    // ==============================================
+    // FUNÇÃO CALCULAR VALOR - CORRIGIDA
+    // ==============================================
     async function calcularValor() {
       const operador = document.getElementById("operador").value;
       const tipo = document.getElementById("tipo").value;
@@ -1241,9 +1259,18 @@
       const idCalculo = editandoId || gerarID();
       const timestamp = new Date().toISOString();
       
-      // Formatando o período para exibição
-      const primeiroDia = new Date(diasSelecionados[0]);
-      const ultimoDia = new Date(diasSelecionados[diasSelecionados.length - 1]);
+      // CORREÇÃO: Formatando o período com as datas corretas
+      // Ordena as datas selecionadas para garantir a ordem correta
+      const datasOrdenadas = [...diasSelecionados].sort((a, b) => a - b);
+      
+      // Verifica se há datas selecionadas
+      if (datasOrdenadas.length === 0) {
+        mostrarPopupAutomatico('Atenção', 'Por favor, selecione os dias previstos.', 'error');
+        return;
+      }
+      
+      const primeiroDia = new Date(datasOrdenadas[0]);
+      const ultimoDia = new Date(datasOrdenadas[datasOrdenadas.length - 1]);
       const periodo = `${primeiroDia.toLocaleDateString('pt-BR')} a ${ultimoDia.toLocaleDateString('pt-BR')}`;
 
       // Exibir resultado
@@ -1304,7 +1331,11 @@
         valor_final: valorFinal.toFixed(2),
         justificativa: justificativa,
         periodo: periodo,
-        dias_selecionados: diasSelecionados.join(', ')
+        dias_selecionados: diasSelecionados.map(d => 
+          d.getFullYear() + '-' + 
+          String(d.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(d.getDate()).padStart(2, '0')
+        ).join(', ')
       };
 
       try {
@@ -1375,7 +1406,7 @@
       }
     }
 
-    // Função para carregar dados do Supabase - ATUALIZADA
+    // Função para carregar dados do Supabase
     async function carregarDados() {
       try {
         // Tenta carregar do Supabase
@@ -1454,7 +1485,7 @@
       document.getElementById('filtroData').value = mesAtual;
     }
 
-    // Função para sincronizar itens locais - NOVA
+    // Função para sincronizar itens locais
     async function sincronizarItensLocais() {
       try {
           const historicoSalvo = localStorage.getItem('historicoAluguel');
@@ -1526,7 +1557,8 @@
           <td>R$ ${parseFloat(item.valor_final).toFixed(2)}</td>
           <td>${item.data}</td>
           <td class="no-print">
-            <button class="btn-excluir" onclick="excluirItemHistorico(${item.id})">Excluir</button>
+            <button class="btn-editar" onclick="editarItem(${item.id})">✏️</button>
+            <button class="btn-excluir" onclick="excluirItemHistorico(${item.id})">🗑️</button>
           </td>
         `;
         
@@ -1603,7 +1635,7 @@
       }
     }
 
-    // Função para filtrar o histórico - ATUALIZADA
+    // Função para filtrar o histórico
     function filtrarListaHistorico() {
         const filtroOperador = document.getElementById('filtroOperador').value;
         const filtroData = document.getElementById('filtroData').value;
@@ -1653,6 +1685,9 @@
 
       document.getElementById('btnExportar').style.display = 'none';
       document.getElementById('exportarPDFContainer').style.display = 'none';
+      
+      // Volta o texto do botão calcular
+      document.querySelector('.btn-success').textContent = 'CALCULAR';
     }
 
     // Função para exportar PDF do cálculo atual
@@ -1784,7 +1819,9 @@
       doc.save(`historico_completo_aluguel_veiculos_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.pdf`);
     }
 
-    // Função para editar item
+    // ==============================================
+    // FUNÇÃO EDITAR ITEM - CORRIGIDA
+    // ==============================================
     function editarItem(id) {
       const item = historicoAluguel.find(item => item.id === id);
       if (!item) return;
@@ -1793,13 +1830,23 @@
       document.getElementById('operador').value = item.operador;
       document.getElementById('tipo').value = item.tipo_veiculo;
       
-      // Configura os dias selecionados
-      diasSelecionados = item.dias_selecionados.split(', ');
+      // CORREÇÃO: Converte as datas do formato string para Date
+      const datasString = item.dias_selecionados.split(', ');
+      diasSelecionados = datasString.map(dataStr => {
+        const partes = dataStr.split('-');
+        return new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+      });
       
       // Reinicializa o flatpickr com as datas selecionadas
       const flatpickrInstance = document.getElementById('faltas')._flatpickr;
       if (flatpickrInstance) {
         flatpickrInstance.setDate(diasSelecionados);
+        
+        // Atualiza o campo com as datas formatadas
+        const datasFormatadas = diasSelecionados.map(date => 
+          date.toLocaleDateString('pt-BR')
+        );
+        flatpickrInstance.input.value = datasFormatadas.join(', ');
       }
       
       document.getElementById('diasReais').value = item.dias_trabalhados;
@@ -1816,6 +1863,8 @@
       
       // Altera o botão calcular para indicar edição
       document.querySelector('.btn-success').textContent = 'ATUALIZAR CÁLCULO';
+      
+      mostrarPopupAutomatico('Edição', `Editando cálculo ID: ${id}`, 'info');
     }
 
     // Função para excluir item do histórico
@@ -1863,5 +1912,3 @@
   </script>
 </body>
 </html>
-
-
